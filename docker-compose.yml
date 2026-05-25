@@ -1,4 +1,16 @@
 services:
+  nginx:
+    build:
+      context: ./nginx
+    container_name: nginx
+    networks:
+      - music_room_network
+    depends_on:
+      - backend
+    restart: on-failure
+    ports:
+      - "80:80"
+      - "443:443"
   db:
     image: postgres:15-alpine
     container_name: music_room_db
@@ -30,8 +42,6 @@ services:
     # volumes:
     #   - ./backend:/app
     #   - /app/node_modules
-    ports:
-      - "${BACKEND_PORT}:3000"
     networks:
       - music_room_network
     # command: npm run dev

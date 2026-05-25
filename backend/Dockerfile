@@ -1,6 +1,8 @@
-FROM node:18
+FROM node:22
 
 WORKDIR /app
+
+RUN chown -R node:node /app && chmod -R 755 /app
 
 COPY package*.json ./
 

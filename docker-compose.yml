@@ -13,8 +13,6 @@ services:
     networks:
       - music_room_network
   backend:
-    image: node:18-alpine
-    working_dir: /app
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -23,19 +21,20 @@ services:
       - db
     environment:
       DB_HOST: db
-      DB_PORT: ${DB_PORT}
+      DB_PORT: 5432
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
       NODE_ENV: development
-    volumes:
-      - ./backend:/app
-      # - /app/node_modules
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+    # volumes:
+    #   - ./backend:/app
+    #   - /app/node_modules
     ports:
       - "${BACKEND_PORT}:3000"
     networks:
       - music_room_network
-    command: npm install && npm run start:dev
+    # command: npm run dev
 
 volumes:
   postgres_data:

@@ -1,0 +1,53 @@
+services:
+  nginx:
+    build:
+      context: ./nginx
+    container_name: nginx
+    networks:
+      - music_room_network
+    depends_on:
+      - backend
+    restart: on-failure
+    ports:
+      - "80:80"
+      - "443:443"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend/src:/app/src:z # hot-reload en dev
+      - ./backend/prisma:/app/prisma:z # migrations live
+    env_file:
+      - ./backend/.env
+    ports:
+      - "5555:5555" # a retirer a la fin
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - music_room_network
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME} -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - music_room_network
+
+volumes:
+  pg_data:
+
+networks:
+  music_room_network:
+    driver: bridge

@@ -16,13 +16,12 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    image: music-room-backend
     volumes:
       - ./backend/src:/app/src:z # hot-reload en dev
       - ./backend/prisma:/app/prisma:z # migrations live
     env_file:
       - ./backend/.env
-    ports:
-      - "5555:5555" # a retirer a la fin
     depends_on:
       db:
         condition: service_healthy
@@ -42,6 +41,31 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - music_room_network
+
+  dbVisualiser:
+    image: music-room-backend
+    container_name: db_visualiser
+    command:
+      [
+        "npx",
+        "prisma",
+        "studio",
+        "--port",
+        "5555",
+        "--browser",
+        "none"
+      ]
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend/prisma:/app/prisma:z
+    ports:
+      - "5555:5555"
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - music_room_network
 

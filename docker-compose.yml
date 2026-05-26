@@ -1,14 +1,16 @@
 services:
   nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:z
+    build:
+      context: ./nginx
+    container_name: nginx
+    networks:
+      - music_room_network
     depends_on:
       - backend
-    networks:
-      - app-network
+    restart: on-failure
+    ports:
+      - "80:80"
+      - "443:443"
 
   backend:
     build:
@@ -20,12 +22,12 @@ services:
     env_file:
       - ./backend/.env
     ports:
-      - "5555:5555"
+      - "5555:5555" # a retirer a la fin
     depends_on:
       db:
         condition: service_healthy
     networks:
-      - app-network
+      - music_room_network
 
   db:
     image: postgres:16-alpine
@@ -41,11 +43,11 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - app-network
+      - music_room_network
 
 volumes:
   pg_data:
 
 networks:
-  app-network:
+  music_room_network:
     driver: bridge

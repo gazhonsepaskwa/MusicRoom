@@ -9,9 +9,7 @@ export default defineConfig({
     path: 'prisma/migrations',
   },
   datasource: {
-    // url: process.env.DATABASE_URL as string,
-
-    url: 'postgresql://music_room_user:oEhb7utCFpaspJVzIT9FrZgPbTAp65e2rV6P8uW2v7l2OeXmuDV2G14UQSgJgchd@db:5432/music_room_db?schema=public',
+    url: process.env.DATABASE_URL as string,
   },
   // schema: 'prisma/schema.prisma',
 });

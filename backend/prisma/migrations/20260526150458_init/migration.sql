@@ -65,6 +65,7 @@ CREATE TABLE "Music" (
     "title" TEXT NOT NULL,
     "duration" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "albumIndex" INTEGER NOT NULL,
     "albumId" INTEGER NOT NULL,
 
     CONSTRAINT "Music_pkey" PRIMARY KEY ("id")

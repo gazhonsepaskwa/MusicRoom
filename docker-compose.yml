@@ -18,7 +18,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./backend/src:/app/src:z # hot-reload en dev
-      # - ./backend/prisma:/app/prisma:z # migrations live
+      - ./backend/prisma:/app/prisma:z # migrations live
     env_file:
       - ./backend/.env
     ports:

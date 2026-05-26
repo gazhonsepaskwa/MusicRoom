@@ -92,6 +92,7 @@ model Music {
   title      String
   duration   Int
   createdAt  DateTime @default(now())
+  albumIndex Int
 
   albumId Int
   album   Album @relation(fields: [albumId], references: [id], onDelete: Cascade)

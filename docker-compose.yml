@@ -45,6 +45,18 @@ services:
     networks:
       - music_room_network
 
+  spoti-scraper:
+    build:
+      context: ./spoti-scraper
+      dockerfile: Dockerfile
+    volumes:
+      - ./spoti-scraper:/app:z
+    networks:
+      - music_room_network
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   pg_data:
 

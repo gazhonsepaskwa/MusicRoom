@@ -61,6 +61,8 @@ services:
       - ./backend/.env
     volumes:
       - ./backend/prisma:/app/prisma:z
+    profiles:
+      - visual
     ports:
       - "5555:5555"
     depends_on:

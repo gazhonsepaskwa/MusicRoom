@@ -135,3 +135,17 @@ def get_artist_albums(artist_uri):
     albums = response.json().get("items")
 
     return albums
+
+def get_artist(artist_uri):
+    """search for an artist on Spotify by URI"""
+    params = {
+        "artist_uri": artist_uri,
+    }
+    response = requests.get(
+        "https://api.spotify.com/v1/artists/{}".format(artist_uri[artist_uri.rfind(":") + 1:]),
+        params=params,
+        headers=headers,
+    )
+    artist = response.json()
+
+    return artist

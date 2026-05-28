@@ -23,3 +23,6 @@ status:
 
 visu:
 	docker compose --profile visual up
+
+scraper:
+	docker compose --profile scraper up

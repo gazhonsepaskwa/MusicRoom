@@ -28,6 +28,14 @@ services:
     networks:
       - music_room_network
 
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 1919:8080
+    networks:
+      - music_room_network
+
   db:
     image: postgres:16-alpine
     environment:
@@ -52,6 +60,8 @@ services:
       - ./spoti-scraper:/app:z
     networks:
       - music_room_network
+    ports:
+      - "4242:4242"
     depends_on:
       db:
         condition: service_healthy

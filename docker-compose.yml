@@ -13,6 +13,8 @@ services:
       - "443:443"
 
   backend:
+    security_opt:
+      - label=disable
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -69,16 +71,7 @@ services:
   dbVisualiser:
     image: music-room-backend
     container_name: db_visualiser
-    command:
-      [
-        "npx",
-        "prisma",
-        "studio",
-        "--port",
-        "5555",
-        "--browser",
-        "none"
-      ]
+    command: ["npx", "prisma", "studio", "--port", "5555", "--browser", "none"]
     env_file:
       - ./backend/.env
     volumes:

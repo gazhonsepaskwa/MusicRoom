@@ -13,66 +13,67 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model user {
   id        Int      @id @default(autoincrement())
   password  String
   username  String	 @unique
   email     String?  @unique
   createdAt DateTime @default(now())
 
-  devices       Device[]
-  playlists     Playlist[]
-  sentFriendships     Friendship[] @relation("Requester")
-  receivedFriendships Friendship[] @relation("Addressee")
-  playlistships Playlistship[]
+  devices       device[]
+  playlists     playlist[]
+  sentFriendships     friendship[] @relation("Requester")
+  receivedFriendships friendship[] @relation("Addressee")
+  playlistships playlistship[]
 }
 
-model Friendship {
+model friendship {
   requesterId Int
   addresseeId Int
-  status       InvitationStatus
+  status       invitationStatus
   createdAt    DateTime @default(now())
 
-  requester User @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
-  addressee User @relation("Addressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+  requester user @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee user @relation("Addressee", fields: [addresseeId], references: [id], onDelete: Cascade)
 
   @@id([requesterId, addresseeId])
+  @@index([addresseeId])
 }
-enum InvitationStatus {
+enum invitationStatus {
   PENDING
   ACCEPTED
   REJECTED
 }
 
-model Playlistship {
+model playlistship {
   addresseeId Int
   playlistId   Int
-  status       InvitationStatus
+  status       invitationStatus
   createdAt    DateTime @default(now())
 
-  user     User     @relation(fields: [addresseeId], references: [id], onDelete: Cascade)
-  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  user     user     @relation(fields: [addresseeId], references: [id], onDelete: Cascade)
+  playlist playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
 
   @@id([playlistId, addresseeId])
 }
 
-model Device {
+model device {
   id       Int           @id @default(autoincrement())
   ownerId  Int
   name     String?
-  license  LicenseStatus
+  license  licenseStatus
 
-  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner user @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
 }
-enum LicenseStatus {
+enum licenseStatus {
   NONE
   TRIAL
   EVERYTHING
 }
 
-model Playlist {
+model playlist {
   id        Int      @id @default(autoincrement())
   isPublic  Boolean
   title     String
@@ -80,81 +81,68 @@ model Playlist {
   status    String
   createdAt DateTime @default(now())
 
-  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  playlistships Playlistship[]
+  user        user            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  playlistships playlistship[]
+  musics       playlistMusic[]         @relation("PlaylistToPlaylistMusic")
 
   @@index([title])
 }
 
-model Music {
+model playlistMusic {
+  playlistId  Int
+  musicId     Int
+  index    Int
+  createdAt     DateTime @default(now())
+
+  playlist  playlist @relation("PlaylistToPlaylistMusic", fields: [playlistId], references: [id], onDelete: Cascade)
+  music     music    @relation("MusicToPlaylistMusic", fields: [musicId], references: [id], onDelete: Cascade)
+
+  @@id([playlistId, musicId])
+}
+
+model music {
   id         Int      @id @default(autoincrement())
-  spotifyId  Int?
+  spotifyId  String   @unique
   title      String
   duration   Int
   createdAt  DateTime @default(now())
   albumIndex Int
 
   albumId Int
-  album   Album @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  album   album @relation(fields: [albumId], references: [id], onDelete: Cascade)
 
-  artists ArtistMusic[]
+  playlistMusics  playlistMusic[] @relation("MusicToPlaylistMusic")
+  artists artist[]
 
   @@index([title])
 }
 
-model Album {
+model album {
   id        Int      @id @default(autoincrement())
-  spotifyId Int?
+  spotifyId String   @unique
   title     String
   date      DateTime
   images    String[]
   coverUrl  String?
   createdAt DateTime @default(now())
 
-  music    Music[]
-  artists  ArtistAlbum[]
+  music    music[]
+  artists  artist[]
 
   @@index([title])
 }
 
-model Artist {
+model artist {
   id        Int      @id @default(autoincrement())
+  spotifyId String   @unique
+
   title     String
   images    String[]
   createdAt DateTime @default(now())
 
-  musics ArtistMusic[]
-  albums ArtistAlbum[]
+  albums album[]
+
+  musics music[]
 
   @@index([title])
 }
-
-model ArtistMusic {
-  artistId Int
-  musicId  Int
-  createdAt DateTime @default(now())
-
-  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
-  music  Music  @relation(fields: [musicId], references: [id], onDelete: Cascade)
-
-  @@id([artistId, musicId])
-
-  @@index([musicId])
-}
-
-model ArtistAlbum {
-  artistId Int
-  albumId  Int
-  createdAt DateTime @default(now())
-
-  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
-  album  Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
-
-  @@id([artistId, albumId])
-
-  @@index([albumId])
-}
-
-
-
-

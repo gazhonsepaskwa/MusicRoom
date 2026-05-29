@@ -1,7 +1,9 @@
 import requests
+import time
+import os
 
-CLIENT_ID = "f9998302eaf64b50bc581c00b291173a"
-CLIENT_SECRET = "f97ac01d01244f4582e2a0c8c9426fba"
+CLIENT_ID = os.environ.get("SPOTIFY_API_USER_ID")
+CLIENT_SECRET = os.environ.get("SPOTIFY_API_SECRET")
 
 # API INIT : request access token
 data = { "grant_type": "client_credentials" }
@@ -123,16 +125,40 @@ def get_album_tracks(album_uri):
     return tracks
 
 def get_artist_albums(artist_uri):
-    """search for the albums of an artist on Spotify"""
-    params = {
-        "artist_uri": artist_uri,
-    }
-    response = requests.get(
-        "https://api.spotify.com/v1/artists/{}/albums".format(artist_uri[artist_uri.rfind(":") + 1:]),
-        params=params,
-        headers=headers,
-    )
-    albums = response.json().get("items")
+    """Search for the albums of an artist on Spotify"""
+    # while because the limit can't be more than 10 but an artist can have more than 10 albums (ex : Queen)
+    offset = 0
+    already_fetched = 0
+    albums = []
+    while True: # do-while
+        params = {
+            "artist_uri": artist_uri,
+            "limit": 10,
+            "offset": offset
+        }
+        response = requests.get(
+            "https://api.spotify.com/v1/artists/{}/albums".format(artist_uri[artist_uri.rfind(":") + 1:]),
+            params=params,
+            headers=headers,
+        )
+        print(response.status_code)
+        if response.status_code != 200:
+            if response.status_code == 429:
+                print(f"Rate limited. Retry after {response.headers.get("Retry-After", 1)} seconds.")
+                break
+            else:
+                print(f"Api error : {response.status_code}")
+                break
+
+        albums += response.json().get("items")
+
+        if already_fetched + len(albums) >= response.json().get("total"): # exit condition
+            break
+
+        already_fetched += len(albums)
+        offset += 10
+
+    # fix the year error time format
 
     return albums
 

@@ -1,5 +1,5 @@
 info:
-  name: add_artist
+  name: add_artist chill
   type: http
   seq: 2
 
@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-        "q" : "em beihold"
+        "q" : "FuzeIII"
       }
   auth: inherit
 

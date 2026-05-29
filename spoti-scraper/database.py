@@ -1,5 +1,20 @@
+"""
+Database
+"""
 import psycopg2
 import os
+
+# check for env var existance
+if not os.environ.get("DB_NAME"):
+    raise Exception("DB_NAME environment variable not set")
+if not os.environ.get("DB_USER"):
+    raise Exception("DB_USER environment variable not set")
+if not os.environ.get("DB_PASSWORD"):
+    raise Exception("DB_PASSWORD environment variable not set")
+if not os.environ.get("DB_HOST"):
+    raise Exception("DB_HOST environment variable not set")
+if not os.environ.get("DB_PORT"):
+    raise Exception("DB_PORT environment variable not set")
 
 # database connection
 connection = psycopg2.connect(
@@ -12,9 +27,17 @@ connection = psycopg2.connect(
 cursor = connection.cursor()
 
 # utils
-
 def fix_date(date: str) -> str:
-    # sometime spotify give partial date format, postgress can't handle so I set first month and first day when missing
+    """
+    fix spotify date format.
+    Sometime spotify give partial date format.
+    Postgress can't handle it so I set first month and first day when missing
+    ex :
+        2025-03-19 -> 2025-03-19
+        2025-03    -> 2025-03-01
+        2025       -> 2025-01-01
+    """
+
     if len(date) == 0:
         return "0001-01-01"
     elif len(date) == 4:
@@ -24,11 +47,14 @@ def fix_date(date: str) -> str:
     return date
 
 # commit
+
 def commit():
+    """commit changes to the database"""
     connection.commit()
 
 # querries
-def insert_track(uri: str, name: str, duration_ms: str, track_number: str, album_id: str):
+def insert_track(uri: str, name: str, duration_ms: str, track_number: str, album_id: str) -> int:
+    """Insert a track into the database and return the track_id"""
     cursor.execute(
         """
         INSERT INTO "music" ("spotifyId", title, duration, "albumIndex", "albumId")

@@ -1,7 +1,7 @@
 info:
-  name: add_track
+  name: /add_track
   type: http
-  seq: 3
+  seq: 2
 
 http:
   method: POST
@@ -19,3 +19,33 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+examples:
+  - name: "200"
+    request:
+      url: http://localhost:4242/add_track
+      method: POST
+      body:
+        type: json
+        data: |-
+          {
+            "q" : "Scared of the dark - em beihold"
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Fri, 29 May 2026 19:40:43 GMT
+        - name: server
+          value: WSGIServer/0.2 CPython/3.12.13
+        - name: content-type
+          value: application/json
+        - name: content-length
+          value: "86"
+      body:
+        type: json
+        data: |-
+          {
+            "msg": "The track 'Scared of the Dark' was added successfully to MusicRoom database"
+          }

@@ -1,7 +1,7 @@
 info:
   name: /add_track
   type: http
-  seq: 2
+  seq: 1
 
 http:
   method: POST
@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-        "q" : "Scared of the dark - em beihold"
+        "q" : "cinnamon Girl - lana del rey"
       }
   auth: inherit
 

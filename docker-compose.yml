@@ -58,6 +58,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./spoti-scraper:/app:z
+      - ./dl:/dl:z
     networks:
       - music_room_network
     ports:

@@ -5,6 +5,7 @@ Main application module for the Spotify/YouTube scraper.
 if __name__ == "__main__":
     # files
     import api.spotify as sp_api
+    import api.youtube as yt_api
     import database as db
     import utils
     # external libs
@@ -182,7 +183,7 @@ if __name__ == "__main__":
             utils.cleanup_image(result.get('album').get('images'))
         )
 
-        # create music record in db
+        # create music record in db and download the audio file
         track_id = db.insert_track(
             result.get('uri'),
             result.get('name'),
@@ -190,6 +191,7 @@ if __name__ == "__main__":
             result.get('track_number'),
             album_id
         )
+        yt_api.search_and_download(f'{result.get('name')} - {result.get('artists')[0].get('name')}', track_id)
 
         # create artist record in db
         for artist in result.get('artists'):

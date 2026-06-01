@@ -1,6 +1,12 @@
+"""
+Spotify API wrapper.
+"""
+
 import requests
 import time
 import os
+import api.utils
+
 
 # check for env var existance
 if not os.environ.get("SPOTIFY_API_USER_ID"):
@@ -12,15 +18,6 @@ if not os.environ.get("SPOTIFY_API_SECRET"):
 CLIENT_ID = os.environ.get("SPOTIFY_API_USER_ID")
 CLIENT_SECRET = os.environ.get("SPOTIFY_API_SECRET")
 
-# utils
-def check_response(response) -> None:
-    """raise an exception if the response status code is not 200"""
-    if response.status_code != 200:
-        if response.status_code == 429:
-            raise requests.exceptions.RequestException(f"Rate limited. Retry after {response.headers.get("Retry-After", 1)} seconds.")
-        else:
-            raise requests.exceptions.RequestException(f"Api error : {response.status_code} - {response.text}")
-
 # API INIT : request access token
 data = { "grant_type": "client_credentials" }
 response = requests.post(
@@ -28,7 +25,7 @@ response = requests.post(
     data=data,
     auth=(CLIENT_ID, CLIENT_SECRET),
 )
-check_response(response)
+api.utils.check_response(response)
 
 # Global variables
 access_token = response.json()["access_token"]
@@ -83,7 +80,7 @@ def search_artist(artist_string: str, user_mode: bool = False) -> list:
         params=params,
         headers=headers,
     )
-    check_response(response)
+    api.utils.check_response(response)
 
     # extract artist list from request response
     artists = response.json().get("artists").get("items")
@@ -115,7 +112,7 @@ def search_album(album_string: str, user_mode: bool = False) -> list:
         params=params,
         headers=headers,
     )
-    check_response(response)
+    api.utils.check_response(response)
 
     # extract album list from request response
     albums = response.json().get("albums").get("items")
@@ -147,7 +144,7 @@ def get_album_tracks(album_uri: str) -> list:
         params=params,
         headers=headers,
     )
-    check_response(response)
+    api.utils.check_response(response)
     tracks = response.json().get("items")
 
     return tracks
@@ -172,7 +169,7 @@ def get_artist_albums(artist_uri: str) -> list:
             params=params,
             headers=headers,
         )
-        check_response(response)
+        api.utils.check_response(response)
 
         albums += response.json().get("items")
 
@@ -199,7 +196,7 @@ def get_artist(artist_uri) -> dict:
         params=params,
         headers=headers,
     )
-    check_response(response)
+    api.utils.check_response(response)
     artist = response.json()
 
     return artist

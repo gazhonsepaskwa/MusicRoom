@@ -114,7 +114,7 @@ model music {
   playlistMusics  playlistMusic[] @relation("MusicToPlaylistMusic")
   artists artist[]
 
-  @@index([title])
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, name: "Music_title_trgm_idx")
 }
 
 model album {
@@ -129,7 +129,7 @@ model album {
   music    music[]
   artists  artist[]
 
-  @@index([title])
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, name: "Album_title_trgm_idx")
 }
 
 model artist {
@@ -144,5 +144,5 @@ model artist {
 
   musics music[]
 
-  @@index([title])
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, name: "Artist_title_trgm_idx")
 }

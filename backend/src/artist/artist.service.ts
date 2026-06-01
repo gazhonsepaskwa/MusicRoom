@@ -3,47 +3,39 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '../../generated/prisma/client';
-import { music } from '../../generated/prisma/browser';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma, artist } from '../../generated/prisma/client';
 
 @Injectable()
-export class MusicService {
+export class ArtistService {
   constructor(private prisma: PrismaService) {}
 
-  async music(
-    musicWhereUniqueInput: Prisma.musicWhereUniqueInput,
+  async artist(
+    artistWhereUniqueInput: Prisma.artistWhereUniqueInput,
   ): Promise<any> {
     try {
-      const result = await this.prisma.music.findUnique({
-        where: musicWhereUniqueInput,
+      const result = await this.prisma.artist.findUnique({
+        where: artistWhereUniqueInput,
         select: {
           id: true,
           title: true,
-          duration: true,
-          album: {
+          images: true,
+          albums: {
             select: {
               title: true,
               date: true,
               images: true,
             },
           },
-          artists: {
-            select: {
-              title: true,
-            },
-          },
         },
       });
       if (!result) {
-        throw new NotFoundException('Music not found');
+        throw new NotFoundException('Artist not found');
       }
-      result['type'] = 'music';
-
       return result;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        throw new BadRequestException('Invalid music ID');
+        throw new BadRequestException('Invalid artist ID');
       }
       throw error;
     }

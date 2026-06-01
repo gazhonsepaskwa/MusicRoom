@@ -10,10 +10,28 @@ import { FriendshipModule } from './friendship/friendship.module';
 import { AlbumModule } from './album/album.module';
 import { ArtistModule } from './artist/artist.module';
 import { SearchModule } from './search/search.module';
+import { APP_GUARD } from '@nestjs/core/constants';
+import { AuthGuard } from './auth/auth.guard';
 
 @Module({
-  imports: [AuthModule, UsersModule, PlaylistsModule, MusicModule, FriendshipModule, AlbumModule, ArtistModule, SearchModule],
+  imports: [
+    AuthModule,
+    UsersModule,
+    PlaylistsModule,
+    MusicModule,
+    FriendshipModule,
+    AlbumModule,
+    ArtistModule,
+    SearchModule,
+  ],
   controllers: [AppController],
-  providers: [AppService, PrismaService],
+  providers: [
+    AppService,
+    PrismaService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
 })
 export class AppModule {}

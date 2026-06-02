@@ -1,3 +1,4 @@
+asyncio==4.0.0
 BLM16-MicroServer==1.0.0
 bottle==0.13.4
 certifi==2026.5.20

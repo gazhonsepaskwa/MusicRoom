@@ -1,0 +1,51 @@
+info:
+  name: /add_album
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:4242/add_album
+  body:
+    type: json
+    data: |-
+      {
+        "q" : "Kyougen - Ado"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: "200"
+    request:
+      url: http://localhost:4242/add_album
+      method: POST
+      body:
+        type: json
+        data: |-
+          {
+            "q" : "Kyougen - Ado"
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Fri, 29 May 2026 19:41:23 GMT
+        - name: server
+          value: WSGIServer/0.2 CPython/3.12.13
+        - name: content-type
+          value: application/json
+        - name: content-length
+          value: "75"
+      body:
+        type: json
+        data: |-
+          {
+            "msg": "The Album 'Kyougen' was added successfully to MusicRoom database"
+          }

@@ -1,3 +1,5 @@
+import * as fs from "fs";
+
 export const jwtConstants = {
-	secret: process.env.JWT_SECRET as string,
-};
+	secret: fs.readFileSync("/run/secrets/jwt_secret", "utf8"),
+}; 

@@ -7,6 +7,6 @@ RUN npm install
 
 COPY . .
 
-RUN npx prisma generate
+RUN ls -la
 
-CMD ["sh", "-c", "echo 'DB is up!' && npx prisma migrate deploy && npm run start:dev"]
+ENTRYPOINT ["sh", "./conf/launch.sh"]

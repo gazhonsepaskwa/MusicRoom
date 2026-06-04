@@ -5,13 +5,13 @@ info:
 
 http:
   method: GET
-  url: http://localhost:80/search?query=port&offset=1&limit=10
+  url: http://localhost:80/search?query=renau&offset=0&limit=10
   params:
     - name: query
-      value: port
+      value: renau
       type: query
     - name: offset
-      value: "1"
+      value: "0"
       type: query
     - name: limit
       value: "10"

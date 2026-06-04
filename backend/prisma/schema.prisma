@@ -48,7 +48,7 @@ enum invitationStatus {
 model playlistship {
   addresseeId Int
   playlistId   Int
-  status       invitationStatus
+  status       invitationStatus @default(PENDING)
   createdAt    DateTime @default(now())
 
   user     user     @relation(fields: [addresseeId], references: [id], onDelete: Cascade)
@@ -78,6 +78,7 @@ model playlist {
   isPublic  Boolean
   title     String
   userId    Int
+  isDefault Boolean @default(false) 
   status    String
   createdAt DateTime @default(now())
 
@@ -85,6 +86,7 @@ model playlist {
   playlistships playlistship[]
   musics       playlistMusic[]         @relation("PlaylistToPlaylistMusic")
 
+  @@unique([title, userId, isDefault])
   @@index([title])
 }
 

@@ -48,4 +48,21 @@ export class MusicService {
       throw error;
     }
   }
+
+  getMusicPath({ id }: { id: number }): string {
+    return `/dl/${id}.mp3`;
+  }
+
+  async streamMusic(
+    musicWhereUniqueInput: Prisma.musicWhereUniqueInput,
+  ): Promise<string> {
+    const music = await this.prisma.music.findUnique({
+      where: musicWhereUniqueInput,
+      select: { id: true },
+    });
+    if (!music) {
+      throw new NotFoundException('Music not found');
+    }
+    return this.getMusicPath({ id: music.id });
+  }
 }

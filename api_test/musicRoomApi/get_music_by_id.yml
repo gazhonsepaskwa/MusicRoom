@@ -6,7 +6,9 @@ info:
 http:
   method: GET
   url: http://localhost:80/music/1
-  auth: inherit
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInVzZXJuYW1lIjoiYXNnIiwiaWF0IjoxNzgwNDc4NTAxLCJleHAiOjE3ODA1NjQ5MDF9.puHc8HqXEim1AJ5oc1NWqKHg3b8E535WveObb1ozp4E
 
 settings:
   encodeUrl: true

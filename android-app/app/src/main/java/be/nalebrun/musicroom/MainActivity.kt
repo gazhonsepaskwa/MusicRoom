@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -40,6 +41,7 @@ fun SearchResultUi() {
             .padding(top = 30.dp)
             .background(Color.White)
     ) {
+        SearchBar()
         SearchResultCard(ResultType.MUSIC, "Scared of the dark", "Em Beihold ● Tales of a failed shapeshifter")
         HorizontalDivider(thickness = 1.dp, color = Color.Gray)
         SearchResultCard(ResultType.PLAYLIST, "Bestof '26", "nalebrun")

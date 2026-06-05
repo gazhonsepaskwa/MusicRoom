@@ -42,6 +42,7 @@ export class AuthController {
 	}
 
 	@Get('oauth')
+	@Public()
 	@UseGuards(AuthGuard('oauth'))
 	async oauthLogin(@Req() req) {}
 

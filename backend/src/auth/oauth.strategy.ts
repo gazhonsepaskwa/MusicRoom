@@ -7,14 +7,16 @@ import * as fs from 'fs';
 @Injectable()
 export class OAuthStrategy extends PassportStrategy(Strategy, 'oauth') {
   constructor(private readonly authService: AuthService) {
-	const googlefile = fs.readFileSync("/run/secrets/google_credentials", "utf8");
+	const googlefile = fs.readFileSync("/run/secrets/oauth_client_id_wa", "utf8");
 	const googleCredentials = JSON.parse(googlefile); 
+	console.log(googleCredentials);
     super({
-      authorizationURL: googleCredentials.auth_uri,
-      tokenURL: googleCredentials.token_uri,
-      clientID: googleCredentials.client_id,
-      clientSecret: googleCredentials.private_key,
-      callbackURL: process.env.REDIRECT_TO_LOGIN,
+      authorizationURL: googleCredentials.web.auth_uri,
+      tokenURL: googleCredentials.web.token_uri,
+      clientID: googleCredentials.web.client_id,
+      clientSecret: googleCredentials.client_secret,
+      callbackURL: googleCredentials.web.redirect_uris[0],
+	  scope: ['profile', 'email'],
     });
   }
 

@@ -1,6 +1,7 @@
-import { Body, Controller, Post, HttpCode, HttpStatus, Get, UseGuards, Request, Query } from '@nestjs/common';
+import { Body, Controller, Post, HttpCode, HttpStatus, Get, UseGuards, Request, Query, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from './auth.guard';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -39,4 +40,17 @@ export class AuthController {
 	resendVerificationEmail(@Body('email') email: string){
 		this.authService.sendVerificationEmail(email);
 	}
+
+	@Get('oauth')
+	@UseGuards(AuthGuard('oauth'))
+	async oauthLogin(@Req() req) {}
+
+	@Get('oauth/callback')
+	@UseGuards(AuthGuard('oauth'))
+	async oauthCallback(@Req() req) {
+		const user = req.user;
+		return this.authService.validateOAuthLogin(user);
+		// Handle the login success scenario.
+		// You might want to create a session or generate a JWT token to send back to the client.
+  }
 }

@@ -16,6 +16,8 @@ export class AuthService {
 		const user = await this.usersService.user({username});
 		if (user == undefined)
 			throw new UnprocessableEntityException("Incorrect Password or Username", "Invalid Loging Attempt ");
+		if (user.password == undefined || user.password == null)
+			throw new UnprocessableEntityException("Connect with your google account and change your password!");
 		const hash = await bcrypt.compare(pass, user?.password);
 		if (hash == false) {
 			throw new UnprocessableEntityException("Incorrect Password or Username", "Invalid Loging Attempt ");
@@ -77,6 +79,12 @@ export class AuthService {
 		this.mailService.sendVerificationEmail(email, link);
 	}
 
+	async generateJWToken(user: any) : Promise<{access_token: string}> {
+		const Payload = { sub: user.id, username: user.username };
+		return {
+			access_token: await this.jwtService.signAsync(Payload),
+		};
+	}
 	async confirmEmail(token: string) :  Promise<{access_token: string}> {
 		try {
 			const payload = await this.jwtService.verifyAsync(token);
@@ -84,14 +92,30 @@ export class AuthService {
 				where: { id: payload.sub },
 				data: { verifiedEmail: true },
 			});
-			const newPayload = { sub: user.id, username: user.username };
-			return {
-				access_token: await this.jwtService.signAsync(newPayload),
-			};
+			return this.generateJWToken(user);
 		}
 		catch {
 			throw new UnauthorizedException("The link has expired or was corrupted. The data you have Send have been deleted. Sign up again");
 		}
 	}
+
+	async validateOAuthLogin(profile: any): Promise<any> {
+		// Here you should validate the user (e.g., check if the user exists in the database)
+		// and create a new user if it doesn't. This implementation is for demonstration purposes.
+		
+		let user = await this.usersService.user({email: profile.email})
+		if (!user) {
+			user = await this.usersService.createUser({
+				username: profile.username,
+				email: profile.email,
+				verifiedEmail: true,
+			})
+		}
+		if (!profile || !user) {
+			throw new UnauthorizedException();
+		}
+
+		return this.generateJWToken(user);
+  }
 }
 

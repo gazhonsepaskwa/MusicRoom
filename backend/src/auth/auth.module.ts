@@ -5,11 +5,14 @@ import { UsersModule } from '../users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './constant';
 import { MailModule } from '../mail/mail.module';
+import { PassportModule } from '@nestjs/passport';
+import { OAuthStrategy } from './oauth.strategy';
 
 @Module({
 	imports: [
 		UsersModule,
 		MailModule,
+		PassportModule,
 		JwtModule.register({
 			global: true,
 			secret: jwtConstants.secret,
@@ -17,6 +20,6 @@ import { MailModule } from '../mail/mail.module';
 		})
 	],
 	controllers: [AuthController],
-	providers: [AuthService]
+	providers: [AuthService, OAuthStrategy],
 })
 export class AuthModule {}

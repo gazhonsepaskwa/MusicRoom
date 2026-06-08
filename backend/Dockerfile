@@ -3,10 +3,12 @@ FROM node:22
 WORKDIR /app
 
 COPY package*.json ./
+RUN export DATABASE_URL="$(cat /run/secrets/database_url)"
+
 RUN npm install
 
 COPY . .
 
-RUN npx prisma generate
+RUN ls -la
 
-CMD ["sh", "-c", "echo 'DB is up!' && npx prisma migrate deploy && npm run start"]
+ENTRYPOINT ["sh", "./conf/launch.sh"]

@@ -33,9 +33,6 @@ export class MailService {
 						Verify Account
 						</a>`,
 			});
-
-			console.log("Message sent: %s", info.messageId);
-			console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
 		}
 		catch (err) {
 			console.error("Error while sending mail:", err);

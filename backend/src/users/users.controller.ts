@@ -27,20 +27,4 @@ export class UsersController {
 			email: user.email,
 		};
 	}
-
-	//rajouter confirmation par email
-	//checker que le mot de passe est assez fort
-	//verifier que le username et email sont conformes aux regex
-	@Post()
-	createUser(@Body() body: {
-			password: string;
-			name: string;
-			email: string;},)
-	{
-		this.usersService.createUser({
-			password: body.password,
-			username: body.name,
-			email: body.email,
-		});
-	}
 }

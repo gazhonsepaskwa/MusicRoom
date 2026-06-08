@@ -2,6 +2,8 @@ import { Body, Controller, Post, HttpCode, HttpStatus, Get, UseGuards, Request, 
 import { AuthService } from './auth.service';
 import { Public } from './auth.guard';
 import { AuthGuard } from '@nestjs/passport';
+import { NewUserDto } from './dto/newUser.dto';
+import { SignInDto } from './dto/signIn.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -10,17 +12,16 @@ export class AuthController {
 	@HttpCode(HttpStatus.OK)
 	@Public()
 	@Post('login')
-	signIn(@Body() signInDto: Record<string, any>) {
+	signIn(@Body() signInDto: SignInDto) {
 		return this.authService.signIn(signInDto.username, signInDto.password);
 	}
 
-	//USE DTO CLASS INSTEAD OF RECORD<>
 	@HttpCode(HttpStatus.OK)
 	@Public()
 	@Post('new_account')
-	signUp(@Body() signUpDto: Record<string, any>) {
-		console.log(process.env.SMTP_HOST);
-		return this.authService.signUp(signUpDto.username, signUpDto.password, signUpDto.email);
+	signUp(@Body() newUserDto: NewUserDto) {
+		const { username, password, email } = newUserDto;
+		return this.authService.signUp(username, password, email);
 	}
 
 	@Get('profile')
@@ -51,7 +52,5 @@ export class AuthController {
 	async oauthCallback(@Req() req) {
 		const user = req.user;
 		return this.authService.validateOAuthLogin(user);
-		// Handle the login success scenario.
-		// You might want to create a session or generate a JWT token to send back to the client.
   }
 }

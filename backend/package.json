@@ -29,6 +29,8 @@
     "@prisma/adapter-pg": "^6.19.3",
     "@prisma/client": "^6.19.3",
     "bcrypt": "^6.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
     "google-auth-library": "^10.6.2",
     "googleapis": "^172.0.0",
     "nodemailer": "^8.0.10",

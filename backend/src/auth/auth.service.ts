@@ -13,14 +13,16 @@ export class AuthService {
 		) {}
 
 	async signIn(username: string, pass: string): Promise<{access_token: string}> {
-		const user = await this.usersService.user({username});
-		if (user == undefined)
-			throw new UnprocessableEntityException("Incorrect Password or Username", "Invalid Loging Attempt ");
+		const userByUsername = await this.usersService.user({username:username});
+		const userByEmail = await this.usersService.user({email:username});
+		const user = userByUsername ?? userByEmail;
+		if (user == undefined || user.username == null)
+			throw new UnprocessableEntityException("Incorrect Password or User", "Invalid Loging Attempt ");
 		if (user.password == undefined || user.password == null)
 			throw new UnprocessableEntityException("Connect with your google account and change your password!");
 		const hash = await bcrypt.compare(pass, user?.password);
 		if (hash == false) {
-			throw new UnprocessableEntityException("Incorrect Password or Username", "Invalid Loging Attempt ");
+			throw new UnprocessableEntityException("Incorrect Password or User", "Invalid Loging Attempt ");
 		}
 		const payload = { sub: user.id, username: user.username };
 		return {
@@ -31,10 +33,10 @@ export class AuthService {
 	async signUp(username: string, password: string, email: string) {
 		const userByEmail = await this.usersService.user({email});
 		if (userByEmail)
-			throw new UnprocessableEntityException(`email already used: ${email}`, "Invalid Account Creation"); // retourner un message disant qu'un compte existe deja à cette adresse
+			throw new UnprocessableEntityException(`email already used: ${email}`, "Invalid Account Creation"); 
 		const userByUsername = await this.usersService.user({username});
 		if (userByUsername)
-			throw new UnprocessableEntityException(`username already used: ${username}`, "Invalid Account Creation"); // retourner un message disant qu'un compte existe deja à cette username
+			throw new UnprocessableEntityException(`username already used: ${username}`, "Invalid Account Creation");
 		const salt = await bcrypt.genSalt();
 		const hash = await bcrypt.hash(password, salt);
 		const user = await this.usersService.createUser({
@@ -60,7 +62,6 @@ export class AuthService {
 	}
 
 	async sendVerificationEmail(email: string, id?: Number) {
-		console.log("Sending verification email to", email);
 		const user = await this.usersService.user({email});
 		if (!user)
 			throw new UnauthorizedException("No user at this email address!")
@@ -100,8 +101,6 @@ export class AuthService {
 	}
 
 	async validateOAuthLogin(profile: any): Promise<any> {
-		// Here you should validate the user (e.g., check if the user exists in the database)
-		// and create a new user if it doesn't. This implementation is for demonstration purposes.
 		
 		let user = await this.usersService.user({email: profile.email})
 		if (!user) {

@@ -9,7 +9,6 @@ export class OAuthStrategy extends PassportStrategy(Strategy, 'oauth') {
   constructor(private readonly authService: AuthService) {
 	const googlefile = fs.readFileSync("/run/secrets/oauth_client_id_wa", "utf8");
 	const googleCredentials = JSON.parse(googlefile); 
-	console.log(googleCredentials);
     super({
       authorizationURL: googleCredentials.web.auth_uri,
       tokenURL: googleCredentials.web.token_uri,

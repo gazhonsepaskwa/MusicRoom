@@ -11,3 +11,4 @@ echo "DB is up, running migrations..."
 npx prisma migrate deploy
 
 npm run start:dev
+

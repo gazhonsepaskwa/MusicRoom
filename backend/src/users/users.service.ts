@@ -7,9 +7,15 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async user(userWhereUniqueInput: Prisma.userWhereUniqueInput): Promise<user | null> {
-    return this.prisma.user.findUnique({
-      where: userWhereUniqueInput,
-    });
+	try {
+
+		return this.prisma.user.findUnique({
+			where: userWhereUniqueInput,
+		});
+	}
+	catch (err) {
+		return null;
+	}
   }
 
   async users(params: {

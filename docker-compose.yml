@@ -45,14 +45,6 @@ services:
     networks:
       - music_room_network
 
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 1919:8080
-    networks:
-      - music_room_network
-
   db:
     image: postgres:16-alpine
     environment:
@@ -84,41 +76,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-
-  spoti-scraper:
-    build:
-      context: ./spoti-scraper
-      dockerfile: Dockerfile
-    volumes:
-      - ./spoti-scraper:/app:z
-      - ./dl:/dl:z
-    networks:
-      - music_room_network
-    ports:
-      - "4242:4242"
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-
-  dbVisualiser:
-    image: music-room-backend
-    container_name: db_visualiser
-    command: ["npx", "prisma", "studio", "--port", "5555", "--browser", "none"]
-    env_file:
-      - ./backend/.env
-    volumes:
-      - ./backend/prisma:/app/prisma:z
-    profiles:
-      - visual
-    ports:
-      - "5555:5555"
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - music_room_network
 
 volumes:
   pg_data:

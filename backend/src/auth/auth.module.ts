@@ -10,8 +10,8 @@ import { OAuthStrategy } from './oauth.strategy';
 
 @Module({
 	imports: [
-		UsersModule,
 		MailModule,
+		UsersModule,
 		PassportModule,
 		JwtModule.register({
 			global: true,
@@ -21,5 +21,6 @@ import { OAuthStrategy } from './oauth.strategy';
 	],
 	controllers: [AuthController],
 	providers: [AuthService, OAuthStrategy],
+	exports: [AuthService],
 })
 export class AuthModule {}

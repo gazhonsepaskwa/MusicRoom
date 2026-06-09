@@ -26,7 +26,7 @@ export class PlaylistsController {
   }
 
   @Post()
-  create(@Body() createPlaylistDto: CreatePlaylistDto, @Req() req: Request) {
+  create(@Body() createPlaylistDto: any, @Req() req: Request) {
     const userId = this.authGuard.getUserIdFromRequest(req);
     if (!userId) {
       throw new BadRequestException('User ID not found in request');

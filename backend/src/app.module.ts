@@ -24,8 +24,8 @@ import { MailModule } from './mail/mail.module';
     FriendshipModule,
     AlbumModule,
     ArtistModule,
-    SearchModule,
-  , MailModule],
+	MailModule,
+    SearchModule],
   controllers: [AppController],
   providers: [
     AppService,

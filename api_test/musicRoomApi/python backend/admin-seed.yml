@@ -1,0 +1,21 @@
+info:
+  name: /admin/seed
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: http://localhost:4242/admin/seed
+  body:
+    type: json
+    data: |-
+      {
+        "q" = "1"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

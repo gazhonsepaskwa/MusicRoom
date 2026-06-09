@@ -20,8 +20,10 @@ services:
       dockerfile: Dockerfile
     image: music-room-backend
     volumes:
-      - ./backend/src:/app/src:z # hot-reload en dev
-      - ./backend/prisma:/app/prisma:z # migrations live
+      - ./backend/src:/app/src:z
+      - ./backend/prisma:/app/prisma:z
+      - ./dl:/dl:z
+
     env_file:
       - ./backend/.env
     depends_on:

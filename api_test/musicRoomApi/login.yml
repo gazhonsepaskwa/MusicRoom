@@ -1,16 +1,17 @@
 info:
-  name: add_artist
+  name: login
   type: http
-  seq: 2
+  seq: 11
 
 http:
   method: POST
-  url: http://localhost:4242/add_artist
+  url: http://localhost:80/auth/login
   body:
     type: json
     data: |-
       {
-        "q" : "Renaud"
+      "username": "a",
+      "password": "dsfj"
       }
   auth: inherit
 

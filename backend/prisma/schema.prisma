@@ -15,10 +15,11 @@ datasource db {
 
 model user {
   id        Int      @id @default(autoincrement())
-  password  String
-  username  String
-  email     String?
+  password  String?
+  username  String	 @unique
+  email     String   @unique
   createdAt DateTime @default(now())
+  verifiedEmail Boolean @default(false)
 
   devices       device[]
   playlists     playlist[]

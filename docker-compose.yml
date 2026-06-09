@@ -13,6 +13,8 @@ services:
       - "443:443"
 
   backend:
+    security_opt:
+      - label=disable
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -27,6 +29,11 @@ services:
         condition: service_healthy
     networks:
       - music_room_network
+    secrets:
+      - smtp_password
+      - jwt_secret
+      - database_url
+      - oauth_client_id_wa
 
   adminer:
     image: adminer
@@ -40,7 +47,7 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
       POSTGRES_DB: ${DB_NAME}
     volumes:
       - pg_data:/var/lib/postgresql/data
@@ -51,6 +58,8 @@ services:
       retries: 5
     networks:
       - music_room_network
+    secrets:
+      - db_password
 
   spoti-scraper:
     build:
@@ -58,43 +67,13 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./spoti-scraper:/app:z
-      - ./dl:/dl:z
     networks:
       - music_room_network
     ports:
       - "4242:4242"
-    env_file:
-      - .env
     depends_on:
       db:
         condition: service_healthy
-
-  dbVisualiser:
-    image: music-room-backend
-    container_name: db_visualiser
-    command:
-      [
-        "npx",
-        "prisma",
-        "studio",
-        "--port",
-        "5555",
-        "--browser",
-        "none"
-      ]
-    env_file:
-      - ./backend/.env
-    volumes:
-      - ./backend/prisma:/app/prisma:z
-    profiles:
-      - visual
-    ports:
-      - "5555:5555"
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - music_room_network
 
 volumes:
   pg_data:
@@ -102,3 +81,17 @@ volumes:
 networks:
   music_room_network:
     driver: bridge
+
+secrets:
+  google_credentials:
+    file: secrets/google_service_account.json
+  smtp_password:
+    file: secrets/smtp_password
+  jwt_secret:
+    file: secrets/jwt_secret
+  database_url:
+    file: secrets/database_url
+  db_password:
+    file: secrets/db_password
+  oauth_client_id_wa:
+    file: secrets/oauth_webapp.json

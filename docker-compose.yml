@@ -67,10 +67,18 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./spoti-scraper:/app:z
+      - ./dl:/dl:z
     networks:
       - music_room_network
     ports:
       - "4242:4242"
+    env_file:
+      - .env
+    secrets:
+      - db_password
+      - google_youtube_credentials
+      - spotify_user_id
+      - spotify_user_secret
     depends_on:
       db:
         condition: service_healthy
@@ -83,7 +91,7 @@ networks:
     driver: bridge
 
 secrets:
-  google_credentials:
+  google_youtube_credentials:
     file: secrets/google_service_account.json
   smtp_password:
     file: secrets/smtp_password
@@ -95,3 +103,7 @@ secrets:
     file: secrets/db_password
   oauth_client_id_wa:
     file: secrets/oauth_webapp.json
+  spotify_user_id:
+    file: secrets/spotify_user_id
+  spotify_user_secret:
+    file: secrets/spotify_user_secret

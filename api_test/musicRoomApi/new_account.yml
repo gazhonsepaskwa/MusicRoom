@@ -1,7 +1,7 @@
 info:
   name: new_account
   type: http
-  seq: 8
+  seq: 5
 
 http:
   method: POST
@@ -10,9 +10,9 @@ http:
     type: json
     data: |-
       {
-      "username": "asg",
+      "username": "asqs",
       "password": "dsfj",
-      "email":"sjfdnf"
+      "email":"sjfdndddf"
       }
   auth:
     type: bearer

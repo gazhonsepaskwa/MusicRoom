@@ -16,7 +16,6 @@ import { Response } from 'express';
 export class MusicController {
   constructor(private readonly musicService: MusicService) {}
 
-  @Public()
   @Get(':id')
   getMusic(@Param('id', ParseSafeIntPipe) id: number) {
     console.log('MusicController.getMusic called with id:', id);

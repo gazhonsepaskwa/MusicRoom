@@ -86,4 +86,128 @@ export class PlaylistsService {
       throw error;
     }
   }
+
+  async update(params: {
+    where: Prisma.playlistWhereUniqueInput;
+    data: Prisma.playlistUpdateInput;
+  }) {
+    const { where, data } = params;
+    try {
+      const updatedPlaylist = await this.prisma.playlist.update({
+        where,
+        data,
+      });
+      return updatedPlaylist;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestException('Invalid data for playlist update');
+      }
+      throw error;
+    }
+  }
+
+  async delete(where: Prisma.playlistWhereUniqueInput) {
+    try {
+      const deletedPlaylist = await this.prisma.playlist.delete({
+        where,
+      });
+      return deletedPlaylist;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestException('Invalid playlist ID for deletion');
+      }
+      throw error;
+    }
+  }
+
+  async getPlaylistVersion(playlistId: number): Promise<number> {
+    const playlist = await this.prisma.playlist.findUnique({
+      where: { id: playlistId },
+      select: { version: true },
+    });
+    return playlist ? playlist.version : 0;
+  }
+
+  async incrementPlaylistVersion(playlistId: number): Promise<number> {
+    const updatedPlaylist = await this.prisma.playlist.update({
+      where: { id: playlistId },
+      data: { version: { increment: 1 } },
+    });
+    return updatedPlaylist.version;
+  }
+
+  async moveMusic(
+    playlistId: number,
+    musicId: number,
+    newIndex: number,
+  ): Promise<number | void> {
+    const playlist = await this.prisma.playlist.findUnique({
+      where: { id: playlistId },
+      include: {
+        musics: {
+          orderBy: { index: 'asc' },
+        },
+      },
+    });
+
+    if (!playlist) {
+      throw new NotFoundException('Playlist not found');
+    }
+
+    const musicToMove = playlist.musics.find((pm) => pm.index === musicId);
+
+    if (!musicToMove) {
+      throw new NotFoundException('Music not found in playlist');
+    }
+
+    const oldIndex = musicToMove.index;
+
+    if (newIndex < 0 || newIndex >= playlist.musics.length) {
+      throw new BadRequestException('Invalid new index for music');
+    }
+
+    await this.prisma.$transaction(async (prisma) => {
+      if (newIndex < oldIndex) {
+        await prisma.playlistMusic.updateMany({
+          where: {
+            playlistId,
+            index: {
+              gte: newIndex,
+              lt: oldIndex,
+            },
+          },
+          data: {
+            index: { increment: 1 },
+          },
+        });
+      } else if (newIndex > oldIndex) {
+        await prisma.playlistMusic.updateMany({
+          where: {
+            playlistId,
+            index: {
+              gt: oldIndex,
+              lte: newIndex,
+            },
+          },
+          data: {
+            index: { decrement: 1 },
+          },
+        });
+      }
+
+      await prisma.playlistMusic.update({
+        where: {
+          playlistId_musicId: {
+            playlistId,
+            musicId,
+          },
+        },
+        data: {
+          index: newIndex,
+        },
+      });
+
+      return await this.incrementPlaylistVersion(playlistId);
+    });
+  }
 }

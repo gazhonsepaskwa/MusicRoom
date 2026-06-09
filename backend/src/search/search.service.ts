@@ -4,6 +4,7 @@ import { MusicService } from '../music/music.service';
 import { AlbumService } from '../album/album.service';
 import { ArtistService } from '../artist/artist.service';
 import { PlaylistsService } from '../playlists/playlists.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class SearchService {
@@ -13,12 +14,13 @@ export class SearchService {
     private readonly artistService: ArtistService,
     private readonly albumService: AlbumService,
     private readonly playlistService: PlaylistsService,
+    private readonly userService: UsersService,
   ) {}
 
   async search(
     query: string,
     userId: number,
-    types: string[] = ['music', 'artist', 'album'],
+    types: string[] = ['music', 'artist', 'album', 'playlist', 'user'],
     offset: number = 0,
     limit: number = 10,
   ) {
@@ -68,12 +70,6 @@ export class SearchService {
     }
 
     if (types.includes('playlist')) {
-      console.log(
-        'Searching for playlists with query:',
-        query,
-        'and userId:',
-        userId,
-      );
       const playlistResults = await this.prisma.$queryRaw<
         { id: number; score: number }[]
       >`
@@ -93,8 +89,18 @@ export class SearchService {
           )
         );
       `;
-      console.log('Playlist search results:', playlistResults);
       results.push(...playlistResults.map((r) => ({ ...r, type: 'playlist' })));
+    }
+
+    if (types.includes('user')) {
+      const userResults = await this.prisma.$queryRaw<
+        { id: number; score: number }[]
+      >`
+        SELECT id, similarity(username, ${query}) AS score
+        FROM "user"
+        WHERE username % ${query};
+      `;
+      results.push(...userResults.map((r) => ({ ...r, type: 'user' })));
     }
 
     results.sort((a, b) => b.score - a.score);
@@ -121,6 +127,11 @@ export class SearchService {
       if (result.type === 'playlist') {
         const playlist = await this.playlistService.playlist({ id: result.id });
         AllResults.push(playlist);
+      }
+
+      if (result.type === 'user') {
+        const user = await this.userService.get_user({ id: result.id });
+        AllResults.push(user);
       }
     }
 

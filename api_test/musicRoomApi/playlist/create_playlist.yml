@@ -1,21 +1,29 @@
 info:
   name: create_playlist
   type: http
-  seq: 15
+  seq: 12
 
 http:
   method: POST
-  url: http://localhost:80/playlists/create?title=tio&status=ekar&isPublic=True
+  url: https://localhost/playlists/create?title=aaarsdd&status=aaa&isPublic=true
   params:
     - name: title
-      value: tio
+      value: aaarsdd
       type: query
     - name: status
-      value: ekar
+      value: aaa
       type: query
     - name: isPublic
-      value: "True"
+      value: "true"
       type: query
+  body:
+    type: json
+    data: |-
+      {
+        "title":"sdezzszezfdsd",
+        "status":"true",
+        "isPublic":true
+      }
   auth: inherit
 
 settings:

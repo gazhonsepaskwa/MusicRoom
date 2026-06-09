@@ -1,16 +1,16 @@
 info:
-  name: add_album
+  name: add_artist
   type: http
-  seq: 4
+  seq: 3
 
 http:
   method: POST
-  url: http://localhost:4242/add_album
+  url: http://localhost:4242/add_artist
   body:
     type: json
     data: |-
       {
-        "q" : "Kyougen - Ado"
+        "q" : "Renaud"
       }
   auth: inherit
 

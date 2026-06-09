@@ -1,16 +1,18 @@
 info:
-  name: add_artist
+  name: update_playlist
   type: http
-  seq: 2
+  seq: 4
 
 http:
-  method: POST
-  url: http://localhost:4242/add_artist
+  method: PATCH
+  url: https://localhost/playlists/update/6
   body:
     type: json
     data: |-
       {
-        "q" : "Renaud"
+        "title":"sdezzszezfdsd",
+        "status":"false",
+        "isPublic":true
       }
   auth: inherit
 

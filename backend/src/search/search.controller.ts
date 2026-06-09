@@ -40,6 +40,7 @@ export class SearchController {
       'music',
       'album',
       'playlist',
+      'user',
     ];
 
     const userId = this.authGuard.getUserIdFromRequest(req);
@@ -47,11 +48,11 @@ export class SearchController {
       throw new BadRequestException('User ID not found in request');
     }
     console.log('User ID extracted from request:', userId);
-    const validTypes = ['artist', 'music', 'album', 'playlist'];
+    const validTypes = ['artist', 'music', 'album', 'playlist', 'user'];
     const invalidTypes = typeArray.filter((type) => !validTypes.includes(type));
     if (invalidTypes.length > 0) {
       throw new BadRequestException(
-        `Types invalides : ${invalidTypes.join(', ')}. Types autorisés : artist, music, album, playlist.`,
+        `Types invalides : ${invalidTypes.join(', ')}. Types autorisés : artist, music, album, playlist, user.`,
       );
     }
 

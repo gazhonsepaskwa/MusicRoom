@@ -31,6 +31,8 @@ services:
         condition: service_healthy
     networks:
       - music_room_network
+    ports:
+      - "3000:3000"
 
   adminer:
     image: adminer

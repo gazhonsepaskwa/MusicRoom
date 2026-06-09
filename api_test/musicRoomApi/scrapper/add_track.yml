@@ -1,17 +1,16 @@
 info:
-  name: login
+  name: add_track
   type: http
-  seq: 6
+  seq: 1
 
 http:
   method: POST
-  url: http://localhost:80/auth/login
+  url: http://localhost:4242/add_track
   body:
     type: json
     data: |-
       {
-      "username": "a",
-      "password": "dsfj"
+        "q" : "joyeux anniversaire"
       }
   auth: inherit
 

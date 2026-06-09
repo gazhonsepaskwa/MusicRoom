@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { user, Prisma } from '../../generated/prisma/client.js';
 
@@ -29,6 +33,32 @@ export class UsersService {
       where,
       orderBy,
     });
+  }
+
+  async get_user(
+    userWhereUniqueInput: Prisma.userWhereUniqueInput,
+  ): Promise<any> {
+    try {
+      const result = await this.prisma.user.findUnique({
+        where: userWhereUniqueInput,
+        select: {
+          id: true,
+          username: true,
+          email: true,
+        },
+      });
+      if (!result) {
+        throw new NotFoundException('User not found');
+      }
+      result['type'] = 'user';
+
+      return result;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestException('Invalid user ID');
+      }
+      throw error;
+    }
   }
 
   async createUser(data: Prisma.userCreateInput): Promise<user> {

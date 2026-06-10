@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { user, Prisma } from '../../generated/prisma/client.js';
+import { ArtistService } from '../artist/artist.service.js';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private artistService: ArtistService) {}
 
   async user(userWhereUniqueInput: Prisma.userWhereUniqueInput): Promise<user | null> {
 	try {
@@ -59,6 +60,12 @@ export class UsersService {
   }
 
   async setPreferredArtist(index: number, userId: number, artistId?: number) {
+	if (artistId) {
+		const artist = await this.artistService.artist({ id: artistId });
+		if (!artist) {
+			throw new Error(`Artist with id ${artistId} does not exist`);
+		}
+	}
 	switch (index) {
 		case 1:
 			return this.prisma.user.update({

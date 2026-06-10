@@ -146,7 +146,6 @@ fun FilterButton(text : String, modifier: Modifier = Modifier, active : Boolean)
             modifier = Modifier
                 .fillMaxWidth())
     }
-
 }
 
 @Composable

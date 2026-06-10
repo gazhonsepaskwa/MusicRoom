@@ -1,5 +1,6 @@
 package be.nalebrun.musicroom
 
+import android.R
 import android.app.appsearch.SearchResult
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -28,9 +29,22 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MusicRoomTheme() {
-                SearchResultUi()
+                PaddingTop({ LoginSignInScreenUi() }, 50)
             }
         }
+    }
+}
+
+@Composable
+fun PaddingTop(content: @Composable () -> Unit, padding: Int) {
+    """
+        Add a padding of [padding].dp to the frame given as parameters
+        Used to be under the android status bar
+    """.trimIndent()
+    Column(
+        modifier = Modifier.padding(top = padding.dp)
+    ) {
+        content() // <--- Execute the composable passed in
     }
 }
 
@@ -38,7 +52,7 @@ class MainActivity : ComponentActivity() {
 fun SearchResultUi() {
     Column(
         modifier = Modifier
-            .padding(top = 30.dp)
+            .padding(top = 50.dp)
             .background(Color.White)
     ) {
         SearchBar()
@@ -55,5 +69,5 @@ fun SearchResultUi() {
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    SearchResultUi()
+    LoginSignInScreenUi()
 }

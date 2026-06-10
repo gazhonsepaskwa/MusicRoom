@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-        "q" : "Scared of the dark - em beihold"
+        "q" : "niki minaj anaconda"
       }
   auth: inherit
 

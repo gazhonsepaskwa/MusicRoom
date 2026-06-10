@@ -1,21 +1,60 @@
+"""
+Database
+"""
 import psycopg2
+import os
+
+# check for env var existance
+if not os.environ.get("DB_NAME"):
+    raise Exception("DB_NAME environment variable not set")
+if not os.environ.get("DB_USER"):
+    raise Exception("DB_USER environment variable not set")
+if not os.environ.get("DB_PASSWORD"):
+    raise Exception("DB_PASSWORD environment variable not set")
+if not os.environ.get("DB_HOST"):
+    raise Exception("DB_HOST environment variable not set")
+if not os.environ.get("DB_PORT"):
+    raise Exception("DB_PORT environment variable not set")
 
 # database connection
 connection = psycopg2.connect(
-    database="music_room_db",
-    user="music_room_user",
-    password="oEhb7utCFpaspJVzIT9FrZgPbTAp65e2rV6P8uW2v7l2OeXmuDV2G14UQSgJgchd",
-    host="db",
-    port=5432
+    database=os.environ.get("DB_NAME"),
+    user=os.environ.get("DB_USER"),
+    password=os.environ.get("DB_PASSWORD"),
+    host=os.environ.get("DB_HOST"),
+    port=os.environ.get("DB_PORT")
 )
 cursor = connection.cursor()
 
+# utils
+def fix_date(date: str) -> str:
+    """
+    fix spotify date format.
+    Sometime spotify give partial date format.
+    Postgress can't handle it so I set first month and first day when missing
+    ex :
+        2025-03-19 -> 2025-03-19
+        2025-03    -> 2025-03-01
+        2025       -> 2025-01-01
+    """
+
+    if len(date) == 0:
+        return "0001-01-01"
+    elif len(date) == 4:
+        return date + "-01-01"
+    elif len(date) == 7:
+        return date + "-01"
+    return date
+
 # commit
+
 def commit():
+    """commit changes to the database"""
     connection.commit()
 
 # querries
-def insert_track(uri: str, name: str, duration_ms: str, track_number: str, album_id: str):
+def insert_track(uri: str, name: str, duration_ms: str, track_number: str, album_id: str) -> int:
+    """Insert a track into the database and return the track_id"""
     cursor.execute(
         """
         INSERT INTO "music" ("spotifyId", title, duration, "albumIndex", "albumId")
@@ -35,6 +74,7 @@ def insert_track(uri: str, name: str, duration_ms: str, track_number: str, album
     return track_id
 
 def insert_album(spotifyId: str, title: str, date: str, images: str):
+    date = fix_date(date)
     cursor.execute(
         """
         INSERT INTO "album" ("spotifyId", title, date, images)
@@ -79,5 +119,18 @@ def link_album_to_artist(album_id: str, artist_id: str):
         (
             album_id,
             artist_id,
+        )
+    )
+
+def link_track_to_artist(track_id: str, artist_id: str):
+    cursor.execute(
+        """
+        INSERT INTO "_artistTomusic" ("A", "B")
+        VALUES (%s, %s)
+        ON CONFLICT ("A", "B") DO NOTHING
+        """,
+        (
+            artist_id,
+            track_id
         )
     )

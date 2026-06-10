@@ -54,10 +54,12 @@ export class AuthService {
 		try {
 			const payload = await this.jwtService.verifyAsync(token);
 			const user = await this.usersService.user({id: payload.sub});
-			return user?.id;
+			if (!user)
+				throw new UnauthorizedException();
+			return user.id;
 		}
-		catch {
-			throw new UnauthorizedException();
+		catch (err){
+			throw err;
 		}
 	}
 

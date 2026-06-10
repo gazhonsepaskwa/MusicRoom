@@ -57,4 +57,26 @@ export class UsersService {
       where,
     });
   }
+
+  async setPreferredArtist(index: number, userId: number, artistId?: number) {
+	switch (index) {
+		case 1:
+			return this.prisma.user.update({
+				where: { id: userId },
+				data: { firstPreferredArtistId: artistId ? artistId : null },
+			});
+		case 2:
+			return this.prisma.user.update({
+				where: { id: userId },
+				data: { secondPreferredArtistId: artistId ? artistId : null },
+			});
+		case 3:
+			return this.prisma.user.update({
+				where: { id: userId },
+				data: { thirdPreferredArtistId: artistId ? artistId : null },
+			});
+		default:
+			throw new Error('Index must be between 1 and 3');
+	}
+  }
 }

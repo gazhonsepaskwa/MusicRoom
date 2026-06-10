@@ -26,6 +26,12 @@ model user {
   sentFriendships     friendship[] @relation("Requester")
   receivedFriendships friendship[] @relation("Addressee")
   playlistships playlistship[]
+  firstPreferredArtistId Int?
+  firstPreferredArtist artist? @relation("FirstPreferredArtist", fields: [firstPreferredArtistId], references: [id])
+  secondPreferredArtistId Int?
+  secondPreferredArtist artist? @relation("SecondPreferredArtist", fields: [secondPreferredArtistId], references: [id])
+  thirdPreferredArtistId Int?
+  thirdPreferredArtist artist? @relation("ThirdPreferredArtist", fields: [thirdPreferredArtistId], references: [id])
 }
 
 model friendship {
@@ -144,6 +150,10 @@ model artist {
   albums album[]
 
   musics music[]
+
+  firstPreferredByUsers  user[] @relation("FirstPreferredArtist")
+  secondPreferredByUsers user[] @relation("SecondPreferredArtist")
+  thirdPreferredByUsers  user[] @relation("ThirdPreferredArtist")
 
   @@index([title])
 }

@@ -1,0 +1,23 @@
+info:
+  name: update_playlist
+  type: http
+  seq: 4
+
+http:
+  method: PATCH
+  url: https://localhost/playlists/update/6
+  body:
+    type: json
+    data: |-
+      {
+        "title":"sdezzszezfdsd",
+        "status":"false",
+        "isPublic":true
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

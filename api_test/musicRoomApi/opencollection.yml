@@ -2,6 +2,22 @@ opencollection: 1.0.0
 
 info:
   name: musicRoomApi
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+
+request:
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInVzZXJuYW1lIjoiYXNxcyIsImlhdCI6MTc4MDkyMzcwNiwiZXhwIjoxNzgxMDEwMTA2fQ.3UiS-ADRbVb0816_OMDPPHBXlJ-lx3mOPHC5unXoXvs
 bundled: false
 extensions:
   bruno:

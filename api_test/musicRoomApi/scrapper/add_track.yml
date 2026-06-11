@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-        "q" : "joyeux anniversaire"
+        "q" : "je suis"
       }
   auth: inherit
 

@@ -12,6 +12,7 @@ import { ArtistModule } from './artist/artist.module';
 import { SearchModule } from './search/search.module';
 import { APP_GUARD } from '@nestjs/core/constants';
 import { AuthGuard } from './auth/auth.guard';
+import { WebsocketsModule } from './websockets/websockets.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AuthGuard } from './auth/auth.guard';
     AlbumModule,
     ArtistModule,
     SearchModule,
+    WebsocketsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { stat } from 'fs';
 
 @Injectable()
 export class PlaylistsService {
@@ -136,6 +135,65 @@ export class PlaylistsService {
     return updatedPlaylist.version;
   }
 
+  async addMusic(playlistId: number, songId: number): Promise<number | void> {
+    const playlist = await this.prisma.playlist.findUnique({
+      where: { id: playlistId },
+      include: { musics: true },
+    });
+
+    if (!playlist) {
+      console.log(`Playlist with ID ${playlistId} not found`);
+      throw new NotFoundException('Playlist not found');
+    }
+
+    const existingMusic = playlist.musics.find((pm) => pm.musicId === songId);
+
+    if (existingMusic) {
+      console.log(
+        `Music with ID ${songId} is already in playlist ${playlistId}`,
+      );
+      throw new BadRequestException('Music already in playlist');
+    }
+
+    await this.prisma.playlistMusic.create({
+      data: {
+        playlistId,
+        musicId: songId,
+        index: playlist.musics.length,
+      },
+    });
+
+    return await this.incrementPlaylistVersion(playlistId);
+  }
+
+  async canJoinPlaylist(playlistId: number, userId: number): Promise<number> {
+    const playlist = await this.prisma.playlist.findUnique({
+      where: {
+        id: playlistId,
+        OR: [
+          { isPublic: true },
+          {
+            playlistships: {
+              some: {
+                addresseeId: userId,
+                status: 'ACCEPTED',
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    if (!playlist) {
+      console.log(`Playlist ${playlistId} not found or user not authorized`);
+      throw new NotFoundException(
+        `Playlist ${playlistId} not found or user not authorized`,
+      );
+    }
+
+    return await this.getPlaylistVersion(playlistId);
+  }
+
   async moveMusic(
     playlistId: number,
     musicId: number,
@@ -151,63 +209,81 @@ export class PlaylistsService {
     });
 
     if (!playlist) {
+      console.log(`Playlist with ID ${playlistId} not found`);
       throw new NotFoundException('Playlist not found');
     }
 
-    const musicToMove = playlist.musics.find((pm) => pm.index === musicId);
+    const musicToMove = playlist.musics.find((pm) => pm.musicId === musicId);
 
     if (!musicToMove) {
+      console.log(
+        `Music with ID ${musicId} not found in playlist ${playlistId}`,
+      );
       throw new NotFoundException('Music not found in playlist');
     }
 
     const oldIndex = musicToMove.index;
 
-    if (newIndex < 0 || newIndex >= playlist.musics.length) {
+    if (
+      newIndex < 0 ||
+      newIndex >= playlist.musics.length ||
+      newIndex === oldIndex
+    ) {
+      console.log(
+        `Invalid new index ${newIndex} for music ${musicId} in playlist ${playlistId}`,
+      );
       throw new BadRequestException('Invalid new index for music');
     }
 
-    await this.prisma.$transaction(async (prisma) => {
-      if (newIndex < oldIndex) {
-        await prisma.playlistMusic.updateMany({
-          where: {
-            playlistId,
-            index: {
-              gte: newIndex,
-              lt: oldIndex,
+    try {
+      await this.prisma.$transaction(async (prisma) => {
+        if (newIndex < oldIndex) {
+          await prisma.playlistMusic.updateMany({
+            where: {
+              playlistId,
+              index: {
+                gte: newIndex,
+                lt: oldIndex,
+              },
             },
-          },
-          data: {
-            index: { increment: 1 },
-          },
-        });
-      } else if (newIndex > oldIndex) {
-        await prisma.playlistMusic.updateMany({
-          where: {
-            playlistId,
-            index: {
-              gt: oldIndex,
-              lte: newIndex,
+            data: {
+              index: { increment: 1 },
             },
-          },
-          data: {
-            index: { decrement: 1 },
-          },
-        });
-      }
+          });
+        } else if (newIndex > oldIndex) {
+          await prisma.playlistMusic.updateMany({
+            where: {
+              playlistId,
+              index: {
+                gt: oldIndex,
+                lte: newIndex,
+              },
+            },
+            data: {
+              index: { decrement: 1 },
+            },
+          });
+        }
 
-      await prisma.playlistMusic.update({
-        where: {
-          playlistId_musicId: {
-            playlistId,
-            musicId,
+        await prisma.playlistMusic.update({
+          where: {
+            playlistId_musicId: {
+              playlistId,
+              musicId,
+            },
           },
-        },
-        data: {
-          index: newIndex,
-        },
+          data: {
+            index: newIndex,
+          },
+        });
       });
+    } catch (error) {
+      console.log(
+        `Failed to move music ${musicId} in playlist ${playlistId} to index ${newIndex}: ${error}`,
+      );
+      throw error;
+    }
 
-      return await this.incrementPlaylistVersion(playlistId);
-    });
+    return await this.incrementPlaylistVersion(playlistId);
   }
 }

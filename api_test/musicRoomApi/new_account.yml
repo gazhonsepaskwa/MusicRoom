@@ -10,9 +10,9 @@ http:
     type: json
     data: |-
       {
-      "username": "asqs",
+      "username": "asahazs",
       "password": "dsfj",
-      "email":"sjfdndddf"
+      "email":"sjddf"
       }
   auth:
     type: bearer

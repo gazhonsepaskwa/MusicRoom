@@ -1,0 +1,61 @@
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Param,
+  Query,
+  Req,
+} from '@nestjs/common';
+import { SearchService } from './search.service';
+import { ParseSafeIntPipe } from '../common/pipe/parse_safe_int.pipe';
+import { AuthGuard } from '../auth/auth.guard';
+import { Request } from 'express';
+
+@Controller('search')
+export class SearchController {
+  constructor(
+    private readonly searchService: SearchService,
+    private readonly authGuard: AuthGuard,
+  ) {}
+
+  @Get()
+  deep_search(
+    @Req() req: Request,
+    @Query('query') query: string,
+    @Query('type') types: string,
+    @Query('offset', ParseSafeIntPipe) offset: number,
+    @Query('limit', ParseSafeIntPipe) limit: number,
+  ) {
+    console.log(
+      'SearchController.deep_search called with query:',
+      query,
+      'offset:',
+      offset,
+      'limit:',
+      limit,
+    );
+
+    const typeArray = types?.split(',') || [
+      'artist',
+      'music',
+      'album',
+      'playlist',
+      'user',
+    ];
+
+    const userId = this.authGuard.getUserIdFromRequest(req);
+    if (!userId) {
+      throw new BadRequestException('User ID not found in request');
+    }
+    console.log('User ID extracted from request:', userId);
+    const validTypes = ['artist', 'music', 'album', 'playlist', 'user'];
+    const invalidTypes = typeArray.filter((type) => !validTypes.includes(type));
+    if (invalidTypes.length > 0) {
+      throw new BadRequestException(
+        `Types invalides : ${invalidTypes.join(', ')}. Types autorisés : artist, music, album, playlist, user.`,
+      );
+    }
+
+    return this.searchService.search(query, userId, typeArray, offset, limit);
+  }
+}

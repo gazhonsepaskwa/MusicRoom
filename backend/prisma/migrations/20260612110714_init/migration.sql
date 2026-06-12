@@ -7,10 +7,11 @@ CREATE TYPE "licenseStatus" AS ENUM ('NONE', 'TRIAL', 'EVERYTHING');
 -- CreateTable
 CREATE TABLE "user" (
     "id" SERIAL NOT NULL,
-    "password" TEXT NOT NULL,
+    "password" TEXT,
     "username" TEXT NOT NULL,
-    "email" TEXT,
+    "email" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "verifiedEmail" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );
@@ -29,7 +30,7 @@ CREATE TABLE "friendship" (
 CREATE TABLE "playlistship" (
     "addresseeId" INTEGER NOT NULL,
     "playlistId" INTEGER NOT NULL,
-    "status" "invitationStatus" NOT NULL,
+    "status" "invitationStatus" NOT NULL DEFAULT 'PENDING',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "playlistship_pkey" PRIMARY KEY ("playlistId","addresseeId")
@@ -52,6 +53,8 @@ CREATE TABLE "playlist" (
     "isPublic" BOOLEAN NOT NULL,
     "title" TEXT NOT NULL,
     "userId" INTEGER NOT NULL,
+    "isDefault" BOOLEAN NOT NULL DEFAULT false,
+    "version" INTEGER NOT NULL DEFAULT 0,
     "status" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -113,6 +116,20 @@ CREATE TABLE "_albumToartist" (
     CONSTRAINT "_albumToartist_AB_pkey" PRIMARY KEY ("A","B")
 );
 
+-- CreateTable
+CREATE TABLE "_artistTomusic" (
+    "A" INTEGER NOT NULL,
+    "B" INTEGER NOT NULL,
+
+    CONSTRAINT "_artistTomusic_AB_pkey" PRIMARY KEY ("A","B")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_username_key" ON "user"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
+
 -- CreateIndex
 CREATE INDEX "friendship_addresseeId_idx" ON "friendship"("addresseeId");
 
@@ -120,25 +137,31 @@ CREATE INDEX "friendship_addresseeId_idx" ON "friendship"("addresseeId");
 CREATE INDEX "playlist_title_idx" ON "playlist"("title");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "playlist_title_userId_isDefault_key" ON "playlist"("title", "userId", "isDefault");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "music_spotifyId_key" ON "music"("spotifyId");
 
 -- CreateIndex
-CREATE INDEX "music_title_idx" ON "music"("title");
+CREATE INDEX "Music_title_trgm_idx" ON "music" USING GIN ("title" gin_trgm_ops);
 
 -- CreateIndex
 CREATE UNIQUE INDEX "album_spotifyId_key" ON "album"("spotifyId");
 
 -- CreateIndex
-CREATE INDEX "album_title_idx" ON "album"("title");
+CREATE INDEX "Album_title_trgm_idx" ON "album" USING GIN ("title" gin_trgm_ops);
 
 -- CreateIndex
 CREATE UNIQUE INDEX "artist_spotifyId_key" ON "artist"("spotifyId");
 
 -- CreateIndex
-CREATE INDEX "artist_title_idx" ON "artist"("title");
+CREATE INDEX "Artist_title_trgm_idx" ON "artist" USING GIN ("title" gin_trgm_ops);
 
 -- CreateIndex
 CREATE INDEX "_albumToartist_B_index" ON "_albumToartist"("B");
+
+-- CreateIndex
+CREATE INDEX "_artistTomusic_B_index" ON "_artistTomusic"("B");
 
 -- AddForeignKey
 ALTER TABLE "friendship" ADD CONSTRAINT "friendship_requesterId_fkey" FOREIGN KEY ("requesterId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -172,3 +195,9 @@ ALTER TABLE "_albumToartist" ADD CONSTRAINT "_albumToartist_A_fkey" FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE "_albumToartist" ADD CONSTRAINT "_albumToartist_B_fkey" FOREIGN KEY ("B") REFERENCES "artist"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_artistTomusic" ADD CONSTRAINT "_artistTomusic_A_fkey" FOREIGN KEY ("A") REFERENCES "artist"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_artistTomusic" ADD CONSTRAINT "_artistTomusic_B_fkey" FOREIGN KEY ("B") REFERENCES "music"("id") ON DELETE CASCADE ON UPDATE CASCADE;

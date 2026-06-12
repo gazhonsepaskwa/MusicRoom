@@ -1,16 +1,17 @@
 info:
-  name: add_album
+  name: login
   type: http
-  seq: 4
+  seq: 6
 
 http:
   method: POST
-  url: http://localhost:4242/add_album
+  url: https://localhost/auth/login
   body:
     type: json
     data: |-
       {
-        "q" : "Kyougen - Ado"
+      "username": "monbeaucul",
+      "password": "esttresJolie1@"
       }
   auth: inherit
 

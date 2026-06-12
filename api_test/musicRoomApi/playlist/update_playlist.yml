@@ -1,16 +1,18 @@
 info:
-  name: add_track
+  name: update_playlist
   type: http
-  seq: 3
+  seq: 4
 
 http:
-  method: POST
-  url: http://localhost:4242/add_track
+  method: PATCH
+  url: https://localhost/playlists/update/6
   body:
     type: json
     data: |-
       {
-        "q" : "Scared of the dark - em beihold"
+        "title":"sdezzszezfdsd",
+        "status":"false",
+        "isPublic":true
       }
   auth: inherit
 

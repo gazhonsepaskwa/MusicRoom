@@ -1,16 +1,18 @@
 info:
-  name: add_artist
+  name: new_account
   type: http
-  seq: 2
+  seq: 5
 
 http:
   method: POST
-  url: http://localhost:4242/add_artist
+  url: https://localhost/auth/new_account
   body:
     type: json
     data: |-
       {
-        "q" : "em beihold"
+        "username": "monbeaucul",
+        "password": "esttresJolie1@",
+        "email": "aurele.josserand@gmail.com"
       }
   auth: inherit
 

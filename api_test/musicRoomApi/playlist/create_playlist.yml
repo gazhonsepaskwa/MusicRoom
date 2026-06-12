@@ -1,0 +1,33 @@
+info:
+  name: create_playlist
+  type: http
+  seq: 12
+
+http:
+  method: POST
+  url: https://localhost/playlists/create?title=aaarsdd&status=aaa&isPublic=true
+  params:
+    - name: title
+      value: aaarsdd
+      type: query
+    - name: status
+      value: aaa
+      type: query
+    - name: isPublic
+      value: "true"
+      type: query
+  body:
+    type: json
+    data: |-
+      {
+        "title":"sdezzszezfdsd",
+        "status":"true",
+        "isPublic":true
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

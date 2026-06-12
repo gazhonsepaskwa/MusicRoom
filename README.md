@@ -26,7 +26,9 @@
 	DB_NAME= \
 	DB_USER= \
 	DB_PORT= \
-	BACKEND_PORT=
+	DB_HOST= \
+	BACKEND_PORT= \
+	EXTERNAL_PORT=
 
 * backend container .env:
 

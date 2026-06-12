@@ -1,21 +1,16 @@
 # --- HTTP Redirect (Port 80) ---
 # This replaces your Nginx server block listening on 80
 :80 {
-    redir https://{host}{uri}?{query} permanent
+    reverse_proxy backend:3000 {
+        header_up X-Real-IP {remote_host}           # Forward Real IP (X-Real-IP)
+        header_up X-Forwarded-For {remote_host}     # Forward Proxy For (X-Forwarded-For)
+    }
 }
 
-# --- HTTPS Proxy (Port 443) ---
-# This replaces your Nginx server block listening on 443
-localhost :443 {
-    # Caddy will automatically create self-signed certs for localhost
-
-    # This maps your Nginx headers
+:443 {
     reverse_proxy backend:3000 {
-        # Forward Real IP (X-Real-IP)
-        header_up X-Real-IP {remote_host}
-        # Forward Proxy For (X-Forwarded-For)
-        header_up X-Forwarded-For {remote_host}
-        # Forward Protocol (Crucial for HTTPS)
-        header_up X-Forwarded-Proto https
+        header_up X-Real-IP {remote_host}           # Forward Real IP (X-Real-IP)
+        header_up X-Forwarded-For {remote_host}     # Forward Proxy For (X-Forwarded-For)
+        header_up X-Forwarded-Proto https           # Forward Protocol (Crucial for HTTPS)
     }
 }

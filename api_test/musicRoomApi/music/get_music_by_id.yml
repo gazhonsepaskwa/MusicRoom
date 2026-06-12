@@ -1,11 +1,11 @@
 info:
-  name: stream_music
+  name: get_music_by_id
   type: http
-  seq: 8
+  seq: 2
 
 http:
   method: GET
-  url: https://localhost/music/stream/1
+  url: https://localhost/music/1
   auth: inherit
 
 settings:

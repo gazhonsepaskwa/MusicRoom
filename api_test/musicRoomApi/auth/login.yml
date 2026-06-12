@@ -1,16 +1,17 @@
 info:
-  name: add_track
+  name: login
   type: http
-  seq: 3
+  seq: 6
 
 http:
   method: POST
-  url: http://localhost:4242/add_track
+  url: https://localhost/auth/login
   body:
     type: json
     data: |-
       {
-        "q" : "Scared of the dark - em beihold"
+      "username": "monbeaucul",
+      "password": "esttresJolie1@"
       }
   auth: inherit
 

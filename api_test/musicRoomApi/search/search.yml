@@ -5,10 +5,10 @@ info:
 
 http:
   method: GET
-  url: http://localhost:80/search?query=renau&offset=0&limit=10
+  url: http://localhost:80/search?query=hexa&offset=0&limit=10
   params:
     - name: query
-      value: renau
+      value: hexa
       type: query
     - name: offset
       value: "0"

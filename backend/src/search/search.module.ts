@@ -9,6 +9,7 @@ import { PlaylistsService } from '../playlists/playlists.service';
 import { AuthService } from '../auth/auth.service';
 import { UsersService } from '../users/users.service';
 import { AuthGuard } from '../auth/auth.guard';
+import { MailService } from '../mail/mail.service';
 
 @Module({
   controllers: [SearchController],
@@ -22,6 +23,7 @@ import { AuthGuard } from '../auth/auth.guard';
     AuthService,
     UsersService,
     AuthGuard,
+    MailService,
   ],
 })
 export class SearchModule {}

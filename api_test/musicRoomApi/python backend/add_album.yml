@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-        "q" : "Kyougen - Ado"
+        "q" : "Grand corps malade"
       }
   auth: inherit
 

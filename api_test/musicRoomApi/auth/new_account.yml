@@ -1,17 +1,18 @@
 info:
-  name: login
+  name: new_account
   type: http
-  seq: 6
+  seq: 5
 
 http:
   method: POST
-  url: http://localhost:80/auth/login
+  url: https://localhost/auth/new_account
   body:
     type: json
     data: |-
       {
-      "username": "a",
-      "password": "dsfj"
+        "username": "monbeaucul",
+        "password": "esttresJolie1@",
+        "email": "aurele.josserand@gmail.com"
       }
   auth: inherit
 

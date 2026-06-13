@@ -35,12 +35,12 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/**
+ * Add a padding of [padding].dp to the frame given as parameters.
+ * Used to be under the android status bar
+ */
 @Composable
 fun PaddingTop(content: @Composable () -> Unit, padding: Int) {
-    """
-        Add a padding of [padding].dp to the frame given as parameters
-        Used to be under the android status bar
-    """.trimIndent()
     Column(
         modifier = Modifier.padding(top = padding.dp)
     ) {

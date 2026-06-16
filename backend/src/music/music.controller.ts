@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { MusicService } from './music.service';
 import { ParseSafeIntPipe } from '../common/pipe/parse_safe_int.pipe';
-import { Public } from '../auth/auth.guard';
 import * as fs from 'fs';
 import { Response } from 'express';
 
@@ -16,7 +15,6 @@ import { Response } from 'express';
 export class MusicController {
   constructor(private readonly musicService: MusicService) {}
 
-  @Public()
   @Get(':id')
   getMusic(@Param('id', ParseSafeIntPipe) id: number) {
     console.log('MusicController.getMusic called with id:', id);
@@ -25,7 +23,6 @@ export class MusicController {
     });
   }
 
-  @Public()
   @Get('stream/:id')
   @Header('Accept-Ranges', 'bytes')
   async streamMusic(

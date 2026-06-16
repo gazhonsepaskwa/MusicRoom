@@ -1,22 +1,25 @@
-import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { user, Prisma } from '../../generated/prisma/client.js';
-import { ArtistService } from '../artist/artist.service.js';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService, private artistService: ArtistService) {}
 
-  async user(userWhereUniqueInput: Prisma.userWhereUniqueInput): Promise<user | null> {
-	try {
-
-		return this.prisma.user.findUnique({
-			where: userWhereUniqueInput,
-		});
-	}
-	catch (err) {
-		return null;
-	}
+  async user(
+    userWhereUniqueInput: Prisma.userWhereUniqueInput,
+  ): Promise<user | null> {
+    try {
+      return this.prisma.user.findUnique({
+        where: userWhereUniqueInput,
+      });
+    } catch (err) {
+      return null;
+    }
   }
 
   async users(params: {
@@ -34,6 +37,32 @@ export class UsersService {
       where,
       orderBy,
     });
+  }
+
+  async get_user(
+    userWhereUniqueInput: Prisma.userWhereUniqueInput,
+  ): Promise<any> {
+    try {
+      const result = await this.prisma.user.findUnique({
+        where: userWhereUniqueInput,
+        select: {
+          id: true,
+          username: true,
+          email: true,
+        },
+      });
+      if (!result) {
+        throw new NotFoundException('User not found');
+      }
+      result['type'] = 'user';
+
+      return result;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestException('Invalid user ID');
+      }
+      throw error;
+    }
   }
 
   async createUser(data: Prisma.userCreateInput): Promise<user> {

@@ -8,6 +8,8 @@ npx prisma generate
 
 echo "DB is up, running migrations..."
 
+# npx prisma migrate reset --force
+
 npx prisma migrate deploy
 
 npm run start:dev

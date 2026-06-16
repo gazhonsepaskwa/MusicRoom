@@ -85,7 +85,9 @@ model playlist {
   isPublic  Boolean
   title     String
   userId    Int
-  isDefault Boolean @default(false) 
+  isDefault Boolean  @default(false)
+  version   Int      @default(0)
+  
   status    String
   createdAt DateTime @default(now())
 
@@ -152,10 +154,6 @@ model artist {
   albums album[]
 
   musics music[]
-
-  firstPreferredByUsers  user[] @relation("FirstPreferredArtist")
-  secondPreferredByUsers user[] @relation("SecondPreferredArtist")
-  thirdPreferredByUsers  user[] @relation("ThirdPreferredArtist")
 
   @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, name: "Artist_title_trgm_idx")
 }

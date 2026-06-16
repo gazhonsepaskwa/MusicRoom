@@ -6,12 +6,12 @@ import { AlbumService } from '../album/album.service';
 import { ArtistService } from '../artist/artist.service';
 import { MusicService } from '../music/music.service';
 import { PlaylistsService } from '../playlists/playlists.service';
+import { AuthService } from '../auth/auth.service';
 import { UsersService } from '../users/users.service';
 import { AuthGuard } from '../auth/auth.guard';
-import { AuthModule } from '../auth/auth.module';
+import { MailService } from '../mail/mail.service';
 
 @Module({
-  imports: [AuthModule],
   controllers: [SearchController],
   providers: [
     SearchService,
@@ -20,8 +20,10 @@ import { AuthModule } from '../auth/auth.module';
     ArtistService,
     AlbumService,
     PlaylistsService,
+    AuthService,
     UsersService,
     AuthGuard,
+    MailService,
   ],
 })
 export class SearchModule {}

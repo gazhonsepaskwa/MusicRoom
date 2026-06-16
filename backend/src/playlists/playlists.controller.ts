@@ -2,8 +2,11 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
+  NotFoundException,
   Param,
+  Patch,
   Post,
   Query,
   Req,
@@ -20,20 +23,51 @@ export class PlaylistsController {
     private readonly authGuard: AuthGuard,
   ) {}
 
-  @Get(':id')
-  get(@Param('id', ParseSafeIntPipe) id: number) {
-    return this.playlistsService.playlist({ id });
-  }
-
-  @Post()
-  create(@Body() createPlaylistDto: any, @Req() req: Request) {
+  @Post('create')
+  create(
+    @Body()
+    body: {
+      title: string;
+      status: string;
+      isPublic: boolean;
+    },
+    @Req() req: Request,
+  ) {
+    console.log('PlaylistsController.create called with body:', body);
     const userId = this.authGuard.getUserIdFromRequest(req);
     if (!userId) {
       throw new BadRequestException('User ID not found in request');
     }
-    return this.playlistsService.create({
-      ...createPlaylistDto,
-      user: { connect: { id: userId } },
+    try {
+      return this.playlistsService.create({
+        ...body,
+        user: { connect: { id: userId } },
+      });
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  @Patch('update/:id')
+  updatePublicStatus(
+    @Param('id', ParseSafeIntPipe) id: number,
+    @Body() body: { title?: string; status?: string; isPublic?: boolean },
+  ) {
+    return this.playlistsService.update({
+      where: { id },
+      data: body,
     });
+  }
+
+  @Get('get/:id')
+  get(@Param('id', ParseSafeIntPipe) id: number) {
+    console.log('PlaylistsController.get called with id:', id);
+    return this.playlistsService.playlist({ id });
+  }
+
+  @Delete('delete/:id')
+  delete(@Param('id', ParseSafeIntPipe) id: number) {
+    console.log('PlaylistsController.delete called with id:', id);
+    return this.playlistsService.delete({ id });
   }
 }

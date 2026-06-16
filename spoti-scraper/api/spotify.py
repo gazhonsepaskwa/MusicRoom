@@ -2,34 +2,38 @@
 Spotify API wrapper.
 """
 
-import requests
-import time
 import os
+import time
+
 import api.utils
+import requests
 
 
-# check for env var existance
-if not os.environ.get("SPOTIFY_API_USER_ID"):
-    raise Exception("SPOTIFY_API_USER_ID environment variable not set")
-if not os.environ.get("SPOTIFY_API_SECRET"):
-    raise Exception("SPOTIFY_API_SECRET environment variable not set")
+def get_secret(file_path: str) -> str:
+    with open(file_path, "r") as file:
+        return file.read().replace("\n", "")
 
-# get secrets from env
-CLIENT_ID = os.environ.get("SPOTIFY_API_USER_ID")
-CLIENT_SECRET = os.environ.get("SPOTIFY_API_SECRET")
+
+# get user id and secret from secrets file
+try:
+    user_id_content = get_secret("/run/secrets/spotify_user_id")
+    user_secret_content = get_secret("/run/secrets/spotify_user_secret")
+except FileNotFoundError:
+    raise Exception("Secrets file not found")
 
 # API INIT : request access token
-data = { "grant_type": "client_credentials" }
+data = {"grant_type": "client_credentials"}
 response = requests.post(
     "https://accounts.spotify.com/api/token",
     data=data,
-    auth=(CLIENT_ID, CLIENT_SECRET),
+    auth=(user_id_content, user_secret_content),
 )
 api.utils.check_response(response)
 
 # Global variables
 access_token = response.json()["access_token"]
-headers = { "Authorization": f"Bearer {access_token}" }
+headers = {"Authorization": f"Bearer {access_token}"}
+
 
 # search
 def search_track(track_string: str, user_mode: bool = False) -> list:
@@ -55,15 +59,20 @@ def search_track(track_string: str, user_mode: bool = False) -> list:
     if user_mode:
         track_count = 1
         for track in tracks:
-            artist_string = ", ".join([artist.get('name') for artist in track.get('artists')])
-            print(f"{track_count} {track.get('name')} - {artist_string}, Album: {track.get('album').get('name')}, Duration: {track.get('duration_ms')}")
+            artist_string = ", ".join(
+                [artist.get("name") for artist in track.get("artists")]
+            )
+            print(
+                f"{track_count} {track.get('name')} - {artist_string}, Album: {track.get('album').get('name')}, Duration: {track.get('duration_ms')}"
+            )
             track_count += 1
         choice = input("chose track -> ")
     else:
         # if no user mode, choose the first track by default
         choice = 1
 
-    return (tracks[int(choice) - 1])
+    return tracks[int(choice) - 1]
+
 
 def search_artist(artist_string: str, user_mode: bool = False) -> list:
     """
@@ -96,7 +105,8 @@ def search_artist(artist_string: str, user_mode: bool = False) -> list:
         # if no user mode, choose the first artist by default
         choice = 1
 
-    return (artists[int(choice) - 1])
+    return artists[int(choice) - 1]
+
 
 def search_album(album_string: str, user_mode: bool = False) -> list:
     """
@@ -128,7 +138,8 @@ def search_album(album_string: str, user_mode: bool = False) -> list:
         # if no user mode, choose the first album by default
         choice = 1
 
-    return (albums[int(choice) - 1])
+    return albums[int(choice) - 1]
+
 
 # other
 def get_album_tracks(album_uri: str) -> list:
@@ -140,7 +151,9 @@ def get_album_tracks(album_uri: str) -> list:
         "album_uri": album_uri,
     }
     response = requests.get(
-        "https://api.spotify.com/v1/albums/{}/tracks".format(album_uri[album_uri.rfind(":") + 1:]),
+        "https://api.spotify.com/v1/albums/{}/tracks".format(
+            album_uri[album_uri.rfind(":") + 1 :]
+        ),
         params=params,
         headers=headers,
     )
@@ -148,6 +161,7 @@ def get_album_tracks(album_uri: str) -> list:
     tracks = response.json().get("items")
 
     return tracks
+
 
 def get_artist_albums(artist_uri: str) -> list:
     """
@@ -158,14 +172,12 @@ def get_artist_albums(artist_uri: str) -> list:
     offset = 0
     already_fetched = 0
     albums = []
-    while True: # do-while
-        params = {
-            "artist_uri": artist_uri,
-            "limit": 10,
-            "offset": offset
-        }
+    while True:  # do-while
+        params = {"artist_uri": artist_uri, "limit": 10, "offset": offset}
         response = requests.get(
-            "https://api.spotify.com/v1/artists/{}/albums".format(artist_uri[artist_uri.rfind(":") + 1:]),
+            "https://api.spotify.com/v1/artists/{}/albums".format(
+                artist_uri[artist_uri.rfind(":") + 1 :]
+            ),
             params=params,
             headers=headers,
         )
@@ -173,7 +185,9 @@ def get_artist_albums(artist_uri: str) -> list:
 
         albums += response.json().get("items")
 
-        if already_fetched + len(albums) >= response.json().get("total"): # exit condition
+        if already_fetched + len(albums) >= response.json().get(
+            "total"
+        ):  # exit condition
             break
 
         already_fetched += len(albums)
@@ -182,6 +196,7 @@ def get_artist_albums(artist_uri: str) -> list:
     # fix the year error time format
 
     return albums
+
 
 def get_artist(artist_uri) -> dict:
     """
@@ -192,7 +207,9 @@ def get_artist(artist_uri) -> dict:
         "artist_uri": artist_uri,
     }
     response = requests.get(
-        "https://api.spotify.com/v1/artists/{}".format(artist_uri[artist_uri.rfind(":") + 1:]),
+        "https://api.spotify.com/v1/artists/{}".format(
+            artist_uri[artist_uri.rfind(":") + 1 :]
+        ),
         params=params,
         headers=headers,
     )

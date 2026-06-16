@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -99,6 +100,8 @@ export class AuthService {
         expiresIn: '1h',
       },
     );
+	if (!process.env.DOMAIN_NAME)
+		throw new InternalServerErrorException('DOMAIN_NAME environment variable is not set');
     const link = `https://${process.env.DOMAIN_NAME}/auth/verify?verificationToken=${token}`;
     this.mailService.sendVerificationEmail(email, link);
   }

@@ -79,7 +79,9 @@ model playlist {
   isPublic  Boolean
   title     String
   userId    Int
-  isDefault Boolean @default(false) 
+  isDefault Boolean  @default(false)
+  version   Int      @default(0)
+  
   status    String
   createdAt DateTime @default(now())
 

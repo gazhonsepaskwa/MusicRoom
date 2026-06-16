@@ -4,7 +4,7 @@ all: up
 re:
 	docker compose down -v && \
 	docker compose build --no-cache && \
-	docker compose up -d
+	docker compose up
 
 rebuild:
 	docker compose down -v && \

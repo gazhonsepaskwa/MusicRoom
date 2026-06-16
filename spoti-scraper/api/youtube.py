@@ -2,64 +2,70 @@
 YouTube API wrapper.
 """
 
-#files
-import api.utils
-# external libs
 import os
-from googleapiclient.discovery import build
-from google.oauth2 import service_account
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-import yt_dlp
-import requests
 
-SCOPES = ['https://www.googleapis.com/auth/youtube.force-ssl']
-SA_KEY_FILE = 'google_service_account.json'
+import api.utils
+import requests
+import yt_dlp
+from google.auth.transport.requests import Request
+from google.oauth2 import service_account
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+
+SCOPES = ["https://www.googleapis.com/auth/youtube.force-ssl"]
+SA_KEY_FILE = "/run/secrets/google_youtube_credentials"
+
 
 def authenticate() -> Credentials:
     """Authenticate the user using service account credentials and return them."""
-    credentials = service_account.Credentials.from_service_account_file(SA_KEY_FILE, scopes=SCOPES)
+    credentials = service_account.Credentials.from_service_account_file(
+        SA_KEY_FILE, scopes=SCOPES
+    )
 
     return credentials
+
 
 # auth
 credentials = authenticate()
 
 # build service
-youtube_service = build('youtube', 'v3', credentials=credentials, static_discovery=False)
+youtube_service = build(
+    "youtube", "v3", credentials=credentials, static_discovery=False
+)
+
 
 def search_videos(query) -> list:
     """
     Search for YouTube videos based on the given query and return the results.
     Raises a RequestException if the response status code is not 200.
     """
-    request = youtube_service.search().list(
-        part='id,snippet',
-        q=query,
-        type='video'
-    )
+    request = youtube_service.search().list(part="id,snippet", q=query, type="video")
     response = request.execute()
 
-    return response['items']
+    return response["items"]
+
 
 def download_youtube_music(video_url, title) -> None:
     """
     Download the audio from a YouTube video and convert it to MP3 format.
     """
     ydl_opts = {
-        'format': 'bestaudio',  # Grab the best audio stream
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',  # 192kbps is standard high quality
-        }],
-        'outtmpl': f'/dl/{title}.%(ext)s',  # Save as the title given by the caller
+        "format": "bestaudio",  # Grab the best audio stream
+        "postprocessors": [
+            {
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": "mp3",
+                "preferredquality": "192",  # 192kbps is standard high quality
+            }
+        ],
+        "outtmpl": f"/dl/{title}.%(ext)s",  # Save as the title given by the caller
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         print(f"Downloading and converting: {video_url}")
         ydl.download([video_url])
         print("Download complete!")
+
 
 def search_and_download(query, title) -> bool:
     """

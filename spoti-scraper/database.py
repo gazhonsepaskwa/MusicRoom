@@ -1,30 +1,35 @@
 """
 Database
 """
-import psycopg2
+
 import os
+
+import psycopg2
 
 # check for env var existance
 if not os.environ.get("DB_NAME"):
     raise Exception("DB_NAME environment variable not set")
 if not os.environ.get("DB_USER"):
     raise Exception("DB_USER environment variable not set")
-if not os.environ.get("DB_PASSWORD"):
-    raise Exception("DB_PASSWORD environment variable not set")
 if not os.environ.get("DB_HOST"):
     raise Exception("DB_HOST environment variable not set")
 if not os.environ.get("DB_PORT"):
     raise Exception("DB_PORT environment variable not set")
 
+# get secret
+with open("/run/secrets/db_password", "r") as file:
+    password_secret = file.read().replace("\n", "")
+
 # database connection
 connection = psycopg2.connect(
     database=os.environ.get("DB_NAME"),
     user=os.environ.get("DB_USER"),
-    password=os.environ.get("DB_PASSWORD"),
+    password=password_secret,
     host=os.environ.get("DB_HOST"),
-    port=os.environ.get("DB_PORT")
+    port=os.environ.get("DB_PORT"),
 )
 cursor = connection.cursor()
+
 
 # utils
 def fix_date(date: str) -> str:
@@ -46,14 +51,19 @@ def fix_date(date: str) -> str:
         return date + "-01"
     return date
 
+
 # commit
+
 
 def commit():
     """commit changes to the database"""
     connection.commit()
 
+
 # querries
-def insert_track(uri: str, name: str, duration_ms: str, track_number: str, album_id: str) -> int:
+def insert_track(
+    uri: str, name: str, duration_ms: str, track_number: str, album_id: str
+) -> int:
     """Insert a track into the database and return the track_id"""
     cursor.execute(
         """
@@ -68,10 +78,11 @@ def insert_track(uri: str, name: str, duration_ms: str, track_number: str, album
             duration_ms,
             track_number,
             album_id,
-        )
+        ),
     )
     track_id = cursor.fetchone()[0]
     return track_id
+
 
 def insert_album(spotifyId: str, title: str, date: str, images: str):
     date = fix_date(date)
@@ -87,10 +98,11 @@ def insert_album(spotifyId: str, title: str, date: str, images: str):
             title,
             date,
             images,
-        )
+        ),
     )
     album_id = cursor.fetchone()[0]
     return album_id
+
 
 def insert_artist(spotifyId: str, name: str, images: str):
     cursor.execute(
@@ -104,10 +116,11 @@ def insert_artist(spotifyId: str, name: str, images: str):
             spotifyId,
             name,
             images,
-        )
+        ),
     )
     artist_id = cursor.fetchone()[0]
     return artist_id
+
 
 def link_album_to_artist(album_id: str, artist_id: str):
     cursor.execute(
@@ -119,8 +132,9 @@ def link_album_to_artist(album_id: str, artist_id: str):
         (
             album_id,
             artist_id,
-        )
+        ),
     )
+
 
 def link_track_to_artist(track_id: str, artist_id: str):
     cursor.execute(
@@ -129,8 +143,5 @@ def link_track_to_artist(track_id: str, artist_id: str):
         VALUES (%s, %s)
         ON CONFLICT ("A", "B") DO NOTHING
         """,
-        (
-            artist_id,
-            track_id
-        )
+        (artist_id, track_id),
     )

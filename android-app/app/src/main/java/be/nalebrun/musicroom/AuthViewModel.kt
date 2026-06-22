@@ -1,9 +1,18 @@
 package be.nalebrun.musicroom
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import okhttp3.FormBody
+
+class AuthViewModelFactory(
+    private val authRepository: AuthRepository
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return AuthViewModel(authRepository) as T
+    }
+}
 
 class AuthViewModel(
     val authRepository: AuthRepository

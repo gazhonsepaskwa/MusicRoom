@@ -24,10 +24,13 @@ import be.nalebrun.musicroom.uiElement.CustomTextField
 
 @Composable
 fun AuthUi(
-    navController: NavController
+    navController: NavController,
+    authRepository: AuthRepository
 ) {
-    val viewModel = viewModel<AuthViewModel>()
-
+    // TODO maybe change the factory by an injection methode (Hilt look to be the right way)
+    val viewModel = viewModel<AuthViewModel>(
+        factory = AuthViewModelFactory(authRepository)
+    )
     // get the viewModel var in the AuthUi to update ui when value change
     val loginResult:  String?  by viewModel.loginResult.collectAsStateWithLifecycle()
     val signinResult: String?  by viewModel.signinResult.collectAsStateWithLifecycle()
@@ -37,12 +40,12 @@ fun AuthUi(
     // navigation triggers
     androidx.compose.runtime.LaunchedEffect(loginResult) {
         if (loginOk == true) {
-            navController.navigate(Search)
+            navController.navigate("search")
         }
     }
     androidx.compose.runtime.LaunchedEffect(signinResult) {
         if (signinOk == true) {
-            navController.navigate(Search)
+            navController.navigate("search")
         }
     }
 

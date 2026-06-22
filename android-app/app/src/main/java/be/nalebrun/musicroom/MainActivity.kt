@@ -19,41 +19,23 @@ class MainActivity : ComponentActivity() {
     private lateinit var navController: NavHostController
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d("MainActivity", "onCreate called")
         try {
-            Log.d("MainActivity", "Calling enableEdgeToEdge")
-            enableEdgeToEdge()
-
-            Log.d("MainActivity", "Calling super.onCreate")
             super.onCreate(savedInstanceState)
-
-            Log.d("MainActivity", "Creating OkHttpClient")
+            enableEdgeToEdge()
             val httpClient = OkHttpClient()
-
-            Log.d("MainActivity", "Creating CredentialRepository")
             credentialRepository = CredentialRepository(this)
-
-            Log.d("MainActivity", "Creating AuthRepository")
             authRepository = AuthRepository(httpClient)
-
-            Log.d("MainActivity", "Calling setContent")
             setContent {
-                Log.d("MainActivity", "Inside setContent")
                 MusicRoomTheme() {
-                    Log.d("MainActivity", "Inside MusicRoomTheme")
                     navController = rememberNavController()
-                    Log.d("MainActivity", "NavController created: $navController")
-                    val startDestination: String = "Auth"
-                    Log.d("MainActivity", "Calling MusicRoomApp")
+                    val startDestination: String = "auth"
                     MusicRoomApp(
                         navController = navController,
+                        authRepository = authRepository,
                         startDestination = startDestination
                     )
-                    Log.d("MainActivity", "MusicRoomApp returned")
                 }
-                Log.d("MainActivity", "setContent block finished")
             }
-            Log.d("MainActivity", "onCreate completed successfully")
         } catch (e: Throwable) {
             Log.e("MainActivity", "CRASH CAUGHT: ${e.javaClass.simpleName}", e)
             e.stackTrace.forEach { Log.e("MainActivity", "  at $it", Throwable()) }
@@ -65,10 +47,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MusicRoomApp(
     navController: NavHostController,
+    authRepository: AuthRepository,
     startDestination: String
 ) {
     SetupNavHost(
         navController = navController,
+        authRepository = authRepository,
         startDestination = startDestination
     )
 }

@@ -1,4 +1,4 @@
-package be.nalebrun.musicroom.uiElement
+package be.nalebrun.musicroom.ui.element
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

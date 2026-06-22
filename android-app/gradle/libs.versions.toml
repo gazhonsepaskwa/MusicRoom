@@ -12,7 +12,6 @@ kotlin = "2.2.10"
 composeBom = "2026.02.01"
 foundation = "1.11.2"
 navigationCompose = "2.9.8"
-kotlinx-serialization = "1.9.24"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -39,5 +38,4 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-kotlinx-serialization = { id = 'org.jetbrains.kotlin.plugin.serialization', version.ref = "kotlin"}
 

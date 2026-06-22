@@ -1,21 +1,22 @@
-package be.nalebrun.musicroom
+package be.nalebrun.musicroom.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import be.nalebrun.musicroom.APIRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import okhttp3.FormBody
 
 class AuthViewModelFactory(
-    private val authRepository: AuthRepository
+    private val APIRepository: APIRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return AuthViewModel(authRepository) as T
+        return AuthViewModel(APIRepository) as T
     }
 }
 
 class AuthViewModel(
-    val authRepository: AuthRepository
+    val APIRepository: APIRepository
 ) : ViewModel() {
 
 
@@ -30,7 +31,7 @@ class AuthViewModel(
             .add("password", password)
             .build()
 
-        authRepository.post(
+        APIRepository.post(
             "https://musicroom.nalebrun.be/auth/login",
             body,
             onResponse = { _, response ->
@@ -57,7 +58,7 @@ class AuthViewModel(
             .add("email", email)
             .build()
 
-        authRepository.post(
+        APIRepository.post(
             "https://musicroom.nalebrun.be/auth/new_account",
             body,
             onResponse = { _, response ->

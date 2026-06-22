@@ -9,13 +9,28 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 interface ICredentialRepository {
+    /**
+     * function to store the JWT in datastore
+     * @param newToken new value for the JWT
+     * @author nalebrun
+     */
     suspend fun setJWT(newToken: String)
+    /**
+     * function to retrieve the stored the JWT in datastore
+     * @author nalebrun
+     */
     suspend fun getJWT() : String
+
+    /**
+     * Flow to retrieve asynchronously from Datastore the JWT
+     * @author nalebrun
+     */
     val jwtFlow: Flow<String>
 }
 
 /**
- * Repository to access credential from DataStore (with cache implementation)
+ * Repository to access credential from DataStore
+ * @param context ? IDK what it really is..
  * @author nalebrun
  */
 class CredentialRepository(context: Context) : ICredentialRepository{

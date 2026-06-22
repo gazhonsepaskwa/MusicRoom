@@ -8,7 +8,7 @@ import okhttp3.RequestBody
 import okhttp3.Response
 import okio.IOException
 
-interface IAuthRepository {
+interface IAPIRepository {
     /**
      * Make a GET query to a given url
      * @author nalebrun
@@ -44,9 +44,9 @@ interface IAuthRepository {
  * @property client (private) hold the connection client
  * @see IAuthRepository
  */
-class AuthRepository(
+class APIRepository(
     private val client: OkHttpClient
-) : IAuthRepository{
+) : IAPIRepository{
 
     // Methods
     override fun get(

@@ -5,10 +5,14 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import be.nalebrun.musicroom.repositories.CredentialRepository
 import be.nalebrun.musicroom.ui.theme.MusicRoomTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 
 class MainActivity : ComponentActivity() {
@@ -72,7 +76,6 @@ fun selectStartDestination(
     val startDest : String = "auth"
     return startDest
 }
-
 
 /**
  * Entrypoint for Application

@@ -15,6 +15,9 @@ class AuthViewModelFactory(
     }
 }
 
+/**
+ * The logic for the Authentification page
+ */
 class AuthViewModel(
     val APIRepository: APIRepository
 ) : ViewModel() {

@@ -5,11 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import be.nalebrun.musicroom.APIRepository
+import be.nalebrun.musicroom.apiJsonStruct.responds.apiLoginJson
+import be.nalebrun.musicroom.apiJsonStruct.responds.apiSigninJson
 import be.nalebrun.musicroom.repositories.CredentialRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import okhttp3.FormBody
+import kotlin.math.log
 
 class AuthViewModelFactory(
     private val APIRepository: APIRepository,
@@ -45,10 +49,11 @@ class AuthViewModel(
             url = "https://musicroom.nalebrun.be/auth/login",
             body = body,
             onResponse = { _, response ->
-                _loginResult.value = response.body?.string()
                 if (response.code in 200..<300) {
                     _loginOk.value = true
+                    // TODO store the jwt
                 } else {
+                    _loginResult.value = Json.decodeFromString<apiLoginJson>(response.body?.string() ?: "").message
                     _loginOk.value = false
                 }
             },
@@ -77,10 +82,10 @@ class AuthViewModel(
             url = "https://musicroom.nalebrun.be/auth/new_account",
             body = body,
             onResponse = { _, response ->
-                _signinResult.value = response.body?.string()
                 if (response.code in 200..<300) {
                     _signinOk.value = true;
                 } else {
+                    _signinResult.value = Json.decodeFromString<apiSigninJson>(response.body?.string() ?: "").message.first()
                     _signinOk.value = false;
                 }
             },
@@ -98,10 +103,10 @@ class AuthViewModel(
                 url = "https://musicroom.nalebrun.be/auth/profile",
                 auth = jwt,
                 onResponse = { _, response ->
-                    Log.i("api", "success")
+
                 },
                 onFailure = { _, e ->
-                    Log.i("api", "failure")
+                    Log.i("api", "user not already logged in")
                 }
             )
         }

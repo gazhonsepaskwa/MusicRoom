@@ -60,22 +60,6 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * Select the Start Screen of the application based on login status.
- * If the user is already logged in, Skipping the AuthUi
- * Else AuthUi
- * @param nonLoginDestination Destination after the login
- * @return The computed result
- * @author nalebrun
- */
-fun selectStartDestination(
-    nonLoginDestination: String
-) : String {
-    // TODO implement the Function
-    val startDest : String = "auth"
-    return startDest
-}
-
-/**
  * Entrypoint for Application
  * @author nalebrun
  */

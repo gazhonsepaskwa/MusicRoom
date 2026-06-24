@@ -43,16 +43,10 @@ fun AuthUi(
     val loginResult:  String?  by viewModel.loginResult.collectAsStateWithLifecycle()
     val signinResult: String?  by viewModel.signinResult.collectAsStateWithLifecycle()
     val loginOk:      Boolean? by viewModel.loginOk.collectAsStateWithLifecycle()
-    val signinOk:     Boolean? by viewModel.signinOk.collectAsStateWithLifecycle()
 
     // navigation triggers
     LaunchedEffect(loginOk) {
         if (loginOk == true) {
-            navController.navigate("search")
-        }
-    }
-    LaunchedEffect(signinOk) {
-        if (signinOk == true) {
             navController.navigate("search")
         }
     }

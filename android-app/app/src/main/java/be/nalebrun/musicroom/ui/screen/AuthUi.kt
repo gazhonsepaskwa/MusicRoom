@@ -15,25 +15,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import be.nalebrun.musicroom.APIRepository
+import be.nalebrun.musicroom.repositories.CredentialRepository
 import be.nalebrun.musicroom.viewmodel.AuthViewModel
 import be.nalebrun.musicroom.viewmodel.AuthViewModelFactory
 import be.nalebrun.musicroom.ui.element.BlackOrWhiteButton
 import be.nalebrun.musicroom.ui.element.CustomTextField
+import kotlin.math.log
 
 @Composable
 fun AuthUi(
     navController: NavController,
-    APIRepository: APIRepository
+    apiRepository: APIRepository,
+    credentialRepository: CredentialRepository
 ) {
     // TODO maybe change the factory by an injection methode (Hilt look to be the right way)
     val viewModel = viewModel<AuthViewModel>(
-        factory = AuthViewModelFactory(APIRepository)
+        factory = AuthViewModelFactory(apiRepository, credentialRepository)
     )
     // get the viewModel var in the AuthUi to update ui when value change
     val loginResult:  String?  by viewModel.loginResult.collectAsStateWithLifecycle()
@@ -60,7 +64,9 @@ fun AuthUi(
     var tfPassword by remember { mutableStateOf("") }
 
     //  Which result to display
-    val currentResult: String? = if (loginMode) loginResult else signinResult
+    var currentResult: String? = if (loginMode) loginResult else signinResult
+
+    viewModel.skipIfAlreadyAuthenticate()
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -118,6 +124,7 @@ fun AuthUi(
                 modifier = buttonMod.weight(3f),
                 active = true,
                 onClick = {
+                    currentResult = ""
                     if (loginMode) {
                         viewModel.login(tfUsername, tfPassword)
                     } else {
@@ -127,6 +134,6 @@ fun AuthUi(
             )
         }
         // Display response
-        Text(currentResult ?: "")
+        Text(currentResult ?: "", textAlign = TextAlign.Center)
     }
 }

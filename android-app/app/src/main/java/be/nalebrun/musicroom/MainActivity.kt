@@ -41,14 +41,12 @@ class MainActivity : ComponentActivity() {
                     // late init the navController
                     navController = rememberNavController()
 
-                    // select start destination
-                    val startDestination: String = selectStartDestination("search")
-
                     // create the app
                     MusicRoomApp(
                         navController = navController,
-                        APIRepository = APIRepository,
-                        startDestination = startDestination
+                        apiRepository = APIRepository,
+                        credentialRepository = credentialRepository,
+                        startDestination = "auth"
                     )
                 }
             }
@@ -84,12 +82,14 @@ fun selectStartDestination(
 @Composable
 fun MusicRoomApp(
     navController: NavHostController,
-    APIRepository: APIRepository,
+    apiRepository: APIRepository,
+    credentialRepository: CredentialRepository,
     startDestination: String
 ) {
     CreateNavGraph(
-        navController = navController,
-        APIRepository = APIRepository,
-        startDestination = startDestination
+        navController =         navController,
+        apiRepository =         apiRepository,
+        credentialRepository =  credentialRepository,
+        startDestination =      startDestination
     )
 }

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import be.nalebrun.musicroom.repositories.CredentialRepository
 import be.nalebrun.musicroom.ui.screen.AuthUi
 import be.nalebrun.musicroom.ui.screen.SearchUi
 
@@ -17,15 +18,16 @@ import be.nalebrun.musicroom.ui.screen.SearchUi
  */
 @Composable
 fun CreateNavGraph(
-    navController:      NavHostController,
-    APIRepository:     APIRepository,
+    navController:        NavHostController,
+    apiRepository:        APIRepository,
+    credentialRepository: CredentialRepository,
     startDestination:   String
 ) {
     NavHost(
         navController =     navController,
-        startDestination =  startDestination
+        startDestination =  startDestination,
     ) {
-        composable(route = "auth")   { AuthUi(navController, APIRepository) }
+        composable(route = "auth")   { AuthUi(navController, apiRepository, credentialRepository) }
         composable(route = "search") { SearchUi() }
     }
 }

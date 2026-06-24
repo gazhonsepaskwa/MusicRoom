@@ -2,6 +2,7 @@ package be.nalebrun.musicroom
 
 import okhttp3.Call
 import okhttp3.Callback
+import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
@@ -13,11 +14,13 @@ interface IAPIRepository {
      * Make a GET query to a given url
      * @author nalebrun
      * @param url the url where the request goes
+     * @param auth the JWT token
      * @param onResponse callback function that execute when the api respond to the request
      * @param onFailure callback function that execute whet there is an error communicating with api
      */
     fun get(
         url: String,
+        auth: String = "",
         onResponse: (call: Call, response: Response) -> Unit,
         onFailure: (call: Call, e: IOException) -> Unit
     )
@@ -26,6 +29,7 @@ interface IAPIRepository {
      * Make a POST query to a given url
      * @author nalebrun
      * @param url the url where the request goes
+     * @param auth the JWT Token
      * @param body the posted body of the request
      * @param onResponse callback function that execute when the api respond to the request
      * @param onFailure callback function that execute whet there is an error communicating with api
@@ -33,6 +37,7 @@ interface IAPIRepository {
     fun post(
         url: String,
         body: RequestBody,
+        auth: String = "",
         onResponse: (call: Call, response: Response) -> Unit,
         onFailure: (call: Call, e: IOException) -> Unit
     )
@@ -51,11 +56,13 @@ class APIRepository(
     // Methods
     override fun get(
         url: String,
+        auth: String,
         onResponse: (call: Call, response: Response) -> Unit,
         onFailure: (call: Call, e: IOException) -> Unit
     ) {
         val request = Request.Builder()
             .url(url)
+            .addHeader("Authorization", auth)
             .build()
 
         client.newCall(request).enqueue(object : Callback {
@@ -72,12 +79,14 @@ class APIRepository(
     override fun post(
         url: String,
         body: RequestBody,
+        auth: String,
         onResponse: (call: Call, response: Response) -> Unit,
         onFailure: (call: Call, e: IOException) -> Unit
     ) {
         val request = Request.Builder()
             .url(url)
             .post(body)
+            .addHeader("Authorization", auth)
             .build()
 
         client.newCall(request).enqueue(object : Callback {

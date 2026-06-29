@@ -25,9 +25,12 @@ fun FriendsUi(navigationViewModel: NavigationViewModel) {
         Column() {
             Text("TODO : Friends page")
         }
-        Column(Modifier.padding(bottom = 5.dp)) {
-            HorizontalDivider(thickness = 1.dp, color = Color.Black, modifier = Modifier.padding(bottom = 5.dp))
-            BottomScreenMenu(ActiveScreen.FRIENDS, navigationViewModel)
-        }
+        BottomScreenMenu(
+            playing = true,
+            title = "La fin de nation Glory",
+            artist = "Fuze III",
+            activeScreen = ActiveScreen.FRIENDS,
+            navigationViewModel = navigationViewModel
+        )
     }
 }

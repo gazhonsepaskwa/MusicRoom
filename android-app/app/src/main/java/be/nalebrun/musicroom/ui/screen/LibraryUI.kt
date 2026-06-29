@@ -25,9 +25,12 @@ fun LibraryUi(navigationViewModel: NavigationViewModel) {
         Column() {
             Text("TODO : Library page")
         }
-        Column(Modifier.padding(bottom = 5.dp)) {
-            HorizontalDivider(thickness = 1.dp, color = Color.Black, modifier = Modifier.padding(bottom = 5.dp))
-            BottomScreenMenu(ActiveScreen.LIBRARY, navigationViewModel)
-        }
+        BottomScreenMenu(
+            playing = true,
+            title = "La fin de nation Glory",
+            artist = "Fuze III",
+            activeScreen = ActiveScreen.LIBRARY,
+            navigationViewModel = navigationViewModel
+        )
     }
 }

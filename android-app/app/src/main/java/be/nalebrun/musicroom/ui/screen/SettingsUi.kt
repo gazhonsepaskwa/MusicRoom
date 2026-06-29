@@ -25,9 +25,12 @@ fun SettingsUi(navigationViewModel: NavigationViewModel) {
         Column() {
             Text("TODO : Settings page")
         }
-        Column(Modifier.padding(bottom = 5.dp)) {
-            HorizontalDivider(thickness = 1.dp, color = Color.Black, modifier = Modifier.padding(bottom = 5.dp))
-            BottomScreenMenu(ActiveScreen.SETTINGS, navigationViewModel)
-        }
+        BottomScreenMenu(
+            playing = true,
+            title = "La fin de nation Glory",
+            artist = "Fuze III",
+            activeScreen = ActiveScreen.SETTINGS,
+            navigationViewModel = navigationViewModel
+        )
     }
 }

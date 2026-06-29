@@ -29,6 +29,10 @@ export class AuthService {
         'Incorrect Password or User',
         'Invalid Loging Attempt ',
       );
+	if (user.verifiedEmail == false)
+		throw new UnprocessableEntityException(
+			'This account does not exist or was not confirmed by email. If you have created an account, check your mailbox!'
+		);
     if (user.password == undefined || user.password == null)
       throw new UnprocessableEntityException(
         'Connect with your google account and change your password!',
@@ -45,7 +49,7 @@ export class AuthService {
       access_token: await this.jwtService.signAsync(payload),
     };
   }
-
+  //message error avec keyword au lieu de array + login possible ss conf email
   async signUp(username: string, password: string, email: string) {
     const userByEmail = await this.usersService.user({ email });
     if (userByEmail)

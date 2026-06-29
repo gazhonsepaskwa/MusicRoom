@@ -15,6 +15,12 @@ import { AlbumModule } from './album/album.module';
 import { ArtistModule } from './artist/artist.module';
 import { SearchModule } from './search/search.module';
 import { WebsocketsModule } from './websockets/websockets.module';
+import { FirebaseService } from './notifications/firebase/firebase.service';
+import { FirebaseModule } from './notifications/firebase/firebase.module';
+import { WebSocketsService } from './websockets/websockets.service';
+import { NotificationsModule } from './notifications/notifications.module';
+import { PlaylistshipModule } from './playlistship/playlistship.module';
+
 
 @Module({
   imports: [
@@ -28,6 +34,9 @@ import { WebsocketsModule } from './websockets/websockets.module';
     ArtistModule,
     SearchModule,
     WebsocketsModule,
+    FirebaseModule,
+    NotificationsModule,
+    PlaylistshipModule,
   ],
   controllers: [AppController],
   providers: [
@@ -38,6 +47,8 @@ import { WebsocketsModule } from './websockets/websockets.module';
       useClass: AuthGuard,
     },
     MailService,
+    FirebaseService,
+    WebSocketsService,
   ],
 })
 export class AppModule {}

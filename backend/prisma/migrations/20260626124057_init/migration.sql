@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "invitationStatus" AS ENUM ('PENDING', 'ACCEPTED', 'REJECTED');
+CREATE TYPE "invitationStatus" AS ENUM ('PENDING', 'ACCEPTED', 'REJECTED', 'NOTVIEWED');
 
 -- CreateEnum
 CREATE TYPE "licenseStatus" AS ENUM ('NONE', 'TRIAL', 'EVERYTHING');
@@ -20,7 +20,7 @@ CREATE TABLE "user" (
 CREATE TABLE "friendship" (
     "requesterId" INTEGER NOT NULL,
     "addresseeId" INTEGER NOT NULL,
-    "status" "invitationStatus" NOT NULL,
+    "status" "invitationStatus" NOT NULL DEFAULT 'NOTVIEWED',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "friendship_pkey" PRIMARY KEY ("requesterId","addresseeId")
@@ -30,7 +30,7 @@ CREATE TABLE "friendship" (
 CREATE TABLE "playlistship" (
     "addresseeId" INTEGER NOT NULL,
     "playlistId" INTEGER NOT NULL,
-    "status" "invitationStatus" NOT NULL DEFAULT 'PENDING',
+    "status" "invitationStatus" NOT NULL DEFAULT 'NOTVIEWED',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "playlistship_pkey" PRIMARY KEY ("playlistId","addresseeId")

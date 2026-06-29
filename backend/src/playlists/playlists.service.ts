@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { playlist } from '../../generated/prisma/browser';
 
 @Injectable()
 export class PlaylistsService {

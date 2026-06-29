@@ -1,55 +1,107 @@
-package be.nalebrun.musicroom
+package be.nalebrun.musicroom.ui.screen
 
-import android.app.appsearch.SearchResult
-import android.text.Layout
-import android.text.method.TextKeyListener
-import android.view.RoundedCorner
+
+/**
+ *
+ *
+ * Do not use, needs to be refactored
+ *
+ *
+ */
+
+
+
+
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.visible
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import coil3.compose.AsyncImage
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
-import coil3.Image
-import java.util.logging.Filter
+import be.nalebrun.musicroom.R
 
 enum class ResultType {
     ARTIST,
     MUSIC,
     PLAYLIST,
     ALBUM
+}
+
+@Composable
+fun SearchUi() {
+    Column(
+        modifier = Modifier
+            .padding(top = 50.dp)
+            .background(Color.White)
+    ) {
+        SearchBar()
+        SearchResultCard(
+            ResultType.MUSIC,
+            "Scared of the dark",
+            "Em Beihold ● Tales of a failed shapeshifter"
+        )
+        HorizontalDivider(thickness = 1.dp, color = Color.Gray)
+        SearchResultCard(ResultType.PLAYLIST, "Bestof '26", "nalebrun")
+        HorizontalDivider(thickness = 1.dp, color = Color.Gray)
+        SearchResultCard(ResultType.ALBUM, "Tales of a failed shapeshifter", "Em Beihold ● 11 song")
+        HorizontalDivider(thickness = 1.dp, color = Color.Gray)
+        SearchResultCard(ResultType.ARTIST, "Em Beihold", "5 albums ● 34 songs")
+    }
+}
+
+@Composable
+fun SearchBar() {
+    Row(
+        modifier = Modifier
+            .padding(horizontal = 10.dp)
+            .clip(shape = RoundedCornerShape(99.dp))
+            .background(Color.White)
+            .border(
+                width = 2.dp,
+                color = Color.Black,
+                shape = RoundedCornerShape(99.dp)
+            )
+            .fillMaxWidth()
+    ) {
+        var text by remember { mutableStateOf("") }
+
+        TextField(
+            value = text,
+            onValueChange = { text = it },
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.Transparent,
+                focusedContainerColor = Color.Transparent
+            ),
+            textStyle = TextStyle(fontSize = 13.sp),
+            modifier = Modifier
+                .height(45.dp)
+        )
+    }
+    Filters(arrayOf("Artist", "Music", "Album", "Playlist", "User"))
 }
 
 /**
@@ -59,7 +111,11 @@ enum class ResultType {
  * @param subtitle Second line to display
  */
 @Composable
-fun SearchResultCard(resultType: ResultType, title: String, subtitle : String) {
+fun SearchResultCard(
+    resultType: ResultType,
+    title: String,
+    subtitle : String
+) {
     Row (
         horizontalArrangement = Arrangement
             .spacedBy(10.dp)
@@ -95,6 +151,8 @@ fun SearchResultCard(resultType: ResultType, title: String, subtitle : String) {
         }
     }
 }
+
+// Filters
 @Composable
 fun Filters(filters: Array<String>) {
     Column() {
@@ -119,7 +177,11 @@ fun FilterRow(filters : Array<String>) {
 }
 
 @Composable
-fun FilterButton(text : String, modifier: Modifier = Modifier, active : Boolean) {
+fun FilterButton(
+    text : String,
+    modifier: Modifier = Modifier,
+    active : Boolean
+) {
     Row(
         modifier = modifier
             .padding(5.dp)
@@ -146,36 +208,5 @@ fun FilterButton(text : String, modifier: Modifier = Modifier, active : Boolean)
             modifier = Modifier
                 .fillMaxWidth())
     }
-
 }
 
-@Composable
-fun SearchBar() {
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 10.dp)
-            .clip(shape = RoundedCornerShape(99.dp))
-            .background(Color.White)
-            .border(
-                width = 2.dp,
-                color = Color.Black,
-                shape = RoundedCornerShape(99.dp)
-            )
-            .fillMaxWidth()
-    ) {
-        var text by remember { mutableStateOf("") }
-
-        TextField(
-            value = text,
-            onValueChange = { text = it },
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.Transparent,
-                focusedContainerColor = Color.Transparent
-            ),
-            textStyle = TextStyle(fontSize = 13.sp),
-            modifier = Modifier
-                .height(45.dp)
-        )
-    }
-    Filters(arrayOf("Artist", "Music", "Album", "Playlist", "User"))
-}

@@ -6,10 +6,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import be.nalebrun.musicroom.repositories.CredentialRepository
 import be.nalebrun.musicroom.ui.theme.MusicRoomTheme
+import be.nalebrun.musicroom.viewmodel.NavigationViewModel
+import be.nalebrun.musicroom.viewmodel.NavigationViewModelFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -21,7 +24,10 @@ class MainActivity : ComponentActivity() {
 
     // Repositories
     private lateinit var credentialRepository: CredentialRepository
-    private lateinit var APIRepository:       APIRepository
+    private lateinit var APIRepository: APIRepository
+
+    // shared viewmodel
+    private lateinit var navigationViewModel: NavigationViewModel
 
 
     // main
@@ -31,22 +37,28 @@ class MainActivity : ComponentActivity() {
 
             // create the http client for APIs repository
             val httpClient = OkHttpClient()
-            // APIs repositories
+            // Repositories
             APIRepository = APIRepository(httpClient)
-            // more soon ...
-
             credentialRepository = CredentialRepository(this)
+
             setContent {
+
+                // shared viewModel
+                navigationViewModel = viewModel<NavigationViewModel>(
+                    factory = NavigationViewModelFactory()
+                )
+
                 MusicRoomTheme() {
                     // late init the navController
                     navController = rememberNavController()
 
                     // create the app
-                    MusicRoomApp(
-                        navController = navController,
-                        apiRepository = APIRepository,
-                        credentialRepository = credentialRepository,
-                        startDestination = "auth"
+                    CreateNavGraph(
+                        navController =         navController,
+                        navigationViewModel =   navigationViewModel,
+                        apiRepository =         APIRepository,
+                        credentialRepository =  credentialRepository,
+                        startDestination =      "auth"
                     )
                 }
             }
@@ -57,23 +69,4 @@ class MainActivity : ComponentActivity() {
             throw e // Re-throw so it's in logcat
         }
     }
-}
-
-/**
- * Entrypoint for Application
- * @author nalebrun
- */
-@Composable
-fun MusicRoomApp(
-    navController: NavHostController,
-    apiRepository: APIRepository,
-    credentialRepository: CredentialRepository,
-    startDestination: String
-) {
-    CreateNavGraph(
-        navController =         navController,
-        apiRepository =         apiRepository,
-        credentialRepository =  credentialRepository,
-        startDestination =      startDestination
-    )
 }

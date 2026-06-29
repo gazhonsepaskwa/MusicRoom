@@ -20,7 +20,7 @@ fun BottomScreenMenu(
     navigationViewModel: NavigationViewModel
 ) {
     Column() {
-        HorizontalDivider(thickness = 1.dp, color = Color.Black, modifier = Modifier.padding(bottom = 5.dp))
+        HorizontalDivider(thickness = 1.dp, color = Color.Black)
         MiniPlayer(playing = playing, title = title, artist = artist)
         Navigation(activeScreen, navigationViewModel)
     }

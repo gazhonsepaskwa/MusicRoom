@@ -4,15 +4,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-// I'm not sure if the factory is necessary for this viewmodel
-class NavigationViewModelFactory(
-) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return NavigationViewModel() as T
-    }
-}
-class NavigationViewModel : ViewModel() {
+@HiltViewModel
+class NavigationViewModel @Inject constructor(
+) : ViewModel() {
     // create a live data that can be updated but private so only local code can update
     private val _navigationEvent = MutableLiveData<String?>()
     // publish a var that have the update of the data but readonly

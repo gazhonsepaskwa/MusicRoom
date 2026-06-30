@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -29,15 +30,12 @@ import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 @Composable
 fun CreateNavGraph(
     navController:        NavHostController,
-    navigationViewModel:  NavigationViewModel,
-    apiRepository:        APIRepository,
-    credentialRepository: CredentialRepository,
     startDestination:     String
 ) {
+    val navigationViewModel: NavigationViewModel = hiltViewModel()
     val navigationEvent by navigationViewModel.navigationEvent.observeAsState()
 
     LaunchedEffect(navigationEvent) {
-        Log.d("Debug", "whyyyyyy")
         navigationEvent?.let { route ->
             navController.navigate(route)
             navigationViewModel.clearNavigationEvent()
@@ -49,11 +47,11 @@ fun CreateNavGraph(
         startDestination =  startDestination,
     ) {
 //         pass repositories to the Uis but declare ViewModels in them ( except for shared View Models )
-        composable(route = "auth")   { AuthUi(apiRepository, credentialRepository, navigationViewModel) }
-        composable(route = "favorite") { FavoriteUi(navigationViewModel) }
-        composable(route = "library") { LibraryUi(navigationViewModel) }
-        composable(route = "friends") { FriendsUi(navigationViewModel) }
-        composable(route = "settings") { SettingsUi(navigationViewModel) }
+        composable(route = "auth")   { AuthUi() }
+        composable(route = "favorite") { FavoriteUi() }
+        composable(route = "library") { LibraryUi() }
+        composable(route = "friends") { FriendsUi() }
+        composable(route = "settings") { SettingsUi() }
         // composable(route = "search") { SearchUi(navigationViewModel) }
     }
 }

@@ -2,37 +2,35 @@ package be.nalebrun.musicroom.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
-import be.nalebrun.musicroom.APIRepository
+import be.nalebrun.musicroom.IAPIRepository
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiLoginFailureJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiLoginSuccessJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiSigninFailureJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiSigninSuccessJson
-import be.nalebrun.musicroom.repositories.CredentialRepository
+import be.nalebrun.musicroom.repositories.ICredentialRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import okhttp3.FormBody
-
-class AuthViewModelFactory(
-    private val APIRepository: APIRepository,
-    private val CredetialRepository: CredentialRepository
-) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return AuthViewModel(APIRepository, CredetialRepository) as T
-    }
-}
+import javax.inject.Inject
+import kotlin.code
 
 /**
  * The logic for the Authentification page
  */
-class AuthViewModel(
-    val apiRepository: APIRepository,
-    val credentialRepository: CredentialRepository
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    val apiRepository: IAPIRepository,
+    val credentialRepository: ICredentialRepository
 ) : ViewModel() {
+
+    init {
+        skipIfAlreadyAuthenticate()  // Runs ONCE when ViewModel is created
+    }
 
     // login
 
@@ -102,22 +100,28 @@ class AuthViewModel(
 
     // check for skipping
     fun skipIfAlreadyAuthenticate() { viewModelScope.launch {
-        credentialRepository.jwtFlow.collect { jwt ->
-            if (jwt != "") {
-                apiRepository.get(
-                    url = "https://musicroom.nalebrun.be/auth/profile",
-                    auth = "Bearer $jwt",
-                    onResponse = { _, response ->
-                        if (response.code in 200..<300) {
-                            Log.i("api", "user logged in, skipping login page")
-                            _loginOk.value = true
+            credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
+                if (jwt.isNotEmpty()) {
+                    apiRepository.get(
+                        url = "https://musicroom.nalebrun.be/auth/profile",
+                        auth = "Bearer $jwt",
+                        onResponse = { _, response ->
+                            if (response.code in 200..<300) {
+                                Log.i("api", "user logged in, skipping login page")
+                                _loginOk.value = true
+                            }
+                            else {
+                                Log.i("api", "user not already logged in")
+                            }
+                        },
+                        onFailure = { _, e ->
+                            Log.i("api", "user not already logged in")
                         }
-                    },
-                    onFailure = { _, e -> }
-                )
+                    )
+                }
             }
-            Log.i("api", "user not already logged in")
         }
-    }}
+    }
+
 
 }

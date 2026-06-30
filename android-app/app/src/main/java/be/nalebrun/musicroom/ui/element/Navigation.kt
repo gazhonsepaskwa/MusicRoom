@@ -1,6 +1,6 @@
 package be.nalebrun.musicroom.ui.element
 
-import android.util.Log
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
 import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 
@@ -28,8 +30,17 @@ enum class ActiveScreen{
 @Composable
 fun Navigation(
     activeScreen: ActiveScreen,
-    navigationViewModel: NavigationViewModel
 ) {
+    // passing the activity scope the view model to the activity
+    // level making it share a global instance
+    val activity = LocalActivity.current
+    val navigationViewModel: NavigationViewModel = if (activity != null) {
+        hiltViewModel(activity as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
+
+    // Ui
     Row(
         Modifier
             .fillMaxWidth(),

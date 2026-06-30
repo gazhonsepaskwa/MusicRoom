@@ -2,12 +2,12 @@ package be.nalebrun.musicroom
 
 import okhttp3.Call
 import okhttp3.Callback
-import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
 import okio.IOException
+import javax.inject.Inject
 
 interface IAPIRepository {
     /**
@@ -49,9 +49,9 @@ interface IAPIRepository {
  * @property client (private) hold the connection client
  * @see IAuthRepository
  */
-class APIRepository(
+class APIRepository @Inject constructor(
     private val client: OkHttpClient
-) : IAPIRepository{
+) : IAPIRepository {
 
     // Methods
     override fun get(
@@ -72,6 +72,7 @@ class APIRepository(
 
             override fun onResponse(call: Call, response: Response) {
                 onResponse(call,response)
+                response.close()
             }
         })
     }
@@ -96,6 +97,7 @@ class APIRepository(
 
             override fun onResponse(call: Call, response: Response) {
                 onResponse(call,response)
+                response.close()
             }
         })
     }

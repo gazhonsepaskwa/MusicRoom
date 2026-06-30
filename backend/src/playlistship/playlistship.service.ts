@@ -17,11 +17,11 @@ export class PlaylistshipService {
 	) {}
 
 	async sendPlaylistInvitation(playlistshipDto: PlaylistshipDto, senderId: number): Promise<void> {
-		this.checkOwnership(senderId, playlistshipDto.playlistId);
+		await this.checkOwnership(senderId, playlistshipDto.playlistId);
 		if (await this.playlistshipExists(playlistshipDto.playlistId, playlistshipDto.addresseeId)) {
-			throw new Error('User Already has access to the playlist');
+			throw new BadRequestException('User Already has access to the playlist');
 		}
-		this.createPlaylistship({
+		await this.createPlaylistship({
 			playlistId: playlistshipDto.playlistId,
 			addresseeId: playlistshipDto.addresseeId,
 		})
@@ -59,7 +59,8 @@ export class PlaylistshipService {
 	}
 
 	async playlistshipExists(playlistId: number, addresseeId: number): Promise<boolean> {
-		let playlistship = this.playlistship({playlistId_addresseeId: {playlistId, addresseeId}})
+		let playlistship = await this.playlistship({playlistId_addresseeId: {playlistId, addresseeId}})
+		console.log("playlistship", playlistship, addresseeId);
 		return playlistship !== null;
 	}
 
@@ -78,7 +79,7 @@ export class PlaylistshipService {
 		if (!await this.playlistsService.findOne({id: playlistshipDto.playlistId}))
 			throw new BadRequestException("Playlist Not FOund");
 		if (userId != playlistshipDto.addresseeId)
-			this.checkOwnership(userId, playlistshipDto.playlistId);
+			await this.checkOwnership(userId, playlistshipDto.playlistId);
 		await this.prisma.playlistship.delete({
 			where: { playlistId_addresseeId: { playlistId: playlistshipDto.playlistId, addresseeId: playlistshipDto.addresseeId } }
 		});

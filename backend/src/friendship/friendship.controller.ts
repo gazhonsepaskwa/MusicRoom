@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { FriendshipService } from './friendship.service';
-import { FirebaseService } from '../notifications/firebase/firebase.service';
 import { friendReqAnswerDto, friendRequestDto } from './dto/friendRequest.dto';
 import { invitationStatus } from '../../generated/prisma/enums';
 import { CurrentUser } from '../common/decorators/current-user.decorator';

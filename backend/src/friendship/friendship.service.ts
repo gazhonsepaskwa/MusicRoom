@@ -1,7 +1,6 @@
 import { BadRequestException, forwardRef, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { friendship, Prisma, invitationStatus } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { request } from 'http';
 import { UsersService } from '../users/users.service';
 import { friendReqAnswerDto, friendRequestDto } from './dto/friendRequest.dto';
 import { NotificationsService } from '../notifications/notifications.service';

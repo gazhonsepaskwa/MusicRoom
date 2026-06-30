@@ -22,7 +22,6 @@ export class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly authService: AuthService,
   ) {}
 
-//   @UseGuards(AuthGuard)
   async handleConnection(client: Socket) {
     try {
       let token = client.handshake.auth?.token;

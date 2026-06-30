@@ -28,6 +28,13 @@ model user {
   playlistships playlistship[]
 }
 
+enum invitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  NOTVIEWED
+}
+
 model friendship {
   requesterId Int
   addresseeId Int
@@ -39,12 +46,6 @@ model friendship {
 
   @@id([requesterId, addresseeId])
   @@index([addresseeId])
-}
-enum invitationStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
-  NOTVIEWED
 }
 
 model playlistship {

@@ -1,19 +1,15 @@
-import { BadRequestException, Controller, Get, Req } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
-import { AuthGuard } from '../auth/auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @Controller('notifications')
 export class NotificationsController {
   constructor(
 	private readonly notificationsService: NotificationsService,
-	private readonly authGuard: AuthGuard,
 	) {}
 
   @Get('pending-notifications')
-  async getPendingNotifications(@Req() request) {
-	const userId = this.authGuard.getUserIdFromRequest(request);
-	if (userId === null)
-		throw new BadRequestException("Invalid JWT token: no user found");
+  async getPendingNotifications(@CurrentUser() userId: number) {
 	return await this.notificationsService.getPendingNotifications(userId);
   }
 }

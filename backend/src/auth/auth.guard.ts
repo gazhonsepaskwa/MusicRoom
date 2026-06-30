@@ -8,6 +8,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
+import { jwtConstants } from './constant';
 // import { Observable } from 'rxjs';
 
 export const IS_PUBLIC_KEY = 'isPublic';
@@ -44,7 +45,8 @@ export class AuthGuard implements CanActivate {
 
   private extractTokenFromHeader(request: Request): string | undefined {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+	console.log(type, token);
+	return type === 'Bearer' ? token : undefined;
   }
 
   getUserIdFromRequest(request: Request): number | null {

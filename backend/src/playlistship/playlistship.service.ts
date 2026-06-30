@@ -1,10 +1,10 @@
-import { BadRequestException, forwardRef, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { NotificationsService } from '../notifications/notifications.service';
 import { UsersService } from '../users/users.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { invitationStatus, playlistship, Prisma } from '../../generated/prisma/browser';
 import { PlaylistsService } from '../playlists/playlists.service';
-import { PlaylistshipDto } from './dto/playlistship.dto';
+import { PlaylistshipAnswerDto, PlaylistshipDto } from './dto/playlistship.dto';
 
 @Injectable()
 export class PlaylistshipService {
@@ -16,25 +16,26 @@ export class PlaylistshipService {
 		private playlistsService: PlaylistsService
 	) {}
 
-	async sendPlaylistInvitation(playlistId: number, receiverId: number): Promise<void> {
-		if (await this.playlistshipExists(playlistId, receiverId)) {
+	async sendPlaylistInvitation(playlistshipDto: PlaylistshipDto, senderId: number): Promise<void> {
+		this.checkOwnership(senderId, playlistshipDto.playlistId);
+		if (await this.playlistshipExists(playlistshipDto.playlistId, playlistshipDto.addresseeId)) {
 			throw new Error('User Already has access to the playlist');
 		}
 		this.createPlaylistship({
-			playlistId: playlistId,
-			addresseeId: receiverId,
+			playlistId: playlistshipDto.playlistId,
+			addresseeId: playlistshipDto.addresseeId,
 		})
-		const playlistName = (await this.playlistsService.playlist({id: playlistId})).title;
+		const playlistName = (await this.playlistsService.findOne({id: playlistshipDto.playlistId}))?.title;
 		this.notificationsService.sendNotification(
-			receiverId,
-			playlistId,
+			playlistshipDto.addresseeId,
+			playlistshipDto.playlistId,
 			{
 				websoketEvent: "playlist-invitation",
 				FireBaseTitle: `Playlist Invitation For ${playlistName}`,
 				FirebaseMessage: `You have been invited to join ${playlistName}. Will you accept it? This message will self-Destruct in 3... 2... 1...`,
 			}
 		)
-		console.log(`Playlist invitation sent for ${playlistId} to ${receiverId}`);
+		console.log(`Playlist invitation sent for ${playlistshipDto.playlistId} to ${playlistshipDto.addresseeId}`);
 	}
 
 	async createPlaylistship(data: Prisma.playlistshipUncheckedCreateInput): Promise<playlistship> {
@@ -73,9 +74,13 @@ export class PlaylistshipService {
 		});
 	}
 
-	async deletePlaylistship(playlistId: number, addresseeId: number) {
+	async deletePlaylistship(playlistshipDto: PlaylistshipDto, userId: number) {
+		if (!await this.playlistsService.findOne({id: playlistshipDto.playlistId}))
+			throw new BadRequestException("Playlist Not FOund");
+		if (userId != playlistshipDto.addresseeId)
+			this.checkOwnership(userId, playlistshipDto.playlistId);
 		await this.prisma.playlistship.delete({
-			where: { playlistId_addresseeId: { playlistId, addresseeId } }
+			where: { playlistId_addresseeId: { playlistId: playlistshipDto.playlistId, addresseeId: playlistshipDto.addresseeId } }
 		});
 	}
 
@@ -95,21 +100,29 @@ export class PlaylistshipService {
 	}
 
 	async getPlaylistUsers(id: number): Promise<playlistship[] | null>{
+		if (!await this.playlistsService.findOne({id}))
+			throw new BadRequestException("Playlist Not FOund");
 		return await this.prisma.playlistship.findMany({
 			where: {playlistId: id, status: 'ACCEPTED'}
-		})
+		});
 	}
 
-	async answerPlaylistInvitation(playlistshipDto: PlaylistshipDto): Promise<playlistship> {
-		if (!playlistshipDto.status)
-			throw new BadRequestException("Answer Needed for Playlist Invitation")
+	async answerPlaylistInvitation(playlistshipDto: PlaylistshipAnswerDto, userId: number): Promise<playlistship> {
 		const playlistship = await this.updatePlaylistshipStatus(
 			playlistshipDto.playlistId, 
-			playlistshipDto.addresseeId, 
+			userId, 
 			playlistshipDto.status
-		)
+		);
 		if (!playlistship)
 			throw new InternalServerErrorException("Playlistship was not recognized")
-		return playlistship
+		return playlistship;
+	}
+
+	async checkOwnership(userId: number, playlistId: number) {
+		const playlist = await this.playlistsService.findOne({id: playlistId});
+		if (!playlist)
+			throw new BadRequestException("Playlist Not Found");
+		if (playlist?.userId != userId)
+			throw new UnauthorizedException("You do not own or have access to this playlist!");
 	}
 }

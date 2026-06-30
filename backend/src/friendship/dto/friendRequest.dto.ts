@@ -1,5 +1,10 @@
+import { invitationStatus } from "../../../generated/prisma/enums"
+
 export class friendRequestDto {
-	senderId!: number
 	receiverId!: number
-	answer?: boolean
+}
+
+export class friendReqAnswerDto {
+	senderId!: number
+	answer!: invitationStatus
 }

@@ -11,8 +11,10 @@ import { playlist } from '../../generated/prisma/browser';
 export class PlaylistsService {
   constructor(private prisma: PrismaService) {}
 
-  findOne(id: string) {
-    return `This action returns a #${id} playlist`;
+  async findOne(playlistWhereUniqueInput: Prisma.playlistWhereUniqueInput): Promise<playlist | null> {
+    return await this.prisma.playlist.findUnique({
+		where: playlistWhereUniqueInput,
+	});
   }
 
   async playlist(

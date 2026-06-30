@@ -22,18 +22,19 @@ export class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly authService: AuthService,
   ) {}
 
+//   @UseGuards(AuthGuard)
   async handleConnection(client: Socket) {
     try {
-      const token = client.handshake.auth?.token;
-      const id = this.authService.getUserFromJWT(token);
-
+      let token = client.handshake.auth?.token;
+	  if (!token)
+		token = client.handshake.headers.authorization;
       if (!token) {
         console.log('Missing token');
         client.disconnect(true);
         return;
-      }
+      } 
 
-      const payload = await this.jwtService.verifyAsync(token);
+	  const payload = await this.jwtService.verifyAsync(token);
       if (!payload.sub) {
         console.log('Invalid token');
         client.disconnect(true);
@@ -42,8 +43,9 @@ export class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       client.data.userId = payload.sub;
       console.log(`Client ${client.id} (userID: ${payload.sub}) connected`);
-      this.websocketsService.addSocket(payload.sub, client.id);
+      this.websocketsService.addSocket((payload.sub).toString(), client.id);
     } catch (err) {
+      console.log(err);
       console.log('Auth failed');
       client.disconnect(true);
     }

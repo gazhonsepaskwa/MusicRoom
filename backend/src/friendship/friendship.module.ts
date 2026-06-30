@@ -12,3 +12,4 @@ import { PrismaService } from '../prisma/prisma.service';
   exports: [FriendshipService],
 })
 export class FriendshipModule {}
+ 

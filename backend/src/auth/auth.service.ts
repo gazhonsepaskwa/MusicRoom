@@ -27,7 +27,7 @@ export class AuthService {
     if (user == undefined || user.username == null)
       throw new UnprocessableEntityException(
         'Incorrect Password or User',
-        'Invalid Loging Attempt ',
+        'Invalid Log In Attempt ',
       );
 	if (user.verifiedEmail == false)
 		throw new UnprocessableEntityException(
@@ -41,7 +41,7 @@ export class AuthService {
     if (hash == false) {
       throw new UnprocessableEntityException(
         'Incorrect Password or User',
-        'Invalid Loging Attempt ',
+        'Invalid Log In Attempt ',
       );
     }
     const payload = { sub: user.id, username: user.username };
@@ -49,7 +49,7 @@ export class AuthService {
       access_token: await this.jwtService.signAsync(payload),
     };
   }
-  //message error avec keyword au lieu de array + login possible ss conf email
+
   async signUp(username: string, password: string, email: string) {
     const userByEmail = await this.usersService.user({ email });
     if (userByEmail)

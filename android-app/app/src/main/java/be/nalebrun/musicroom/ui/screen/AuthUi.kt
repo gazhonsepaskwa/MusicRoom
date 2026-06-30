@@ -60,8 +60,6 @@ fun AuthUi() {
     //  Which result to display
     var currentResult: String? = if (loginMode) loginResult else signinResult
 
-    viewModel.skipIfAlreadyAuthenticate()
-
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,

@@ -1,5 +1,6 @@
 package be.nalebrun.musicroom.ui.screen
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,27 +19,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import be.nalebrun.musicroom.APIRepository
 import be.nalebrun.musicroom.repositories.CredentialRepository
 import be.nalebrun.musicroom.viewmodel.AuthViewModel
-import be.nalebrun.musicroom.viewmodel.AuthViewModelFactory
 import be.nalebrun.musicroom.ui.element.BlackOrWhiteButton
 import be.nalebrun.musicroom.ui.element.CustomTextField
-import kotlin.math.log
+import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 
 @Composable
-fun AuthUi(
-    navController: NavController,
-    apiRepository: APIRepository,
-    credentialRepository: CredentialRepository
-) {
-    // TODO maybe change the factory by an injection methode (Hilt look to be the right way)
-    val viewModel = viewModel<AuthViewModel>(
-        factory = AuthViewModelFactory(apiRepository, credentialRepository)
-    )
+fun AuthUi() {
+    val viewModel: AuthViewModel = hiltViewModel()
+    // passing the activity scope the view model to the activity
+    // level making it share a global instance
+    val activity = LocalActivity.current
+    val navigationViewModel: NavigationViewModel = if (activity != null) {
+        hiltViewModel(activity as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
+
     // get the viewModel var in the AuthUi to update ui when value change
     val loginResult:  String?  by viewModel.loginResult.collectAsStateWithLifecycle()
     val signinResult: String?  by viewModel.signinResult.collectAsStateWithLifecycle()
@@ -47,7 +51,7 @@ fun AuthUi(
     // navigation triggers
     LaunchedEffect(loginOk) {
         if (loginOk == true) {
-            navController.navigate("playlist")
+            navigationViewModel.navigateTo("favorite")
         }
     }
 
@@ -59,8 +63,6 @@ fun AuthUi(
 
     //  Which result to display
     var currentResult: String? = if (loginMode) loginResult else signinResult
-
-    viewModel.skipIfAlreadyAuthenticate()
 
     Column(
         modifier = Modifier.fillMaxSize(),

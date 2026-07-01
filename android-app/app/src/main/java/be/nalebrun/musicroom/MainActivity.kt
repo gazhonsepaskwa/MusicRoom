@@ -24,10 +24,7 @@ class MainActivity : ComponentActivity() {
 
     // Repositories
     private lateinit var credentialRepository: CredentialRepository
-    private lateinit var APIRepository: APIRepository
-
-    // shared viewmodel
-    private lateinit var navigationViewModel: NavigationViewModel
+    private lateinit var APIRepository:       APIRepository
 
 
     // main
@@ -37,28 +34,22 @@ class MainActivity : ComponentActivity() {
 
             // create the http client for APIs repository
             val httpClient = OkHttpClient()
-            // Repositories
+            // APIs repositories
             APIRepository = APIRepository(httpClient)
+            // more soon ...
+
             credentialRepository = CredentialRepository(this)
-
             setContent {
-
-                // shared viewModel
-                navigationViewModel = viewModel<NavigationViewModel>(
-                    factory = NavigationViewModelFactory()
-                )
-
                 MusicRoomTheme() {
                     // late init the navController
                     navController = rememberNavController()
 
                     // create the app
-                    CreateNavGraph(
-                        navController =         navController,
-                        navigationViewModel =   navigationViewModel,
-                        apiRepository =         APIRepository,
-                        credentialRepository =  credentialRepository,
-                        startDestination =      "auth"
+                    MusicRoomApp(
+                        navController = navController,
+                        apiRepository = APIRepository,
+                        credentialRepository = credentialRepository,
+                        startDestination = "auth"
                     )
                 }
             }
@@ -69,4 +60,23 @@ class MainActivity : ComponentActivity() {
             throw e // Re-throw so it's in logcat
         }
     }
+}
+
+/**
+ * Entrypoint for Application
+ * @author nalebrun
+ */
+@Composable
+fun MusicRoomApp(
+    navController: NavHostController,
+    apiRepository: APIRepository,
+    credentialRepository: CredentialRepository,
+    startDestination: String
+) {
+    CreateNavGraph(
+        navController =         navController,
+        apiRepository =         apiRepository,
+        credentialRepository =  credentialRepository,
+        startDestination =      startDestination
+    )
 }

@@ -23,7 +23,6 @@ class MusicRoomApp : Application() {
             StrictMode.VmPolicy.Builder()
                 .detectAll()
                 .penaltyLog()
-                // no kill in VM to debug
                 .build()
         )
 

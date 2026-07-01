@@ -11,4 +11,6 @@ COPY . .
 
 RUN ls -la
 
+
+
 ENTRYPOINT ["sh", "./conf/launch.sh"]

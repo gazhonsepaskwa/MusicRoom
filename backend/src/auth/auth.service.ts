@@ -8,6 +8,7 @@ import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from '../mail/mail.service';
+import { DevicesService } from '../devices/devices.service';
 
 @Injectable()
 export class AuthService {
@@ -15,11 +16,14 @@ export class AuthService {
     private readonly usersService: UsersService,
     private jwtService: JwtService,
     private mailService: MailService,
+    private readonly devicesService: DevicesService,
   ) {}
 
   async signIn(
     username: string,
     pass: string,
+    deviceID: string,
+    deviceName: string,
   ): Promise<{ access_token: string }> {
     const userByUsername = await this.usersService.user({ username: username });
     const userByEmail = await this.usersService.user({ email: username });
@@ -41,12 +45,19 @@ export class AuthService {
       );
     }
     const payload = { sub: user.id, username: user.username };
+    await this.devicesService.addDevice(user.id, deviceID, deviceName);
     return {
       access_token: await this.jwtService.signAsync(payload),
     };
   }
 
-  async signUp(username: string, password: string, email: string) {
+  async signUp(
+    username: string,
+    password: string,
+    email: string,
+    deviceID: string,
+    deviceName: string,
+  ) {
     const userByEmail = await this.usersService.user({ email });
     if (userByEmail)
       throw new UnprocessableEntityException(
@@ -69,6 +80,7 @@ export class AuthService {
     if (!user.email)
       throw new BadRequestException('Missing email for verification');
     this.sendVerificationEmail(user.email, user.id);
+    await this.devicesService.addDevice(user.id, deviceID, deviceName);
     return {
       message:
         'Please Check your mailbox for the verfication email we have send you (you have 1 hour)',

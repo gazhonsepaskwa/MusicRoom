@@ -11,7 +11,9 @@ http:
     data: |-
       {
       "username": "monbeaucul",
-      "password": "esttresJolie1@"
+      "password": "esttresJolie1@",
+      "deviceID": "1",
+      "deviceName":"1"
       }
   auth: inherit
 

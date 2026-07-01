@@ -73,6 +73,13 @@ export class FriendshipService {
 		});
 	}
 
+	async updateManpyFriendshipStatus(where : Prisma.friendshipWhereInput, data: Prisma.friendshipUpdateInput){
+		return await this.prisma.friendship.updateMany({
+			data,
+			where,
+		})
+	}
+
 	async deleteFriendship(id1: number, id2: number) {
 		await this.prisma.friendship.deleteMany({
 			where: {

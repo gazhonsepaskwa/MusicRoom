@@ -75,6 +75,13 @@ export class PlaylistshipService {
 		});
 	}
 
+	async updateManpyPlaylistshipStatus(where : Prisma.playlistshipWhereInput, data: Prisma.playlistshipUpdateInput){
+		return await this.prisma.playlistship.updateMany({
+			data,
+			where,
+		})
+	}
+
 	async deletePlaylistship(playlistshipDto: PlaylistshipDto, userId: number) {
 		if (!await this.playlistsService.findOne({id: playlistshipDto.playlistId}))
 			throw new BadRequestException("Playlist Not FOund");

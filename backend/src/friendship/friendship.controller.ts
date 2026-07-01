@@ -35,4 +35,9 @@ export class FriendshipController {
 			friendship.status == invitationStatus.REJECTED ? "rejected" : "pending",
 		}
 	}
+
+	@Get('friend-list')
+	async getFriendList(@CurrentUser() userId) {
+		return await this.friendshipService.getFriendRequests(userId, [invitationStatus.ACCEPTED])
+	}
 }

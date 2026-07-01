@@ -69,5 +69,10 @@ export class NotificationsService {
 			}
 		}*/
 	}
+
+	async updateUsersNotification(userId: number) {
+		this.friendshipService.updateManpyFriendshipStatus({addresseeId: userId, status:invitationStatus.NOTVIEWED}, {status:invitationStatus.PENDING})
+		this.playlistshipService.updateManpyPlaylistshipStatus({addresseeId: userId, status:invitationStatus.NOTVIEWED}, {status:invitationStatus.PENDING})
+	}
 }
 

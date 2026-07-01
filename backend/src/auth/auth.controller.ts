@@ -24,15 +24,22 @@ export class AuthController {
   @Public()
   @Post('login')
   signIn(@Body() signInDto: SignInDto) {
-    return this.authService.signIn(signInDto.username, signInDto.password);
+    const { username, password, deviceID, deviceName } = signInDto;
+    return this.authService.signIn(username, password, deviceID, deviceName);
   }
 
   @HttpCode(HttpStatus.OK)
   @Public()
   @Post('new_account')
   signUp(@Body() newUserDto: NewUserDto) {
-    const { username, password, email } = newUserDto;
-    return this.authService.signUp(username, password, email);
+    const { username, password, email, deviceID, deviceName } = newUserDto;
+    return this.authService.signUp(
+      username,
+      password,
+      email,
+      deviceID,
+      deviceName,
+    );
   }
 
   @Get('profile')

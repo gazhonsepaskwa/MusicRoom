@@ -15,6 +15,7 @@ import { AlbumModule } from './album/album.module';
 import { ArtistModule } from './artist/artist.module';
 import { SearchModule } from './search/search.module';
 import { WebsocketsModule } from './websockets/websockets.module';
+import { DevicesModule } from './devices/devices.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { WebsocketsModule } from './websockets/websockets.module';
     ArtistModule,
     SearchModule,
     WebsocketsModule,
+    DevicesModule,
   ],
   controllers: [AppController],
   providers: [

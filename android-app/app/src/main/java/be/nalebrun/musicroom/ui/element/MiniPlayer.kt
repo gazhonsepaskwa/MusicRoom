@@ -1,7 +1,9 @@
 package be.nalebrun.musicroom.ui.element
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,10 +18,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
 import be.nalebrun.musicroom.R
+import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 
 @Composable
 fun MiniPlayer(playing: Boolean, title: String, artist: String) {
+    val activity = LocalActivity.current
+    val navigationViewModel: NavigationViewModel = if (activity != null) {
+        hiltViewModel(activity as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -29,6 +41,9 @@ fun MiniPlayer(playing: Boolean, title: String, artist: String) {
     ) {
         // song info
         Column(
+            modifier = Modifier.clickable(onClick = {
+                navigationViewModel.navigateTo("music-player")
+            })
         ) {
             Text(title, fontSize = 15.sp, fontWeight = FontWeight.Bold)
             Text(artist, fontSize = 13.sp,)

@@ -15,6 +15,7 @@ import be.nalebrun.musicroom.ui.screen.AuthUi
 import be.nalebrun.musicroom.ui.screen.FavoriteUi
 import be.nalebrun.musicroom.ui.screen.FriendsUi
 import be.nalebrun.musicroom.ui.screen.LibraryUi
+import be.nalebrun.musicroom.ui.screen.MusicPlayerUi
 import be.nalebrun.musicroom.ui.screen.SearchUi
 import be.nalebrun.musicroom.ui.screen.SettingsUi
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
@@ -52,6 +53,7 @@ fun CreateNavGraph(
         composable(route = "library") { LibraryUi() }
         composable(route = "friends") { FriendsUi() }
         composable(route = "settings") { SettingsUi() }
+        composable(route = "music-player") { MusicPlayerUi() }
         // composable(route = "search") { SearchUi(navigationViewModel) }
     }
 }

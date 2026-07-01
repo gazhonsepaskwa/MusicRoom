@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import be.nalebrun.musicroom.repositories.CredentialRepository
 import be.nalebrun.musicroom.ui.screen.AuthUi
 import be.nalebrun.musicroom.ui.screen.SearchUi
+import be.nalebrun.musicroom.ui.screen.PlaylistUI
 
 /**
  * Function that Create the NavGraph.
@@ -29,5 +30,6 @@ fun CreateNavGraph(
     ) {
         composable(route = "auth")   { AuthUi(navController, apiRepository, credentialRepository) }
         composable(route = "search") { SearchUi() }
+        composable(route= "playlist") { PlaylistUI(apiRepository)}
     }
 }

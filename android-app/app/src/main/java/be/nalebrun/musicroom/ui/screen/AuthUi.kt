@@ -47,7 +47,7 @@ fun AuthUi(
     // navigation triggers
     LaunchedEffect(loginOk) {
         if (loginOk == true) {
-            navController.navigate("search")
+            navController.navigate("playlist")
         }
     }
 

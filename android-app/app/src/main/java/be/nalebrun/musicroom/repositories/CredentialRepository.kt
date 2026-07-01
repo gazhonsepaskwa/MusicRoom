@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import be.nalebrun.musicroom.dataStore
 import be.nalebrun.musicroom.keys.PreferenceKey
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 interface ICredentialRepository {
     /**
@@ -27,7 +29,9 @@ interface ICredentialRepository {
  * @param context ? IDK what it really is.
  * @author nalebrun
  */
-class CredentialRepository(context: Context) : ICredentialRepository {
+class CredentialRepository @Inject constructor(
+    @ApplicationContext context: Context
+) : ICredentialRepository {
     private var dataStore = context.dataStore
 
     // Methode

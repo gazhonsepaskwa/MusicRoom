@@ -14,7 +14,6 @@ export class FriendshipController {
 	async sendFriendRequest(
 		@CurrentUser() userId: number,
 		@Body() friendRequestDto : friendRequestDto){
-		console.log(userId, typeof(userId))
 		try {
 			await this.friendshipService.sendFriendRequest(userId, friendRequestDto.receiverId);
 		}

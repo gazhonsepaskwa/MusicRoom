@@ -17,7 +17,6 @@ export class MusicController {
 
   @Get(':id')
   getMusic(@Param('id', ParseSafeIntPipe) id: number) {
-    console.log('MusicController.getMusic called with id:', id);
     return this.musicService.music({
       id,
     });
@@ -29,7 +28,6 @@ export class MusicController {
     @Param('id', ParseSafeIntPipe) id: number,
     @Res() res: Response,
   ) {
-    console.log('MusicController.streamMusic called with id:', id);
     try {
       const filePath = await this.musicService.streamMusic({ id });
       const fileStream = fs.createReadStream(filePath);

@@ -33,11 +33,9 @@ export class FriendshipService {
 				FirebaseMessage: `${senderName} wish to connect with you. Will you accept it? This message will self-Destruct in 3... 2... 1...`,
 			}
 		)
-		console.log(`Friend request sent from ${senderId} to ${receiverId}`);
 	} 
 
 	async createFriendship(data: Prisma.friendshipUncheckedCreateInput): Promise<friendship> {
-		console.log(`Friendship added between ${data.requesterId} and ${data.addresseeId}`);
 		return this.prisma.friendship.create({
 			data,
 		});

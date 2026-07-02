@@ -145,16 +145,12 @@ export class PlaylistsService {
     });
 
     if (!playlist) {
-      console.log(`Playlist with ID ${playlistId} not found`);
       throw new NotFoundException('Playlist not found');
     }
 
     const existingMusic = playlist.musics.find((pm) => pm.musicId === songId);
 
     if (existingMusic) {
-      console.log(
-        `Music with ID ${songId} is already in playlist ${playlistId}`,
-      );
       throw new BadRequestException('Music already in playlist');
     }
 
@@ -188,7 +184,6 @@ export class PlaylistsService {
     });
 
     if (!playlist) {
-      console.log(`Playlist ${playlistId} not found or user not authorized`);
       throw new NotFoundException(
         `Playlist ${playlistId} not found or user not authorized`,
       );
@@ -212,16 +207,12 @@ export class PlaylistsService {
     });
 
     if (!playlist) {
-      console.log(`Playlist with ID ${playlistId} not found`);
       throw new NotFoundException('Playlist not found');
     }
 
     const musicToMove = playlist.musics.find((pm) => pm.musicId === musicId);
 
     if (!musicToMove) {
-      console.log(
-        `Music with ID ${musicId} not found in playlist ${playlistId}`,
-      );
       throw new NotFoundException('Music not found in playlist');
     }
 
@@ -232,9 +223,6 @@ export class PlaylistsService {
       newIndex >= playlist.musics.length ||
       newIndex === oldIndex
     ) {
-      console.log(
-        `Invalid new index ${newIndex} for music ${musicId} in playlist ${playlistId}`,
-      );
       throw new BadRequestException('Invalid new index for music');
     }
 

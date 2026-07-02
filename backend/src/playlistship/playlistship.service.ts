@@ -35,11 +35,9 @@ export class PlaylistshipService {
 				FirebaseMessage: `You have been invited to join ${playlistName}. Will you accept it? This message will self-Destruct in 3... 2... 1...`,
 			}
 		)
-		console.log(`Playlist invitation sent for ${playlistshipDto.playlistId} to ${playlistshipDto.addresseeId}`);
 	}
 
 	async createPlaylistship(data: Prisma.playlistshipUncheckedCreateInput): Promise<playlistship> {
-		console.log(`${data.addresseeId} has now access to playlist ${data.playlistId}`);
 		if (await this.playlistsService.playlist({id: data.playlistId}) == null)
 			throw new BadRequestException("PlaylistId not found");
 		if (await this.usersService.user({id: data.addresseeId}) == null)

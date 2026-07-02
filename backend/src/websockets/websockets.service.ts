@@ -46,6 +46,10 @@ export class WebSocketsService {
     return this.deviceSocket.has(deviceId);
   }
 
+  isOnlineSocket(socketId: string): boolean {
+    return this.socketDevice.has(socketId);
+  }
+
   getOnlineUsers(): number[] {
     return [...this.userSockets.keys()];
   }

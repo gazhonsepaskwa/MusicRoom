@@ -77,12 +77,4 @@ export class DevicesController {
     console.log('DevicesController.getUserDevices called with id:', userId);
     return this.devicesService.getUserDevices(userId);
   }
-
-  @Post('connection')
-  async connectDevice(
-    @Body() { deviceId }: { deviceId: string },
-    @CurrentUser() userId: number,
-  ) {
-    return this.devicesService.connectDevice(userId, deviceId);
-  }
 }

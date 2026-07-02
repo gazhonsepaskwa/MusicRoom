@@ -8,7 +8,6 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { WebSocketsService } from './websockets.service';
-import { AuthService } from '../auth/auth.service';
 
 @WebSocketGateway({
   cors: { origin: '*' },
@@ -19,7 +18,6 @@ export class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     protected jwtService: JwtService,
     private readonly websocketsService: WebSocketsService,
-    private readonly authService: AuthService,
   ) {}
 
   async handleConnection(client: Socket) {
@@ -32,6 +30,12 @@ export class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
 
+      const device = client.handshake.auth?.device;
+      if (!device) {
+        console.log('Missing device');
+        client.disconnect(true);
+        return;
+      }
       const payload = await this.jwtService.verifyAsync(token);
       if (!payload.sub) {
         console.log('Invalid token');
@@ -40,8 +44,13 @@ export class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
       client.data.userId = payload.sub;
+      client.data.deviceId = device;
       console.log(`Client ${client.id} (userID: ${payload.sub}) connected`);
-      this.websocketsService.addSocket(payload.sub.toString(), client.id);
+      this.websocketsService.addSocket(
+        payload.sub.toString(),
+        client.id,
+        device,
+      );
     } catch (err) {
       console.log(err);
       console.log('Auth failed');
@@ -56,11 +65,21 @@ export class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.websocketsService.removeSocket(client.data.userId, client.id);
   }
 
-  sendToUser(userId: string, event: string, data: any) {
+  sendToUser(userId: number, event: string, data: any) {
     const sockets = this.websocketsService.getUserSockets(userId);
     if (!sockets) return;
     sockets.forEach((socketId) => {
       this.server.to(socketId).emit(event, data);
     });
+  }
+
+  sendToDevice(deviceId: string, event: string, data: any): boolean {
+    const socketId = this.websocketsService.getSocketByDeviceId(deviceId);
+
+    if (!socketId) return false;
+
+    this.server.to(socketId).emit(event, data);
+
+    return true;
   }
 }

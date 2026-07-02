@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { BaseGateway } from './base.gateway';
 import { WebSocketsService } from './websockets.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -13,7 +13,7 @@ import { jwtConstants } from '../auth/constant';
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '31day' },
     }),
-    AuthModule,
+    forwardRef(() => AuthModule),
   ],
   providers: [BaseGateway, WebSocketsService, PrismaService],
   exports: [BaseGateway, WebSocketsService],

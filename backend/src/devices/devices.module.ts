@@ -10,7 +10,7 @@ import { forwardRef } from '@nestjs/common';
 @Module({
   providers: [DevicesService, DevicesGateway, PrismaService],
   controllers: [DevicesController],
-  imports: [forwardRef(() => WebsocketsModule), AuthModule],
+  imports: [forwardRef(() => WebsocketsModule), forwardRef(() => AuthModule)],
   exports: [DevicesService],
 })
 export class DevicesModule {}

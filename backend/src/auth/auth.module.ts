@@ -8,10 +8,8 @@ import { MailModule } from '../mail/mail.module';
 import { PassportModule } from '@nestjs/passport';
 import { OAuthStrategy } from './oauth.strategy';
 import { DevicesModule } from '../devices/devices.module';
-import { DevicesService } from '../devices/devices.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { WebsocketsModule } from '../websockets/websockets.module';
-import { WebSocketsService } from '../websockets/websockets.service';
 import { forwardRef } from '@nestjs/common';
 
 @Module({
@@ -25,15 +23,10 @@ import { forwardRef } from '@nestjs/common';
       signOptions: { expiresIn: '31day' },
     }),
     forwardRef(() => DevicesModule),
-    WebsocketsModule,
+    forwardRef(() => WebsocketsModule),
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    OAuthStrategy,
-    DevicesService,
-    PrismaService,
-  ],
+  providers: [AuthService, OAuthStrategy, PrismaService],
   exports: [AuthService],
 })
 export class AuthModule {}

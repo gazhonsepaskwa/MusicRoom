@@ -130,7 +130,7 @@ export class DevicesService {
     return devices;
   }
 
-  async connectDevice(userId: number, deviceId: string) {
+  async canConnectToDevice(userId: number, deviceId: string) {
     const deviceship = await this.prisma.deviceship.findUnique({
       where: {
         deviceId_userId: {
@@ -141,7 +141,7 @@ export class DevicesService {
     });
 
     if (!deviceship) {
-      throw new Error('Device not found');
+      return false;
     }
 
     if (
@@ -149,10 +149,8 @@ export class DevicesService {
       !deviceship.canSeek &&
       !deviceship.canTogglePlayPause
     ) {
-      throw new Error('User does not have permission to modify music');
+      return false;
     }
-
-    const socket = this.websocketsService.getSocketByDeviceId(deviceId);
 
     return deviceship;
   }

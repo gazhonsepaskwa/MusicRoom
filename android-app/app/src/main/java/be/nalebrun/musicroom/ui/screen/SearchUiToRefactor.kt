@@ -128,11 +128,6 @@ fun SearchResultCard(
         ,
         verticalAlignment = Alignment.CenterVertically
     ){
-//        AsyncImage(
-//            modifier = Modifier.padding(5.dp),
-//            model = "https://i.scdn.co/image/ab67616d0000b273dd3a17393ca3f47e4c523c26",
-//            contentDescription = null,
-//        )
         Image(
             modifier = Modifier
                 .padding(2.dp),

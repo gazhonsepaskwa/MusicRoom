@@ -21,7 +21,7 @@
 }
 
 
-localhost {
-    tls internal
+{$DOMAIN_NAME} {
+    tls internal # Only for dev (localhost) remove for Prod (?)
     reverse_proxy backend:3000
 }

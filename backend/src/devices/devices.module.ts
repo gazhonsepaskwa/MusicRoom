@@ -3,19 +3,14 @@ import { DevicesService } from './devices.service';
 import { DevicesController } from './devices.controller';
 import { DevicesGateway } from './devices.gateway';
 import { PrismaService } from '../prisma/prisma.service';
-import { AuthGuard } from '../auth/auth.guard';
 import { WebsocketsModule } from '../websockets/websockets.module';
-import { WebSocketsService } from '../websockets/websockets.service';
+import { AuthModule } from '../auth/auth.module';
+import { forwardRef } from '@nestjs/common';
 
 @Module({
-  providers: [
-    DevicesService,
-    DevicesGateway,
-    PrismaService,
-    AuthGuard,
-    WebSocketsService,
-  ],
+  providers: [DevicesService, DevicesGateway, PrismaService],
   controllers: [DevicesController],
-  imports: [WebsocketsModule],
+  imports: [forwardRef(() => WebsocketsModule), AuthModule],
+  exports: [DevicesService],
 })
 export class DevicesModule {}

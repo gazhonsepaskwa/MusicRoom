@@ -15,6 +15,7 @@ import { PlaylistsService } from './playlists.service';
 import { ParseSafeIntPipe } from '../common/pipe/parse_safe_int.pipe';
 import { AuthGuard } from '../auth/auth.guard';
 import { Request } from 'express';
+import { CurrentUser } from '../decorator/current-user.decorator';
 
 @Controller('playlists')
 export class PlaylistsController {
@@ -69,5 +70,11 @@ export class PlaylistsController {
   delete(@Param('id', ParseSafeIntPipe) id: number) {
     console.log('PlaylistsController.delete called with id:', id);
     return this.playlistsService.delete({ id });
+  }
+
+  @Get('available')
+  async getAvailable(@CurrentUser() userId: number) {
+    console.log('PlaylistController.available called with id:', userId);
+    return await this.playlistsService.getPersonnal(userId);
   }
 }

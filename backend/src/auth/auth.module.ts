@@ -12,6 +12,7 @@ import { DevicesService } from '../devices/devices.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { WebsocketsModule } from '../websockets/websockets.module';
 import { WebSocketsService } from '../websockets/websockets.service';
+import { forwardRef } from '@nestjs/common';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { WebSocketsService } from '../websockets/websockets.service';
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '31day' },
     }),
-    DevicesModule,
+    forwardRef(() => DevicesModule),
     WebsocketsModule,
   ],
   controllers: [AuthController],
@@ -34,5 +35,6 @@ import { WebSocketsService } from '../websockets/websockets.service';
     PrismaService,
     WebSocketsService,
   ],
+  exports: [AuthService],
 })
 export class AuthModule {}

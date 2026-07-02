@@ -1,12 +1,14 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WebSocketsService } from '../websockets/websockets.service';
+import { BaseGateway } from '../websockets/base.gateway';
 
 @Injectable()
 export class DevicesService {
   constructor(
     private prisma: PrismaService,
     private websocketsService: WebSocketsService,
+    private baseGateway: BaseGateway,
   ) {}
   async addDevice(ownerId: number, id: string, name: string) {
     const device = await this.prisma.device.upsert({
@@ -149,6 +151,8 @@ export class DevicesService {
     ) {
       throw new Error('User does not have permission to modify music');
     }
+
+    const socket = this.websocketsService.getSocketByDeviceId(deviceId);
 
     return deviceship;
   }

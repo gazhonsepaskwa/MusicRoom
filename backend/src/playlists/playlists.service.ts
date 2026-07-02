@@ -286,4 +286,37 @@ export class PlaylistsService {
 
     return await this.incrementPlaylistVersion(playlistId);
   }
+
+  async getPersonnal(userId: number) {
+    const personnalPlaylists = await this.prisma.playlist.findMany({
+      where: {
+        OR: [
+          { userId },
+          {
+            playlistships: {
+              some: {
+                addresseeId: userId,
+                status: 'ACCEPTED',
+              },
+            },
+          },
+        ],
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!personnalPlaylists) {
+      throw new NotFoundException('No personnal playlists found');
+    }
+
+    const ret = await Promise.all(
+      personnalPlaylists.map(async (playlist) => {
+        return await this.playlist(playlist);
+      }),
+    );
+
+    return ret;
+  }
 }

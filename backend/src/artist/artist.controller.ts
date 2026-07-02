@@ -8,7 +8,6 @@ export class ArtistController {
 
   @Get(':id')
   getArtist(@Param('id', ParseSafeIntPipe) id: number) {
-    console.log('ArtistController.getArtist called with id:', id);
     return this.artistService.artist({
       id,
     });

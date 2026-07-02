@@ -33,7 +33,6 @@ import { forwardRef } from '@nestjs/common';
     OAuthStrategy,
     DevicesService,
     PrismaService,
-    WebSocketsService,
   ],
   exports: [AuthService],
 })

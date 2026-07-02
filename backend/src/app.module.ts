@@ -16,6 +16,11 @@ import { ArtistModule } from './artist/artist.module';
 import { SearchModule } from './search/search.module';
 import { WebsocketsModule } from './websockets/websockets.module';
 import { DevicesModule } from './devices/devices.module';
+import { FirebaseService } from './notifications/firebase/firebase.service';
+import { FirebaseModule } from './notifications/firebase/firebase.module';
+import { WebSocketsService } from './websockets/websockets.service';
+import { NotificationsModule } from './notifications/notifications.module';
+import { PlaylistshipModule } from './playlistship/playlistship.module';
 
 @Module({
   imports: [
@@ -30,6 +35,9 @@ import { DevicesModule } from './devices/devices.module';
     SearchModule,
     WebsocketsModule,
     DevicesModule,
+    FirebaseModule,
+    NotificationsModule,
+    PlaylistshipModule,
   ],
   controllers: [AppController],
   providers: [
@@ -40,6 +48,8 @@ import { DevicesModule } from './devices/devices.module';
       useClass: AuthGuard,
     },
     MailService,
+    FirebaseService,
+    WebSocketsService,
   ],
 })
 export class AppModule {}

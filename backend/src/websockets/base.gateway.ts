@@ -24,24 +24,26 @@ export class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleConnection(client: Socket) {
     try {
-      const token = client.handshake.auth?.token;
-      console.log('token', token);
-
-      const id = await this.authService.getUserFromJWT(token);
-      if (!id) {
-        throw new Error('Invaldid token');
+      let token = client.handshake.auth?.token;
+      if (!token) token = client.handshake.headers.authorization;
+      if (!token) {
+        console.log('Missing token');
+        client.disconnect(true);
+        return;
       }
 
-      const deviceId = client.handshake.auth?.deviceId;
-      console.log('deviceId', deviceId);
-      if (!deviceId) {
-        throw new Error('Invalid deviceId');
+      const payload = await this.jwtService.verifyAsync(token);
+      if (!payload.sub) {
+        console.log('Invalid token');
+        client.disconnect(true);
+        return;
       }
 
-      client.data.userId = id;
-      console.log(`Client ${client.id} (userID: ${id}) connected`);
-      this.websocketsService.addSocket(id, client.id, deviceId);
+      client.data.userId = payload.sub;
+      console.log(`Client ${client.id} (userID: ${payload.sub}) connected`);
+      this.websocketsService.addSocket(payload.sub.toString(), client.id);
     } catch (err) {
+      console.log(err);
       console.log('Auth failed');
       client.disconnect(true);
     }
@@ -54,7 +56,7 @@ export class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.websocketsService.removeSocket(client.data.userId, client.id);
   }
 
-  sendToUser(userId: number, event: string, data: any) {
+  sendToUser(userId: string, event: string, data: any) {
     const sockets = this.websocketsService.getUserSockets(userId);
     if (!sockets) return;
     sockets.forEach((socketId) => {

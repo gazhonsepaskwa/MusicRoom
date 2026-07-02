@@ -8,5 +8,6 @@ import { PlaylistsGateway } from './playlists.gateway';
 @Module({
   providers: [PlaylistsService, PrismaService, AuthGuard, PlaylistsGateway],
   controllers: [PlaylistsController],
+  exports: [PlaylistsService]
 })
 export class PlaylistsModule {}

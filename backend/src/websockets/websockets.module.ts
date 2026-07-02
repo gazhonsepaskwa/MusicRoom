@@ -2,23 +2,20 @@ import { Module } from '@nestjs/common';
 import { BaseGateway } from './base.gateway';
 import { WebSocketsService } from './websockets.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { UsersService } from '../users/users.service';
-import { MailService } from '../mail/mail.service';
-import { forwardRef } from '@nestjs/common';
-
-import { DevicesModule } from '../devices/devices.module';
+import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from '../auth/auth.module';
+import { jwtConstants } from '../auth/constant';
 
 @Module({
-  providers: [
-    BaseGateway,
-    WebSocketsService,
-    PrismaService,
-    UsersService,
-    MailService,
+  imports: [
+    JwtModule.register({
+      global: true,
+      secret: jwtConstants.secret,
+      signOptions: { expiresIn: '31day' },
+    }),
+    AuthModule,
   ],
-  imports: [forwardRef(() => DevicesModule), forwardRef(() => AuthModule)],
-
+  providers: [BaseGateway, WebSocketsService, PrismaService],
   exports: [BaseGateway, WebSocketsService],
 })
 export class WebsocketsModule {}

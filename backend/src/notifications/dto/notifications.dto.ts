@@ -1,4 +1,7 @@
 import { invitationStatus } from "../../../generated/prisma/enums";
+import { IsIn, IsInt } from "class-validator"
+
+
 
 export enum NotificationType {
   FRIEND_REQUEST = 'FRIEND_REQUEST',

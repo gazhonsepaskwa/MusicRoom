@@ -60,7 +60,6 @@ export class PlaylistshipService {
 
 	async playlistshipExists(playlistId: number, addresseeId: number): Promise<boolean> {
 		let playlistship = await this.playlistship({playlistId_addresseeId: {playlistId, addresseeId}})
-		console.log("playlistship", playlistship, addresseeId);
 		return playlistship !== null;
 	}
 

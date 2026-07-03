@@ -1,0 +1,24 @@
+info:
+  name: answerPlaylistInvitation
+  type: http
+  seq: 20
+
+http:
+  method: POST
+  url: https://localhost:8443/playlistship/send-playlist-invitation
+  body:
+    type: json
+    data: |-
+      {
+        "playlistId":1,
+        "addresseeId":2
+      }
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInVzZXJuYW1lIjoibGVvIiwiaWF0IjoxNzgzMTEwODUxLCJleHAiOjE3ODU3ODkyNTF9.0aH3NoliYyCeQjLpRd31CA38JpMVMMWeRh_spScj8Bw
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

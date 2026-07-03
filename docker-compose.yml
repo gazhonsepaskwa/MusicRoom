@@ -40,6 +40,7 @@ services:
       - jwt_secret
       - database_url
       - oauth_client_id_wa
+      - firebase_service_account.json
 
   adminer:
     image: adminer

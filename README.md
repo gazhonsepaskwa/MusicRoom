@@ -27,18 +27,16 @@ _42 project where you have to make a music streaming service_
 
 - **root .env:**
 
+	DOMAIN_NAME= \
+
 	DB_NAME= \
 	DB_USER= \
 	DB_PORT= \
 	DB_HOST= \
 	BACKEND_PORT= \
-	DOMAIN_NAME= \
-	EXTERNAL_PORT=
-
-- **backend container .env:**
-
-	DOMAIN_NAME= \
 	EXTERNAL_PORT= \
+	CADDY_INTERNAL_PORT= \
+	CADDY_DOMAIN_NAME= \
 \
 	***SMTP Configuration***\
 	SMTP_HOST=\

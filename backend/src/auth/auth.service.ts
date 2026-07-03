@@ -99,8 +99,8 @@ export class AuthService {
         expiresIn: '1h',
       },
     );
-	const domainName = process.env.DOMAIN_NAME + (process.env.EXTERNAL_PORT ? `:${process.env.EXTERNAL_PORT}` : '');
-    const link = `https://${domainName}/auth/verify?verificationToken=${token}`;
+	const domainName = process.env.DOMAIN_NAME == 'localhost' ? process.env.DOMAIN_NAME + (process.env.EXTERNAL_PORT ? `:${process.env.EXTERNAL_PORT}` : '') : process.env.DOMAIN_NAME;
+	const link = `https://${domainName}/auth/verify?verificationToken=${token}`;
     this.mailService.sendVerificationEmail(email, link);
   }
 

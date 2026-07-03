@@ -14,6 +14,7 @@ import { AuthService } from './auth.service';
 import { Public } from './auth.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { NewUserDto } from './dto/newUser.dto';
+import { EmailDto } from './dto/email.dto';
 import { SignInDto } from './dto/signIn.dto';
 
 @Controller('auth')
@@ -48,8 +49,8 @@ export class AuthController {
 
   @Post('resend-email')
   @Public()
-  resendVerificationEmail(@Body('email') email: string) {
-    this.authService.sendVerificationEmail(email);
+  resendVerificationEmail(@Body() emailDto: EmailDto) {
+    this.authService.sendVerificationEmail(emailDto.email);
   }
 
   @Get('oauth')

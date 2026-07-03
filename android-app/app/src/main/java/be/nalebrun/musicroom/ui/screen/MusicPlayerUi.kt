@@ -24,6 +24,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -41,8 +42,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import be.nalebrun.musicroom.R
+import be.nalebrun.musicroom.apiJsonStruct.responds.apiMusicJson
 import be.nalebrun.musicroom.ui.element.PageTopBackButton
+import be.nalebrun.musicroom.viewmodel.AuthViewModel
+import be.nalebrun.musicroom.viewmodel.MusicViewModel
 import coil3.compose.AsyncImage
 
 enum class Repeat{
@@ -55,10 +61,18 @@ enum class Repeat{
 @Composable
 fun MusicPlayerUi() {
 
-    var songNow by remember { mutableIntStateOf(10004) }
-    var songEnd by remember { mutableIntStateOf(23043) }
+    val viewModel: MusicViewModel = hiltViewModel()
+
+    val currentSong: Int by viewModel.currentSong.collectAsStateWithLifecycle()
 
     var lyrics  by remember { mutableStateOf(""      ) }
+
+    val musicJson: apiMusicJson by viewModel.music.collectAsStateWithLifecycle()
+
+    // on song change, fetch the info of the next song
+    LaunchedEffect(currentSong) {
+        viewModel.fetchMusicById(currentSong)
+    }
 
     Column(
         modifier = Modifier
@@ -68,31 +82,31 @@ fun MusicPlayerUi() {
     ) {
         PageTopBackButton()
 
-        CoverArt(lyrics)
+        CoverArt(musicJson.album?.images?.getOrNull(1) ?: "", lyrics) // take the second image because the screen quality is low
 
         // Title and artist
         Column() {
-            Text("Someone You Loved", fontSize = 18.sp, fontWeight = FontWeight.Black)
-            Text("Lewis Capaldi")
+            Text(musicJson.title, fontSize = 18.sp, fontWeight = FontWeight.Black)
+            Text(musicJson.artists.firstOrNull()?.title ?: "Unknown Artist")
         }
 
-        SongProgressBar()
+        SongProgressBar(viewModel)
 
-        MusicControlButtons()
+        MusicControlButtons(viewModel)
 
         BottomButtons()
     }
 }
 
 @Composable
-fun CoverArt(lyrics: String) {
+fun CoverArt(url: String, lyrics: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-        // Back Box (Text/Lyrics)
-        Box(
+            // Back Box (Text/Lyrics)
+            Box(
             modifier = Modifier
                 .offset(x = 50.dp)
                 .size(200.dp)
@@ -119,7 +133,7 @@ fun CoverArt(lyrics: String) {
             AsyncImage(
                 modifier = Modifier
                     .fillMaxSize(),
-                model = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fm.media-amazon.com%2Fimages%2FI%2F61xp%2Be6A%2BVL._AC_SL1457_.jpg&f=1&nofb=1&ipt=f467e010dd014469c9259c2842f1935c5429b5b4aa3efcf3d3923e1c9ac42116",
+                model = url,
                 contentDescription = null
             )
         }
@@ -128,15 +142,18 @@ fun CoverArt(lyrics: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SongProgressBar() {
-    var songNow by remember { mutableIntStateOf(0) }
-    var songEnd by remember { mutableIntStateOf(1000) }
+fun SongProgressBar(viewModel: MusicViewModel) {
+    val songNow by viewModel.currentPosition.collectAsStateWithLifecycle()
+    val songEnd by viewModel.duration.collectAsStateWithLifecycle()
 
     Column() {
-        var sliderPosition by remember { mutableFloatStateOf(0f) }
+        val sliderPosition = if (songEnd > 0) songNow.toFloat() / songEnd.toFloat() else 0f
         Slider(
             value = sliderPosition,
-            onValueChange = { sliderPosition = it },
+            onValueChange = { 
+                val newPosition = (it * songEnd).toLong()
+                viewModel.player.seekTo(newPosition)
+            },
             colors = SliderDefaults.colors(
                 thumbColor = Color.Black,
                 activeTrackColor = Color.Black,
@@ -180,19 +197,12 @@ fun SongProgressBar() {
     }
 }
 
-fun msToReadableString(msTime: Int) : String {
-    val min: Int = (msTime.toFloat() / 60000).toInt()
-    val sec: Int = ( (msTime.toFloat() % 60000) / 1000).toInt()
-    val str = min.toString() + ":" + sec.toString() + if (sec.toString().length == 1) "0" else ""
-    return str
-}
-
 @Composable
-fun MusicControlButtons() {
+fun MusicControlButtons(viewModel: MusicViewModel) {
 
     var repeat  by remember { mutableStateOf(Repeat.NO) }
     var shuffle by remember { mutableStateOf(false    ) }
-    var play    by remember { mutableStateOf(false    ) }
+    val play    by viewModel.isPlaying.collectAsStateWithLifecycle()
 
     Row(
         Modifier
@@ -221,7 +231,7 @@ fun MusicControlButtons() {
                 Modifier
                     .size(controlIconsSize)
                     .clickable(onClick = {
-
+                        viewModel.goToPreviousSong()
                     })
             )
             Image(
@@ -233,7 +243,7 @@ fun MusicControlButtons() {
                 Modifier
                     .size(controlIconsSize)
                     .clickable(onClick = {
-                        play = !play
+                        if (play) viewModel.player.pause() else viewModel.player.play()
                     })
             )
             Image(
@@ -242,7 +252,7 @@ fun MusicControlButtons() {
                 Modifier
                     .size(controlIconsSize)
                     .clickable(onClick = {
-
+                        viewModel.goToNextSong()
                     })
             )
         }
@@ -295,4 +305,11 @@ fun BottomButtons() {
             Modifier.size(25.dp)
         )
     }
+}
+
+fun msToReadableString(msTime: Long): String {
+    val totalSeconds = msTime / 1000
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    return "$minutes:${seconds.toString().padStart(2, '0')}"
 }

@@ -16,7 +16,12 @@ import { ParseSafeIntPipe } from '../common/pipe/parse_safe_int.pipe';
 import { AuthGuard } from '../auth/auth.guard';
 import { Request } from 'express';
 import { ApiBody, ApiOkResponse, ApiParam } from '@nestjs/swagger';
-import { CreatePlaylistDto, PlaylistResponseDto, UpdatePlaylistDto } from './dto/playlists.dto';
+import {
+  CreatePlaylistDto,
+  PlaylistDetailResponseDto,
+  PlaylistResponseDto,
+  UpdatePlaylistDto,
+} from './dto/playlists.dto';
 
 @Controller('playlists')
 export class PlaylistsController {
@@ -66,7 +71,7 @@ export class PlaylistsController {
   }
 
   @ApiParam({ name: 'id', type: Number })
-  @ApiOkResponse({ type: PlaylistResponseDto })
+  @ApiOkResponse({ type: PlaylistDetailResponseDto })
   @Get('get/:id')
   get(@Param('id', ParseSafeIntPipe) id: number) {
     return this.playlistsService.playlist({ id });

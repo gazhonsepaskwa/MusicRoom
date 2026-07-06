@@ -1,5 +1,6 @@
 package be.nalebrun.musicroom.ui.screen
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,12 +44,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiMusicJson
 import be.nalebrun.musicroom.ui.element.PageTopBackButton
 import be.nalebrun.musicroom.viewmodel.AuthViewModel
 import be.nalebrun.musicroom.viewmodel.MusicViewModel
+import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import coil3.compose.AsyncImage
 
 enum class Repeat{
@@ -61,7 +64,12 @@ enum class Repeat{
 @Composable
 fun MusicPlayerUi() {
 
-    val viewModel: MusicViewModel = hiltViewModel()
+    val activity = LocalActivity.current
+    val viewModel: MusicViewModel = if (activity != null) {
+        hiltViewModel(activity as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
 
     val currentSong: Int by viewModel.currentSong.collectAsStateWithLifecycle()
 

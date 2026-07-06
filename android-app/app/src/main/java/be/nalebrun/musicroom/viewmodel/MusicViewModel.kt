@@ -13,7 +13,6 @@ import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import be.nalebrun.musicroom.IAPIRepository
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiMusicJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.AlbumJson
-import be.nalebrun.musicroom.apiJsonStruct.responds.ArtistJson
 import be.nalebrun.musicroom.repositories.ICredentialRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -29,6 +28,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class MusicViewModel @Inject constructor(
@@ -38,6 +38,9 @@ class MusicViewModel @Inject constructor(
 ) : ViewModel() {
     private val _waitingList = MutableStateFlow(listOf(1, 2, 5))
     private val _currentSongIndex = MutableStateFlow(0)
+
+    private var currentPlayingId: Int? = null
+    private var isFirstLoad = true
 
     val player = ExoPlayer.Builder(context).build()
 
@@ -56,7 +59,11 @@ class MusicViewModel @Inject constructor(
                 _currentPosition.value = player.currentPosition
                 _duration.value = player.duration.coerceAtLeast(0L)
                 _isPlaying.value = player.isPlaying
-                delay(1000)
+                if (currentPosition.value > _duration.value - 100 && _duration.value > 0) {
+                    // skip to next song 100 ms before the end
+                    goToNextSong()
+                }
+                delay(1000.milliseconds)
             }
         }
     }
@@ -92,29 +99,40 @@ class MusicViewModel @Inject constructor(
                 _currentSongIndex.value - 1
     }
 
-    fun fetchMusicById(id : Int) { viewModelScope.launch {
-        credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
-            apiRepository.get(
-                url = "https://musicroom.nalebrun.be/music/$id",
-                auth = "Bearer $jwt",
-                onResponse = { _, response ->
-                    if (response.code in 200..<300) {
-                        val body = response.body?.string() ?: ""
-                        viewModelScope.launch {
-                            _music.value = Json.decodeFromString<apiMusicJson>(body)
-                            playStream(id, jwt)
+    fun fetchMusicById(id : Int) {
+        if (id == currentPlayingId) return
+
+        viewModelScope.launch {
+            credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
+                apiRepository.get(
+                    url = "https://musicroom.nalebrun.be/music/$id",
+                    auth = "Bearer $jwt",
+                    onResponse = { _, response ->
+                        if (response.code in 200..<300) {
+                            val body = response.body?.string() ?: ""
+                            viewModelScope.launch {
+                                _music.value = Json.decodeFromString<apiMusicJson>(body)
+                                currentPlayingId = id
+                                val shouldPlay = if (isFirstLoad) {
+                                    isFirstLoad = false
+                                    false
+                                } else {
+                                    true
+                                }
+                                playStream(id, jwt, shouldPlay)
+                            }
                         }
+                    },
+                    onFailure = { _, e ->
+                        Log.d("API_RESPONSE_ERROR", "error: $e")
                     }
-                },
-                onFailure = { _, e ->
-                    Log.d("API_RESPONSE_ERROR", "error: $e")
-                }
-            )
+                )
+            }
         }
-    }}
+    }
 
     @OptIn(UnstableApi::class)
-    private fun playStream(id: Int, jwt: String) {
+    private fun playStream(id: Int, jwt: String, autoPlay: Boolean = true) {
         val dataSourceFactory = DefaultHttpDataSource.Factory()
             .setDefaultRequestProperties(mapOf("Authorization" to "Bearer $jwt"))
         
@@ -124,7 +142,9 @@ class MusicViewModel @Inject constructor(
 
         player.setMediaSource(mediaSource)
         player.prepare()
-        player.play()
+        if (autoPlay) {
+            player.play()
+        }
     }
 
     override fun onCleared() {

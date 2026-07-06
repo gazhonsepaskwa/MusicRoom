@@ -47,7 +47,6 @@ fun CreateNavGraph(
         navController =     navController,
         startDestination =  startDestination,
     ) {
-//         pass repositories to the Uis but declare ViewModels in them ( except for shared View Models )
         composable(route = "auth")   { AuthUi() }
         composable(route = "favorite") { FavoriteUi() }
         composable(route = "library") { LibraryUi() }

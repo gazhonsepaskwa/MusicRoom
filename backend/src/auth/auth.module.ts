@@ -7,6 +7,7 @@ import { jwtConstants } from './constant';
 import { MailModule } from '../mail/mail.module';
 import { PassportModule } from '@nestjs/passport';
 import { OAuthStrategy } from './oauth.strategy';
+import { AuthGuard } from './auth.guard';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { OAuthStrategy } from './oauth.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, OAuthStrategy],
-  exports: [AuthService]
+  providers: [AuthGuard, AuthService, OAuthStrategy],
+  exports: [AuthService, AuthGuard],
 })
 export class AuthModule {}
+  

@@ -33,7 +33,6 @@ export class PlaylistsController {
     },
     @Req() req: Request,
   ) {
-    console.log('PlaylistsController.create called with body:', body);
     const userId = this.authGuard.getUserIdFromRequest(req);
     if (!userId) {
       throw new BadRequestException('User ID not found in request');
@@ -61,13 +60,11 @@ export class PlaylistsController {
 
   @Get('get/:id')
   get(@Param('id', ParseSafeIntPipe) id: number) {
-    console.log('PlaylistsController.get called with id:', id);
     return this.playlistsService.playlist({ id });
   }
 
   @Delete('delete/:id')
   delete(@Param('id', ParseSafeIntPipe) id: number) {
-    console.log('PlaylistsController.delete called with id:', id);
     return this.playlistsService.delete({ id });
   }
 }

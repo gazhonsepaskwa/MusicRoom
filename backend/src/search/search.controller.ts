@@ -26,14 +26,6 @@ export class SearchController {
     @Query('offset', ParseSafeIntPipe) offset: number,
     @Query('limit', ParseSafeIntPipe) limit: number,
   ) {
-    console.log(
-      'SearchController.deep_search called with query:',
-      query,
-      'offset:',
-      offset,
-      'limit:',
-      limit,
-    );
 
     const typeArray = types?.split(',') || [
       'artist',
@@ -47,7 +39,6 @@ export class SearchController {
     if (!userId) {
       throw new BadRequestException('User ID not found in request');
     }
-    console.log('User ID extracted from request:', userId);
     const validTypes = ['artist', 'music', 'album', 'playlist', 'user'];
     const invalidTypes = typeArray.filter((type) => !validTypes.includes(type));
     if (invalidTypes.length > 0) {

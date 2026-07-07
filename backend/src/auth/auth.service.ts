@@ -27,8 +27,12 @@ export class AuthService {
     if (user == undefined || user.username == null)
       throw new UnprocessableEntityException(
         'Incorrect Password or User',
-        'Invalid Loging Attempt ',
+        'Invalid Log In Attempt ',
       );
+	if (user.verifiedEmail == false)
+		throw new UnprocessableEntityException(
+			'This account does not exist or was not confirmed by email. If you have created an account, check your mailbox!'
+		);
     if (user.password == undefined || user.password == null)
       throw new UnprocessableEntityException(
         'Connect with your google account and change your password!',
@@ -37,7 +41,7 @@ export class AuthService {
     if (hash == false) {
       throw new UnprocessableEntityException(
         'Incorrect Password or User',
-        'Invalid Loging Attempt ',
+        'Invalid Log In Attempt ',
       );
     }
     const payload = { sub: user.id, username: user.username };

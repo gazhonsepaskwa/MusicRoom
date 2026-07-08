@@ -17,6 +17,13 @@ import { AuthGuard } from '../auth/auth.guard';
 import { Request } from 'express';
 import { CurrentUser } from '../decorator/current-user.decorator';
 import { MusicPlaylistDto } from './dto/playlists.dto';
+import { ApiBody, ApiOkResponse, ApiParam } from '@nestjs/swagger';
+import {
+  CreatePlaylistDto,
+  PlaylistDetailResponseDto,
+  PlaylistResponseDto,
+  UpdatePlaylistDto,
+} from './dto/playlists.dto';
 
 @Controller('playlists')
 export class PlaylistsController {
@@ -25,6 +32,8 @@ export class PlaylistsController {
     private readonly authGuard: AuthGuard,
   ) {}
 
+  @ApiBody({ type: CreatePlaylistDto })
+  @ApiOkResponse({ type: PlaylistResponseDto })
   @Post('create')
   create(
     @Body()
@@ -49,6 +58,9 @@ export class PlaylistsController {
     }
   }
 
+  @ApiParam({ name: 'id', type: Number })
+  @ApiBody({ type: UpdatePlaylistDto })
+  @ApiOkResponse({ type: PlaylistResponseDto })
   @Patch('update/:id')
   updatePublicStatus(
     @Param('id', ParseSafeIntPipe) id: number,
@@ -60,11 +72,15 @@ export class PlaylistsController {
     });
   }
 
+  @ApiParam({ name: 'id', type: Number })
+  @ApiOkResponse({ type: PlaylistDetailResponseDto })
   @Get('get/:id')
   get(@Param('id', ParseSafeIntPipe) id: number) {
     return this.playlistsService.playlist({ id });
   }
 
+  @ApiParam({ name: 'id', type: Number })
+  @ApiOkResponse({ type: PlaylistResponseDto })
   @Delete('delete/:id')
   delete(@Param('id', ParseSafeIntPipe) id: number) {
     return this.playlistsService.delete({ id });

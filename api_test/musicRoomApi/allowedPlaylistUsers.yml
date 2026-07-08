@@ -1,0 +1,24 @@
+info:
+  name: allowedPlaylistUsers
+  type: http
+  seq: 22
+
+http:
+  method: POST
+  url: https://localhost:8443/playlistship/leave-playlist
+  body:
+    type: json
+    data: |-
+      {
+        "playlistId":1,
+        "addresseeId":2
+      }
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInVzZXJuYW1lIjoibGVvMiIsImlhdCI6MTc4MzExMTE4NiwiZXhwIjoxNzg1Nzg5NTg2fQ.hJAjQj2JHlOsnz057r-9wwjPKuOeLn1bHgTI0U8vwSM
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

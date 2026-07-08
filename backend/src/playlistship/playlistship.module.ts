@@ -1,17 +1,18 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { PlaylistshipService } from './playlistship.service';
 import { PlaylistshipController } from './playlistship.controller';
-import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { UsersModule } from '../users/users.module';
 import { PlaylistsModule } from '../playlists/playlists.module';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
   imports: [UsersModule,
-	PlaylistsModule, forwardRef(() => NotificationsModule)],
+	PlaylistsModule, forwardRef(() => NotificationsModule),
+	PrismaModule
+],
   controllers: [PlaylistshipController],
-  providers: [PlaylistshipService,
-	PrismaService],
+  providers: [PlaylistshipService],
   exports: [PlaylistshipService],
 })
 export class PlaylistshipModule {}

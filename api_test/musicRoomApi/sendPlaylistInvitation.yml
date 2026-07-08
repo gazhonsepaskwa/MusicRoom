@@ -1,0 +1,15 @@
+info:
+  name: sendPlaylistInvitation
+  type: http
+  seq: 24
+
+http:
+  method: GET
+  url: https://localhost:8443/playlistship/send-playlist-invitation
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -83,6 +83,7 @@ export class PlaylistsService {
       return newPlaylist;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
+		console.error('Error creating playlist:', error);
         throw new BadRequestException('Invalid data for playlist creation');
       }
       throw error;

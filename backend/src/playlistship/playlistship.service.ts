@@ -19,7 +19,7 @@ export class PlaylistshipService {
 	async sendPlaylistInvitation(playlistshipDto: PlaylistshipDto, senderId: number): Promise<void> {
 		await this.checkOwnership(senderId, playlistshipDto.playlistId);
 		if (await this.playlistshipExists(playlistshipDto.playlistId, playlistshipDto.addresseeId)) {
-			throw new BadRequestException('User Already has access to the playlist');
+			throw new BadRequestException('User Already has already received an invitation to the playlist');
 		}
 		await this.createPlaylistship({
 			playlistId: playlistshipDto.playlistId,

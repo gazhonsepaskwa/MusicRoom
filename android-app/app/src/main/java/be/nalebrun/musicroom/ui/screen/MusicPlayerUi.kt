@@ -53,6 +53,7 @@ import be.nalebrun.musicroom.viewmodel.AuthViewModel
 import be.nalebrun.musicroom.viewmodel.MusicViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import coil3.compose.AsyncImage
+import androidx.compose.runtime.collectAsState
 
 enum class Repeat{
     NO,
@@ -160,7 +161,7 @@ fun SongProgressBar(viewModel: MusicViewModel) {
             value = sliderPosition,
             onValueChange = { 
                 val newPosition = (it * songEnd).toLong()
-                viewModel.player.seekTo(newPosition)
+                viewModel.seekTo(newPosition)
             },
             colors = SliderDefaults.colors(
                 thumbColor = Color.Black,
@@ -210,7 +211,7 @@ fun MusicControlButtons(viewModel: MusicViewModel) {
 
     var repeat  by remember { mutableStateOf(Repeat.NO) }
     var shuffle by remember { mutableStateOf(false    ) }
-    val play    by viewModel.isPlaying.collectAsStateWithLifecycle()
+    val play     =viewModel.isPlaying
 
     Row(
         Modifier
@@ -244,14 +245,14 @@ fun MusicControlButtons(viewModel: MusicViewModel) {
             )
             Image(
                 painter = painterResource(id = when {
-                    play -> R.drawable.outline_pause_24
+                    play.collectAsState().value -> R.drawable.outline_pause_24
                     else -> R.drawable.outline_play_arrow_24
                 }),
                 contentDescription = "",
                 Modifier
                     .size(controlIconsSize)
                     .clickable(onClick = {
-                        if (play) viewModel.player.pause() else viewModel.player.play()
+                        if (play.value) viewModel.pause() else viewModel.play()
                     })
             )
             Image(

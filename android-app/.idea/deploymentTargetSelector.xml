@@ -3,11 +3,11 @@
   <component name="deploymentTargetSelector">
     <selectionStates>
       <SelectionState runConfigName="app">
-        <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-06-29T14:30:57.869677Z">
+        <option name="selectionMode" value="DIALOG" />
+        <DropdownSelection timestamp="2026-07-06T16:57:15.176146Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=LD20241013808" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/work/.android/avd/Mudita_Kompact.avd" />
             </handle>
           </Target>
         </DropdownSelection>
@@ -15,7 +15,12 @@
           <targets>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="LocalEmulator" identifier="path=/Users/work/.android/avd/Mudita_Kompact.avd" />
+                <DeviceId pluginId="PhysicalDevice" identifier="serial=LD20241013808" />
+              </handle>
+            </Target>
+            <Target type="DEFAULT_BOOT">
+              <handle>
+                <DeviceId pluginId="LocalEmulator" identifier="path=/Users/work/.android/avd/Small_Phone.avd" />
               </handle>
             </Target>
           </targets>

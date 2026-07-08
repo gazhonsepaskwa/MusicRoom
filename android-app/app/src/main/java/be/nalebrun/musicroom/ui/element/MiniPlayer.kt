@@ -95,7 +95,7 @@ fun MiniPlayer() {
                 Modifier
                     .size(30.dp)
                     .clickable(onClick = {
-                        if (playing) musicViewModel.player.pause() else musicViewModel.player.play()
+                        if (playing) musicViewModel.pause() else musicViewModel.play()
                     })
             )
             Image(

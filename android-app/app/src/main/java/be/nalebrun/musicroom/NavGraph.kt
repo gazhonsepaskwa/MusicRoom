@@ -47,12 +47,12 @@ fun CreateNavGraph(
         navController =     navController,
         startDestination =  startDestination,
     ) {
-        composable(route = "auth")   { AuthUi() }
-        composable(route = "favorite") { FavoriteUi() }
-        composable(route = "library") { LibraryUi() }
-        composable(route = "friends") { FriendsUi() }
-        composable(route = "settings") { SettingsUi() }
-        composable(route = "music-player") { MusicPlayerUi() }
+        composable(route = "auth")          { AuthUi() }
+        composable(route = "favorite")      { FavoriteUi() }
+        composable(route = "library")       { LibraryUi() }
+        composable(route = "friends")       { FriendsUi() }
+        composable(route = "settings")      { SettingsUi() }
+        composable(route = "music-player")  { MusicPlayerUi() }
         // composable(route = "search") { SearchUi(navigationViewModel) }
     }
 }

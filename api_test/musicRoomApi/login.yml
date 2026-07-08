@@ -1,7 +1,7 @@
 info:
   name: login
   type: http
-  seq: 11
+  seq: 18
 
 http:
   method: POST

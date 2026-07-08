@@ -5,12 +5,14 @@
 
 generator client {
   provider = "prisma-client"
+  previewFeatures = ["postgresqlExtensions"]
   output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  extensions = [pg_trgm]  
 }
 
 model user {
@@ -34,10 +36,17 @@ model user {
   thirdPreferredArtist artist? @relation("ThirdPreferredArtist", fields: [thirdPreferredArtistId], references: [id])
 }
 
+enum invitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  NOTVIEWED
+}
+
 model friendship {
   requesterId Int
   addresseeId Int
-  status       invitationStatus
+  status       invitationStatus @default(NOTVIEWED)
   createdAt    DateTime @default(now())
 
   requester user @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
@@ -46,16 +55,11 @@ model friendship {
   @@id([requesterId, addresseeId])
   @@index([addresseeId])
 }
-enum invitationStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
-}
 
 model playlistship {
   addresseeId Int
   playlistId   Int
-  status       invitationStatus @default(PENDING)
+  status       invitationStatus @default(NOTVIEWED)
   createdAt    DateTime @default(now())
 
   user     user     @relation(fields: [addresseeId], references: [id], onDelete: Cascade)

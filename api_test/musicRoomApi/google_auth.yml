@@ -1,7 +1,7 @@
 info:
   name: google_auth
   type: http
-  seq: 8
+  seq: 17
 
 http:
   method: GET

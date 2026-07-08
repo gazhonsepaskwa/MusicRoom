@@ -8,7 +8,6 @@ export class AlbumController {
 
   @Get(':id')
   getAlbum(@Param('id', ParseSafeIntPipe) id: number) {
-    console.log('AlbumController.getAlbum called with id:', id);
     return this.albumService.album({
       id,
     });

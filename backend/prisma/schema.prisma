@@ -28,12 +28,26 @@ model user {
   sentFriendships     friendship[] @relation("Requester")
   receivedFriendships friendship[] @relation("Addressee")
   playlistships playlistship[]
-  firstPreferredArtistId Int?
-  firstPreferredArtist artist? @relation("FirstPreferredArtist", fields: [firstPreferredArtistId], references: [id])
-  secondPreferredArtistId Int?
-  secondPreferredArtist artist? @relation("SecondPreferredArtist", fields: [secondPreferredArtistId], references: [id])
-  thirdPreferredArtistId Int?
-  thirdPreferredArtist artist? @relation("ThirdPreferredArtist", fields: [thirdPreferredArtistId], references: [id])
+  firstPreferredMusicId Int?
+  firstPreferredMusic music? @relation("FirstPreferredMusic", fields: [firstPreferredMusicId], references: [id])
+  secondPreferredMusicId Int?
+  secondPreferredMusic music? @relation("SecondPreferredMusic", fields: [secondPreferredMusicId], references: [id])
+  thirdPreferredMusicId Int?
+  thirdPreferredMusic music? @relation("ThirdPreferredMusic", fields: [thirdPreferredMusicId], references: [id])
+}
+
+enum visibilityStatus {
+	PUBLIC
+	FRIEND
+	PRIVATE
+}
+
+model profile {
+	userId	Int @unique
+	address			visibilityStatus @default(PRIVATE)
+	friends			visibilityStatus @default(PUBLIC)
+	createdPlaylist	visibilityStatus @default(PUBLIC)
+	invitedPlaylist	visibilityStatus @default(PUBLIC)
 }
 
 enum invitationStatus {
@@ -122,6 +136,7 @@ model music {
   duration   Int
   createdAt  DateTime @default(now())
   albumIndex Int
+  lyrics     String?
 
   albumId Int
   album   album @relation(fields: [albumId], references: [id], onDelete: Cascade)

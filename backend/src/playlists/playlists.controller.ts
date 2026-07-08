@@ -15,6 +15,8 @@ import { PlaylistsService } from './playlists.service';
 import { ParseSafeIntPipe } from '../common/pipe/parse_safe_int.pipe';
 import { AuthGuard } from '../auth/auth.guard';
 import { Request } from 'express';
+import { CurrentUser } from '../decorator/current-user.decorator';
+import { MusicPlaylistDto } from './dto/playlists.dto';
 
 @Controller('playlists')
 export class PlaylistsController {
@@ -66,5 +68,36 @@ export class PlaylistsController {
   @Delete('delete/:id')
   delete(@Param('id', ParseSafeIntPipe) id: number) {
     return this.playlistsService.delete({ id });
+  }
+
+  @Get('available')
+  async getAvailable(@CurrentUser() userId: number) {
+    console.log('PlaylistController.available called with id:', userId);
+    return await this.playlistsService.getPersonnal(userId);
+  }
+
+  @Post('add-music')
+  async addMusic(@CurrentUser() userId: number, @Body() musicPlaylistDto: MusicPlaylistDto) {
+	if (await this.playlistsService.canAccess(musicPlaylistDto.playlistId, userId) === false) {
+		throw new BadRequestException('You are not the owner of this playlist');
+	}
+	return await this.playlistsService.addMusic(musicPlaylistDto.playlistId, musicPlaylistDto.musicId);
+  }
+
+  @Delete('remove-music')
+  async removeMusic(@CurrentUser() userId: number, @Body() musicPlaylistDto: MusicPlaylistDto) {
+	if (await this.playlistsService.canAccess(musicPlaylistDto.playlistId, userId) === false) {
+		throw new BadRequestException('You are not the owner of this playlist');
+	}
+	return await this.playlistsService.removeMusic(musicPlaylistDto.playlistId, musicPlaylistDto.musicId);
+  }
+
+  @Get('favorite')
+  async getFavorite(@CurrentUser() userId: number) {
+	const favoritePlaylist = await this.playlistsService.playlist({
+	  userId,
+	  isDefault: true,
+	});
+	return favoritePlaylist;
   }
 }

@@ -165,6 +165,34 @@ export class PlaylistsService {
     return await this.incrementPlaylistVersion(playlistId);
   }
 
+  async removeMusic(playlistId: number, songId: number): Promise<number | void> {
+	const playlist = await this.prisma.playlist.findUnique({
+	  where: { id: playlistId },
+	  include: { musics: true },
+	});
+
+	    if (!playlist) {
+      throw new NotFoundException('Playlist not found');
+    }
+
+    const existingMusic = playlist.musics.find((pm) => pm.musicId === songId);
+
+    if (!existingMusic) {
+      throw new BadRequestException('Music not in playlist');
+    }
+
+    await this.prisma.playlistMusic.delete({
+      where: {
+        playlistId_musicId: {
+          playlistId,
+          musicId: songId,
+        },
+      },
+    });
+
+    return await this.incrementPlaylistVersion(playlistId);
+  }
+
   async canJoinPlaylist(playlistId: number, userId: number): Promise<number> {
     const playlist = await this.prisma.playlist.findUnique({
       where: {
@@ -276,5 +304,79 @@ export class PlaylistsService {
     }
 
     return await this.incrementPlaylistVersion(playlistId);
+  }
+
+  async getPersonnal(userId: number) {
+    const personnalPlaylists = await this.prisma.playlist.findMany({
+      where: {
+        OR: [
+          { userId },
+          {
+            playlistships: {
+              some: {
+                addresseeId: userId,
+                status: 'ACCEPTED',
+              },
+            },
+          },
+        ],
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!personnalPlaylists) {
+      throw new NotFoundException('No personnal playlists found');
+    }
+
+    const ret = await Promise.all(
+      personnalPlaylists.map(async (playlist) => {
+        return await this.playlist(playlist);
+      }),
+    );
+
+    return ret;
+  }
+
+  async canAccess(playlistId: number, userId: number): Promise<boolean> {
+	const playlist = await this.prisma.playlist.findUnique({
+		where: {
+		  id: playlistId,
+		OR: {
+			userId: userId,
+			playlistships: {
+				some: {
+					addresseeId: userId,
+					status: 'ACCEPTED',
+				},
+			},
+		}
+	   },
+	  select: { userId: true },
+	});
+	return playlist?.userId === userId;
+  }
+
+  async getPlaylistDetails(playlistId: number): Promise<any> {
+	const playlistDetails = await this.prisma.music.aggregate({
+	  where: {
+		playlistMusics: {
+		  some: {
+			playlistId: playlistId,
+		  },
+		},
+	  },
+	  _duration: {
+		duration: true,
+	  },
+	  _count: {
+		id: true,
+	  },
+	});
+	if (!playlistDetails) {
+	  throw new NotFoundException('Playlist not found');
+	}
+	return playlistDetails;
   }
 }

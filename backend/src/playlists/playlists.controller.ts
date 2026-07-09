@@ -29,25 +29,15 @@ import {
 export class PlaylistsController {
   constructor(
     private readonly playlistsService: PlaylistsService,
-    private readonly authGuard: AuthGuard,
   ) {}
 
   @ApiBody({ type: CreatePlaylistDto })
   @ApiOkResponse({ type: PlaylistResponseDto })
   @Post('create')
   create(
-    @Body()
-    body: {
-      title: string;
-      status: string;
-      isPublic: boolean;
-    },
-    @Req() req: Request,
+    @Body() body: CreatePlaylistDto,
+    @CurrentUser() userId: number,
   ) {
-    const userId = this.authGuard.getUserIdFromRequest(req);
-    if (!userId) {
-      throw new BadRequestException('User ID not found in request');
-    }
     try {
       return this.playlistsService.create({
         ...body,
@@ -65,7 +55,7 @@ export class PlaylistsController {
   async updatePublicStatus(
 	@CurrentUser() userId: number,
     @Param('id', ParseSafeIntPipe) id: number,
-    @Body() body: { title?: string; status?: string; isPublic?: boolean },
+    @Body() body: UpdatePlaylistDto,
   ) {
 	if (await this.playlistsService.canAccess(id, userId) === false) {
 		throw new BadRequestException('You are not the owner of this playlist');

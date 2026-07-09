@@ -20,7 +20,7 @@ import { PlaylistsModule } from '../playlists/playlists.module';
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '31day' },
     }),
-	forwardRef(() => PlaylistsModule),
+	PlaylistsModule,
   ],
   controllers: [AuthController],
   providers: [AuthGuard, AuthService, OAuthStrategy],

@@ -6,6 +6,7 @@ import {
 import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { playlist } from '../../generated/prisma/browser';
+import { PlaylistVersionResponseDto } from './dto/playlists.dto';
 
 @Injectable()
 export class PlaylistsService {
@@ -139,59 +140,83 @@ export class PlaylistsService {
     return updatedPlaylist.version;
   }
 
-  async addMusic(playlistId: number, songId: number): Promise<number | void> {
-    const playlist = await this.prisma.playlist.findUnique({
-      where: { id: playlistId },
-      include: { musics: true },
-    });
+  async addMusic(playlistId: number, songId: number): Promise<PlaylistVersionResponseDto | void> {
+	try {
+		const playlist = await this.prisma.playlist.findUnique({
+		where: { id: playlistId },
+		include: { musics: true },
+		});
 
-    if (!playlist) {
-      throw new NotFoundException('Playlist not found');
-    }
+		if (!playlist) {
+		throw new NotFoundException('Playlist not found');
+		}
 
-    const existingMusic = playlist.musics.find((pm) => pm.musicId === songId);
+		const existingMusic = playlist.musics.find((pm) => pm.musicId === songId);
 
-    if (existingMusic) {
-      throw new BadRequestException('Music already in playlist');
-    }
+		if (existingMusic) {
+		throw new BadRequestException('Music already in playlist');
+		}
 
-    await this.prisma.playlistMusic.create({
-      data: {
-        playlistId,
-        musicId: songId,
-        index: playlist.musics.length,
-      },
-    });
+		await this.prisma.playlistMusic.create({
+			data: {
+				playlistId,
+				musicId: songId,
+				index: playlist.musics.length,
+			},
+		});
 
-    return await this.incrementPlaylistVersion(playlistId);
+		const version =await this.incrementPlaylistVersion(playlistId);
+		return {
+			playlistId: playlistId,
+			musicId: songId,
+			version: version,
+		};
+	} catch (error) {
+		if (error instanceof Prisma.PrismaClientKnownRequestError) {
+			throw new BadRequestException('Invalid data for adding music to playlist');
+		}
+		throw error;
+	}
   }
 
-  async removeMusic(playlistId: number, songId: number): Promise<number | void> {
-	const playlist = await this.prisma.playlist.findUnique({
-	  where: { id: playlistId },
-	  include: { musics: true },
-	});
+  async removeMusic(playlistId: number, songId: number): Promise<PlaylistVersionResponseDto | void> {
+	try {
+		const playlist = await this.prisma.playlist.findUnique({
+		where: { id: playlistId },
+		include: { musics: true },
+		});
 
-	    if (!playlist) {
-      throw new NotFoundException('Playlist not found');
-    }
+			if (!playlist) {
+		throw new NotFoundException('Playlist not found');
+		}
 
-    const existingMusic = playlist.musics.find((pm) => pm.musicId === songId);
+		const existingMusic = playlist.musics.find((pm) => pm.musicId === songId);
 
-    if (!existingMusic) {
-      throw new BadRequestException('Music not in playlist');
-    }
+		if (!existingMusic) {
+		throw new BadRequestException('Music not in playlist');
+		}
 
-    await this.prisma.playlistMusic.delete({
-      where: {
-        playlistId_musicId: {
-          playlistId,
-          musicId: songId,
-        },
-      },
-    });
+		await this.prisma.playlistMusic.delete({
+		where: {
+			playlistId_musicId: {
+			playlistId,
+			musicId: songId,
+			},
+		},
+		});
 
-    return await this.incrementPlaylistVersion(playlistId);
+		const version = await this.incrementPlaylistVersion(playlistId);
+		return {
+			playlistId: playlistId,
+			musicId: songId,
+			version: version,
+		};
+	} catch (error) {
+		if (error instanceof Prisma.PrismaClientKnownRequestError) {
+			throw new BadRequestException('Invalid data for adding music to playlist');
+		}
+		throw error;
+	}
   }
 
   async canJoinPlaylist(playlistId: number, userId: number): Promise<number> {
@@ -322,62 +347,50 @@ export class PlaylistsService {
           },
         ],
       },
-      select: {
-        id: true,
-      },
-    });
+	  include: {
+		musics: {
+			include: {
+					music: {
+						select: {
+							duration: true,
+						},
+					},
+				},
+			},
+		},
+	});
 
     if (!personnalPlaylists) {
       throw new NotFoundException('No personnal playlists found');
     }
 
-    const ret = await Promise.all(
-      personnalPlaylists.map(async (playlist) => {
-        return await this.playlist(playlist);
-      }),
-    );
-
-    return ret;
+    return personnalPlaylists.map((playlist) => ({
+		id: playlist.id,
+		title: playlist.title,
+		songs: playlist.musics.length,
+		duration: playlist.musics.reduce(
+			(sum, musics) => sum + musics.music.duration,
+			0,
+		),
+		}));
   }
 
   async canAccess(playlistId: number, userId: number): Promise<boolean> {
 	const playlist = await this.prisma.playlist.findUnique({
 		where: {
 		  id: playlistId,
-		OR: {
-			userId: userId,
-			playlistships: {
+		OR: [
+			{ userId },
+			{playlistships: {
 				some: {
 					addresseeId: userId,
 					status: 'ACCEPTED',
 				},
-			},
-		}
+			}},
+		],
 	   },
 	  select: { userId: true },
 	});
 	return playlist?.userId === userId;
-  }
-
-  async getPlaylistDetails(playlistId: number): Promise<any> {
-	const playlistDetails = await this.prisma.music.aggregate({
-	  where: {
-		playlistMusics: {
-		  some: {
-			playlistId: playlistId,
-		  },
-		},
-	  },
-	  _duration: {
-		duration: true,
-	  },
-	  _count: {
-		id: true,
-	  },
-	});
-	if (!playlistDetails) {
-	  throw new NotFoundException('Playlist not found');
-	}
-	return playlistDetails;
   }
 }

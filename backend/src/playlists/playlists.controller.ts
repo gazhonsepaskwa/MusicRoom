@@ -15,8 +15,8 @@ import { PlaylistsService } from './playlists.service';
 import { ParseSafeIntPipe } from '../common/pipe/parse_safe_int.pipe';
 import { AuthGuard } from '../auth/auth.guard';
 import { Request } from 'express';
-import { CurrentUser } from '../decorator/current-user.decorator';
-import { MusicPlaylistDto } from './dto/playlists.dto';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { MusicPlaylistDto, PlaylistListItemDto, PlaylistVersionResponseDto } from './dto/playlists.dto';
 import { ApiBody, ApiOkResponse, ApiParam } from '@nestjs/swagger';
 import {
   CreatePlaylistDto,
@@ -86,12 +86,14 @@ export class PlaylistsController {
     return this.playlistsService.delete({ id });
   }
 
+  @ApiOkResponse({ type: [PlaylistListItemDto] })
   @Get('available')
   async getAvailable(@CurrentUser() userId: number) {
     console.log('PlaylistController.available called with id:', userId);
     return await this.playlistsService.getPersonnal(userId);
   }
 
+  @ApiOkResponse({ type: PlaylistVersionResponseDto })
   @Post('add-music')
   async addMusic(@CurrentUser() userId: number, @Body() musicPlaylistDto: MusicPlaylistDto) {
 	if (await this.playlistsService.canAccess(musicPlaylistDto.playlistId, userId) === false) {
@@ -100,6 +102,7 @@ export class PlaylistsController {
 	return await this.playlistsService.addMusic(musicPlaylistDto.playlistId, musicPlaylistDto.musicId);
   }
 
+  @ApiOkResponse({ type: PlaylistVersionResponseDto })  
   @Delete('remove-music')
   async removeMusic(@CurrentUser() userId: number, @Body() musicPlaylistDto: MusicPlaylistDto) {
 	if (await this.playlistsService.canAccess(musicPlaylistDto.playlistId, userId) === false) {
@@ -108,11 +111,15 @@ export class PlaylistsController {
 	return await this.playlistsService.removeMusic(musicPlaylistDto.playlistId, musicPlaylistDto.musicId);
   }
 
+  @ApiOkResponse({ type: PlaylistDetailResponseDto })
   @Get('favorite')
   async getFavorite(@CurrentUser() userId: number) {
 	const favoritePlaylist = await this.playlistsService.playlist({
-	  userId,
-	  isDefault: true,
+	  title_userId_isDefault: {
+		title: 'Favorite',
+		userId: userId,
+		isDefault: true,
+	  },
 	});
 	return favoritePlaylist;
   }

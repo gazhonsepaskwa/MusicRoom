@@ -2,8 +2,25 @@ import { ApiProperty } from '@nestjs/swagger';
 import { MusicArtistDto } from '../../music/dto/music.dto';
 
 export class MusicPlaylistDto {
+  @ApiProperty({ example: 1 })
   musicId!: number
+
+  @ApiProperty({ example: 1 })
   playlistId!: number
+}
+
+export class PlaylistListItemDto {
+	@ApiProperty({ example: 1 })
+	id!: number
+
+	@ApiProperty({ example: 'My Playlist' })
+	title!: string
+	
+	@ApiProperty({ example: 5 })
+	songs!: number
+	
+	@ApiProperty({ example: 180000 })
+	duration!: number
 }
 
 export class CreatePlaylistDto {
@@ -113,4 +130,15 @@ export class PlaylistResponseDto {
 
   @ApiProperty({ example: '2026-01-01T00:00:00.000Z' })
   createdAt!: Date;
+}
+
+export class PlaylistVersionResponseDto {
+  @ApiProperty({ example: 1 })
+  playlistId!: number;
+
+  @ApiProperty({ example: 1 })
+  musicId!: number;
+
+  @ApiProperty({ example: 1 })
+  version!: number;
 }

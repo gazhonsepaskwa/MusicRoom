@@ -62,11 +62,15 @@ export class PlaylistsController {
   @ApiBody({ type: UpdatePlaylistDto })
   @ApiOkResponse({ type: PlaylistResponseDto })
   @Patch('update/:id')
-  updatePublicStatus(
+  async updatePublicStatus(
+	@CurrentUser() userId: number,
     @Param('id', ParseSafeIntPipe) id: number,
     @Body() body: { title?: string; status?: string; isPublic?: boolean },
   ) {
-    return this.playlistsService.update({
+	if (await this.playlistsService.canAccess(id, userId) === false) {
+		throw new BadRequestException('You are not the owner of this playlist');
+	}
+    return await this.playlistsService.update({
       where: { id },
       data: body,
     });
@@ -82,8 +86,8 @@ export class PlaylistsController {
   @ApiParam({ name: 'id', type: Number })
   @ApiOkResponse({ type: PlaylistResponseDto })
   @Delete('delete/:id')
-  delete(@Param('id', ParseSafeIntPipe) id: number) {
-    return this.playlistsService.delete({ id });
+  async delete(@CurrentUser() userId: number, @Param('id', ParseSafeIntPipe) id: number) {
+    return await this.playlistsService.delete({ id }, userId, false);
   }
 
   @ApiOkResponse({ type: [PlaylistListItemDto] })

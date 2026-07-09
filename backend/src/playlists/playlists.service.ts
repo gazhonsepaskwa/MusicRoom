@@ -110,8 +110,22 @@ export class PlaylistsService {
     }
   }
 
-  async delete(where: Prisma.playlistWhereUniqueInput) {
+  async delete(where: Prisma.playlistWhereUniqueInput, userId: number, isAdmin: boolean) {
     try {
+	  const playlist = await this.prisma.playlist.findUnique({
+		where,
+		select: { userId: true, isDefault: true },
+	  });
+
+	  if (!playlist) {
+		throw new NotFoundException('Playlist not found');
+	  }
+	  if (playlist.userId !== userId) {
+		throw new BadRequestException('You are not the owner of this playlist');
+	  }
+	  if (playlist.isDefault && !isAdmin) {
+		throw new BadRequestException('Default playlists cannot be deleted');
+	  }
       const deletedPlaylist = await this.prisma.playlist.delete({
         where,
       });

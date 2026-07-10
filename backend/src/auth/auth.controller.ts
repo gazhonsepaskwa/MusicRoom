@@ -9,6 +9,8 @@ import {
   Request,
   Query,
   Req,
+  Res,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from './auth.guard';
@@ -18,6 +20,7 @@ import { EmailDto } from './dto/email.dto';
 import { SignInDto } from './dto/signIn.dto';
 import { ApiBody, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { AuthMessageResponseDto, AuthTokenResponseDto, UserProfileResponseDto } from './dto/auth-response.dto';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -49,11 +52,28 @@ export class AuthController {
   }
 
   @ApiQuery({ name: 'verificationToken', required: false })
-  @ApiOkResponse({ type: AuthTokenResponseDto })
   @Get('verify')
   @Public()
-  verifyEmail(@Query('verificationToken') token?: string) {
-    if (token) return this.authService.confirmEmail(token);
+  async verifyEmail(@Res() res: Response, @Query('verificationToken') token?: string) {
+    if (!token) {
+		throw new UnauthorizedException(
+			'Missing verification token.',
+		);
+	}
+	await this.authService.confirmEmail(token);
+	
+	// return res.redirect(`${process.env.APP_SCHEME}://auth/callback?verificationToken=` + token);
+  }
+
+  @Post('callback')
+  @Public()
+  async callback(@Query('verificationToken') token?: string) {
+	if (!token) {
+		throw new UnauthorizedException(
+			'Missing verification token.',
+		);
+	}
+	return await this.authService.loginFromVerificationToken(token);
   }
 
   @ApiBody({ type: EmailDto })

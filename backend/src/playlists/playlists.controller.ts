@@ -77,7 +77,7 @@ export class PlaylistsController {
   @ApiOkResponse({ type: PlaylistResponseDto })
   @Delete('delete/:id')
   async delete(@CurrentUser() userId: number, @Param('id', ParseSafeIntPipe) id: number) {
-    return await this.playlistsService.delete({ id }, userId, false);
+    return await this.playlistsService.delete({ id }, userId);
   }
 
   @ApiOkResponse({ type: [PlaylistListItemDto] })

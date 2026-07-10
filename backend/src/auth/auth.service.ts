@@ -57,11 +57,14 @@ export class AuthService {
 
   async signUp(username: string, password: string, email: string) {
     const userByEmail = await this.usersService.user({ email });
-    if (userByEmail)
+    if (userByEmail && userByEmail.verifiedEmail)
       throw new UnprocessableEntityException(
         `email already used: ${email}`,
         'Invalid Account Creation',
       );
+	else if (userByEmail && !userByEmail.verifiedEmail) {
+		await this.usersService.deleteUser({ id: userByEmail.id });
+	}
     const userByUsername = await this.usersService.user({ username });
     if (userByUsername)
       throw new UnprocessableEntityException(
@@ -80,7 +83,7 @@ export class AuthService {
     this.sendVerificationEmail(user.email, user.id);
     return {
       message:
-        'Please Check your mailbox for the verfication email we have send you (you have 1 hour)',
+        'Please Check your mailbox for the verfication email we have send you (you have 10 minutes)',
     };
   }
 
@@ -105,7 +108,7 @@ export class AuthService {
         purpose: 'verify-email',
       },
       {
-        expiresIn: '1h',
+        expiresIn: '10min',
       },
     );
 	const domainName = process.env.DOMAIN_NAME == 'localhost' ? process.env.DOMAIN_NAME + (process.env.EXTERNAL_PORT ? `:${process.env.EXTERNAL_PORT}` : '') : process.env.DOMAIN_NAME;
@@ -119,30 +122,46 @@ export class AuthService {
       access_token: await this.jwtService.signAsync(Payload),
     };
   }
-  async confirmEmail(token: string): Promise<{ access_token: string }> {
+  async confirmEmail(token: string) {
     try {
       const payload = await this.jwtService.verifyAsync(token);
-      const user = await this.usersService.updateUser({
-        where: { id: payload.sub },
-        data: { verifiedEmail: true },
-      });
-	  await this.playlistsService.create({
-		  isPublic: false, 
-		  title: "Favorite", 
-		  isDefault: true, 
-		  status: "FAVORITE",
-		  user: {
-			connect: {
-				id: +user.id,
-			},
-		}, 
+	  if ((await this.usersService.user({ id: payload.sub }))?.verifiedEmail == false) {
+		const user = await this.usersService.updateUser({
+			where: { id: payload.sub },
+			data: { verifiedEmail: true },
 		});
-      return this.generateJWToken(user);
+			await this.playlistsService.create({
+				isPublic: false, 
+				title: "Favorite", 
+				isDefault: true, 
+				status: "FAVORITE",
+				user: {
+				connect: {
+					id: +user.id,
+				},
+			}, 
+			});
+		}
     } catch {
       throw new UnauthorizedException(
         'The link has expired or was corrupted. The data you have Send have been deleted. Sign up again',
       );
     }
+  }
+
+  async loginFromVerificationToken(token: string): Promise<{ access_token: string }> {
+	try {
+	  const payload = await this.jwtService.verifyAsync(token);
+	  const user = await this.usersService.user({ id: payload.sub });
+	  if (!user || !user.verifiedEmail) {
+		throw new UnauthorizedException();
+	  }
+	  return this.generateJWToken(user);
+	} catch {
+	  throw new UnauthorizedException(
+		'The link has expired or was corrupted. The data you have Send have been deleted. Sign up again',
+	  );
+	}
   }
 
   async validateOAuthLogin(profile: any): Promise<any> {
@@ -159,5 +178,10 @@ export class AuthService {
     }
 
     return this.generateJWToken(user);
+  }
+
+  async deleteUserAccount(userId: number): Promise<void> {
+	await this.playlistsService.deleteAllUserPlaylists(userId);
+	await this.usersService.deleteUser({ id: userId });
   }
 }

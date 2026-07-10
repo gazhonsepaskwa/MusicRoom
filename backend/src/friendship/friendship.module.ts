@@ -3,11 +3,11 @@ import { FriendshipService } from './friendship.service';
 import { FriendshipController } from './friendship.controller';
 import { UsersModule } from '../users/users.module';
 import { NotificationsModule } from '../notifications/notifications.module';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-  imports: [UsersModule, forwardRef(() => NotificationsModule)],
-  providers: [FriendshipService, PrismaService],
+  imports: [UsersModule, forwardRef(() => NotificationsModule), PrismaModule],
+  providers: [FriendshipService],
   controllers: [FriendshipController],
   exports: [FriendshipService],
 })

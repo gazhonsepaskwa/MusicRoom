@@ -28,6 +28,23 @@ model user {
   sentFriendships     friendship[] @relation("Requester")
   receivedFriendships friendship[] @relation("Addressee")
   playlistships playlistship[]
+  firstPreferredMusicId Int?
+  firstPreferredMusic music? @relation("FirstPreferredMusic", fields: [firstPreferredMusicId], references: [id])
+  secondPreferredMusicId Int?
+  secondPreferredMusic music? @relation("SecondPreferredMusic", fields: [secondPreferredMusicId], references: [id])
+  thirdPreferredMusicId Int?
+  thirdPreferredMusic music? @relation("ThirdPreferredMusic", fields: [thirdPreferredMusicId], references: [id])
+
+  showAddress			visibilityStatus @default(PRIVATE)
+  showFriends			visibilityStatus @default(PUBLIC)
+  showCreatedPlaylist	visibilityStatus @default(PUBLIC)
+  showInvitedPlaylist	visibilityStatus @default(PUBLIC)
+}
+
+enum visibilityStatus {
+	PUBLIC
+	FRIEND
+	PRIVATE
 }
 
 enum invitationStatus {
@@ -116,12 +133,17 @@ model music {
   duration   Int
   createdAt  DateTime @default(now())
   albumIndex Int
+  lyrics     String?
 
   albumId Int
   album   album @relation(fields: [albumId], references: [id], onDelete: Cascade)
 
   playlistMusics  playlistMusic[] @relation("MusicToPlaylistMusic")
   artists artist[]
+
+  preferredAsFirstBy user[] @relation("FirstPreferredMusic")
+  preferredAsSecondBy user[] @relation("SecondPreferredMusic")
+  preferredAsThirdBy user[] @relation("ThirdPreferredMusic")
 
   @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, name: "Music_title_trgm_idx")
 }

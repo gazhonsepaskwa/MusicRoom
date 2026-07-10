@@ -3,6 +3,8 @@ import { FriendshipService } from './friendship.service';
 import { friendReqAnswerDto, friendRequestDto } from './dto/friendRequest.dto';
 import { invitationStatus } from '../../generated/prisma/enums';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
+import { FriendshipResponseDto } from './dto/friendship-response.dto';
 
 @Controller('friendship')
 export class FriendshipController {
@@ -10,6 +12,8 @@ export class FriendshipController {
 		private readonly friendshipService: FriendshipService,
 	) {}
 
+	@ApiBody({ type: friendRequestDto })
+	@ApiOkResponse({ type: FriendshipResponseDto })
 	@Post('send-friend-request')
 	async sendFriendRequest(
 		@CurrentUser() userId: number,
@@ -23,6 +27,8 @@ export class FriendshipController {
 		return {message: "Friend Request Send!"};
 	}
 
+	@ApiBody({ type: friendReqAnswerDto })
+	@ApiOkResponse({ type: FriendshipResponseDto })
 	@Post('answer-friend-request')
 	async answerFriendRequest(
 		@CurrentUser() userId: number,
@@ -35,6 +41,7 @@ export class FriendshipController {
 		}
 	}
 
+	@ApiOkResponse({ type: [FriendshipResponseDto] })
 	@Get('friend-list')
 	async getFriendList(@CurrentUser() userId) {
 		return await this.friendshipService.getFriendRequests(userId, [invitationStatus.ACCEPTED])

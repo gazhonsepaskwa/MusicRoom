@@ -9,6 +9,7 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { jwtConstants } from './constant';
+import { UsersService } from '../users/users.service';
 // import { Observable } from 'rxjs';
 
 export const IS_PUBLIC_KEY = 'isPublic';
@@ -19,6 +20,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly reflector: Reflector,
+	private readonly usersService: UsersService
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -32,13 +34,16 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException("No JWT found.");
     }
     try {
       const payload = await this.jwtService.verifyAsync(token);
       request['user'] = payload;
+	  if (await this.usersService.user({ id: payload.sub }) === null) {
+		throw new UnauthorizedException("Invalid JWT.");
+	  }
     } catch {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException("Invalid JWT.");
     }
     return true;
   }
@@ -61,3 +66,4 @@ export class AuthGuard implements CanActivate {
     }
   }
 }
+ 

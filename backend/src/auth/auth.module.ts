@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UsersModule } from '../users/users.module';
@@ -7,6 +7,8 @@ import { jwtConstants } from './constant';
 import { MailModule } from '../mail/mail.module';
 import { PassportModule } from '@nestjs/passport';
 import { OAuthStrategy } from './oauth.strategy';
+import { AuthGuard } from './auth.guard';
+import { PlaylistsModule } from '../playlists/playlists.module';
 
 @Module({
   imports: [
@@ -18,9 +20,11 @@ import { OAuthStrategy } from './oauth.strategy';
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '31day' },
     }),
+	PlaylistsModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, OAuthStrategy],
-  exports: [AuthService]
+  providers: [AuthGuard, AuthService, OAuthStrategy],
+  exports: [AuthService, AuthGuard],
 })
 export class AuthModule {}
+  

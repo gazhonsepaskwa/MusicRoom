@@ -8,12 +8,17 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import { UserResponseDto } from './dto/user.dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   //a garder ou pas ?
+  @ApiQuery({ name: 'id', required: false, type: String })
+  @ApiQuery({ name: 'username', required: false, type: String })
+  @ApiOkResponse({ type: UserResponseDto })
   @Get()
   async getUser(
     @Query('id') id?: string,

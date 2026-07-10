@@ -61,7 +61,7 @@ export class AuthController {
 		);
 	}
 	await this.authService.confirmEmail(token);
-	
+	return this.authService.loginFromVerificationToken(token);
 	// return res.redirect(`${process.env.APP_SCHEME}://auth/callback?verificationToken=` + token);
   }
 

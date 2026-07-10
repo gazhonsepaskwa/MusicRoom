@@ -156,7 +156,7 @@ export class AuthService {
 	  if (!user || !user.verifiedEmail) {
 		throw new UnauthorizedException();
 	  }
-	  return this.generateJWToken(user);
+	  return await this.generateJWToken(user);
 	} catch {
 	  throw new UnauthorizedException(
 		'The link has expired or was corrupted. The data you have Send have been deleted. Sign up again',
@@ -177,7 +177,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    return this.generateJWToken(user);
+    return await this.generateJWToken(user);
   }
 
   async deleteUserAccount(userId: number): Promise<void> {

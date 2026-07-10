@@ -1,0 +1,15 @@
+info:
+  name: getFriendList
+  type: http
+  seq: 28
+
+http:
+  method: GET
+  url: https://localhost:8443/friendship/friend-list
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

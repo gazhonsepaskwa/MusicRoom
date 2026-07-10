@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   UnauthorizedException,
   UnprocessableEntityException,
@@ -8,6 +10,7 @@ import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from '../mail/mail.service';
+import { PlaylistsService } from '../playlists/playlists.service';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +18,8 @@ export class AuthService {
     private readonly usersService: UsersService,
     private jwtService: JwtService,
     private mailService: MailService,
+	@Inject(forwardRef(() => PlaylistsService))
+	private playlistsService: PlaylistsService,
   ) {}
 
   async signIn(
@@ -121,6 +126,17 @@ export class AuthService {
         where: { id: payload.sub },
         data: { verifiedEmail: true },
       });
+	  await this.playlistsService.create({
+		  isPublic: false, 
+		  title: "Favorite", 
+		  isDefault: true, 
+		  status: "FAVORITE",
+		  user: {
+			connect: {
+				id: +user.id,
+			},
+		}, 
+		});
       return this.generateJWToken(user);
     } catch {
       throw new UnauthorizedException(

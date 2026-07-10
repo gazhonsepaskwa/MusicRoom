@@ -35,6 +35,7 @@ _42 project where you have to make a music streaming service_
 	DB_HOST= \
 	BACKEND_PORT= \
 	EXTERNAL_PORT= \
+	ADMINER_PORT= \
 	CADDY_INTERNAL_PORT= \
 	CADDY_DOMAIN_NAME= \
 \

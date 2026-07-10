@@ -1,7 +1,7 @@
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 -- CreateEnum
-CREATE TYPE "invitationStatus" AS ENUM ('PENDING', 'ACCEPTED', 'REJECTED', 'NOTVIEWED');
+CREATE TYPE "invitationStatus" AS ENUM ('PENDING', 'ACCEPTED', 'REJECTED');
 
 -- CreateEnum
 CREATE TYPE "licenseStatus" AS ENUM ('NONE', 'TRIAL', 'EVERYTHING');
@@ -22,7 +22,7 @@ CREATE TABLE "user" (
 CREATE TABLE "friendship" (
     "requesterId" INTEGER NOT NULL,
     "addresseeId" INTEGER NOT NULL,
-    "status" "invitationStatus" NOT NULL DEFAULT 'NOTVIEWED',
+    "status" "invitationStatus" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "friendship_pkey" PRIMARY KEY ("requesterId","addresseeId")
@@ -32,7 +32,7 @@ CREATE TABLE "friendship" (
 CREATE TABLE "playlistship" (
     "addresseeId" INTEGER NOT NULL,
     "playlistId" INTEGER NOT NULL,
-    "status" "invitationStatus" NOT NULL DEFAULT 'NOTVIEWED',
+    "status" "invitationStatus" NOT NULL DEFAULT 'PENDING',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "playlistship_pkey" PRIMARY KEY ("playlistId","addresseeId")

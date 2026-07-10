@@ -5,12 +5,12 @@ CREATE TYPE "visibilityStatus" AS ENUM ('PUBLIC', 'FRIEND', 'PRIVATE');
 ALTER TABLE "music" ADD COLUMN     "lyrics" TEXT;
 
 -- AlterTable
-ALTER TABLE "user" ADD COLUMN     "address" "visibilityStatus" NOT NULL DEFAULT 'PRIVATE',
-ADD COLUMN     "createdPlaylist" "visibilityStatus" NOT NULL DEFAULT 'PUBLIC',
-ADD COLUMN     "firstPreferredMusicId" INTEGER,
-ADD COLUMN     "friends" "visibilityStatus" NOT NULL DEFAULT 'PUBLIC',
-ADD COLUMN     "invitedPlaylist" "visibilityStatus" NOT NULL DEFAULT 'PUBLIC',
+ALTER TABLE "user" ADD COLUMN     "firstPreferredMusicId" INTEGER,
 ADD COLUMN     "secondPreferredMusicId" INTEGER,
+ADD COLUMN     "showAddress" "visibilityStatus" NOT NULL DEFAULT 'PRIVATE',
+ADD COLUMN     "showCreatedPlaylist" "visibilityStatus" NOT NULL DEFAULT 'PUBLIC',
+ADD COLUMN     "showFriends" "visibilityStatus" NOT NULL DEFAULT 'PUBLIC',
+ADD COLUMN     "showInvitedPlaylist" "visibilityStatus" NOT NULL DEFAULT 'PUBLIC',
 ADD COLUMN     "thirdPreferredMusicId" INTEGER;
 
 -- AddForeignKey

@@ -87,4 +87,16 @@ export class UsersService {
       where,
     });
   }
+
+  async getUserProfile(userId: number, requesterId: number): Promise<any> {
+	const user = await this.prisma.user.findUnique({
+	  where: { id: userId },
+	  select: {
+		id: true,
+		username: true,
+		email: true,
+	  },
+	});
+	return user;
+  }
 }

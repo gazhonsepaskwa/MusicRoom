@@ -7,9 +7,11 @@ import { PlaylistsModule } from '../playlists/playlists.module';
 import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-  imports: [UsersModule,
-	PlaylistsModule, forwardRef(() => NotificationsModule),
-	PrismaModule
+	imports: [
+		PlaylistsModule, 
+		forwardRef(() => NotificationsModule),
+		forwardRef(() => UsersModule),
+		PrismaModule,
 ],
   controllers: [PlaylistshipController],
   providers: [PlaylistshipService],

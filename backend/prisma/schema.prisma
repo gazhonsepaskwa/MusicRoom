@@ -37,6 +37,7 @@ model user {
 
   showAddress			visibilityStatus @default(PRIVATE)
   showFriends			visibilityStatus @default(PUBLIC)
+  showPreferedMusics	visibilityStatus @default(PUBLIC)
   showCreatedPlaylist	visibilityStatus @default(PUBLIC)
   showInvitedPlaylist	visibilityStatus @default(PUBLIC)
 }

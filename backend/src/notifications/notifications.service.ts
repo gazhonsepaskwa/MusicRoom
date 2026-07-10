@@ -18,6 +18,7 @@ export class NotificationsService {
 		private friendshipService: FriendshipService,
 		private websocketService: WebSocketsService,
 		private baseGateway: BaseGateway,
+		@Inject(forwardRef(() => UsersService))
 		private usersService: UsersService,
 		private pushNotification: FirebaseService
 	) {}

@@ -12,6 +12,7 @@ export class PlaylistshipService {
 		private prisma: PrismaService, 
 		@Inject(forwardRef(() => NotificationsService))
 		private notificationsService: NotificationsService,
+		@Inject(forwardRef(() => UsersService))
 		private usersService: UsersService,
 		private playlistsService: PlaylistsService
 	) {}

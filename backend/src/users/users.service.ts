@@ -1,14 +1,29 @@
 import { PrismaService } from '../prisma/prisma.service.js';
-import { user, Prisma } from '../../generated/prisma/client.js';
+import { user, Prisma, visibilityStatus } from '../../generated/prisma/client.js';
 import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  Inject,
+  forwardRef
 } from '@nestjs/common';
+import { PlaylistsService } from '../playlists/playlists.service.js';
+import { UserProfileResponseDto } from './dto/user.dto.js';
+import { FriendshipService } from '../friendship/friendship.service.js';
+
+export const VisibilityLevel: Record<visibilityStatus, number> = {
+  PRIVATE: 0,
+  FRIEND: 1,
+  PUBLIC: 2,
+};
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService,
+	private playlistsService: PlaylistsService,
+	@Inject(forwardRef(() => FriendshipService))
+	private friendshipService: FriendshipService
+  ) {}
 
   async user(
     userWhereUniqueInput: Prisma.userWhereUniqueInput,
@@ -88,15 +103,40 @@ export class UsersService {
     });
   }
 
+	showProfileItem(status: visibilityStatus, requester: visibilityStatus): boolean {
+		const levelRequired = VisibilityLevel[status];
+		const requesterlevel = VisibilityLevel[requester];
+
+		return requesterlevel <= levelRequired;
+	}
+
   async getUserProfile(userId: number, requesterId: number): Promise<any> {
-	const user = await this.prisma.user.findUnique({
-	  where: { id: userId },
-	  select: {
-		id: true,
-		username: true,
-		email: true,
-	  },
-	});
-	return user;
+	const user = await this.user({ id: userId });
+	const isFriend = await this.friendshipService.isFriend(requesterId, userId);
+	const visibilty = userId == requesterId ? visibilityStatus.PRIVATE : (isFriend ? visibilityStatus.FRIEND : visibilityStatus.PUBLIC)
+	if (!user) {
+	  throw new NotFoundException('User not found');
+	}
+	let result: UserProfileResponseDto;
+	const ownedPlaylists = await this.playlistsService.getOwned(userId, requesterId);
+	const invitedPlaylists = await this.playlistsService.getInvited(userId, requesterId);
+	const friendsCount = await this.friendshipService.getFriendsCount(userId);
+	const { ownedPlaylistsCount, invitedPlaylistsCount } = await this.playlistsService.getPlaylistCounts(userId);
+	result = { 
+		id: user.id,
+		username: user.username,
+		email: this.showProfileItem(user.showAddress, visibilty) ? user.email : null,
+		friends: this.showProfileItem(user.showFriends, visibilty) ? friendsCount : null,
+		playlists: ownedPlaylistsCount + invitedPlaylistsCount,
+		invitedPlaylistsNbr: invitedPlaylistsCount,
+		ownedPlaylistsNbr: ownedPlaylistsCount,
+		isFriend: isFriend ? true : false,
+		firstPreferedMusicId: this.showProfileItem(user.showPreferedMusics, visibilty) ? user.firstPreferredMusicId : null,
+		secondPreferedMusicId: this.showProfileItem(user.showPreferedMusics, visibilty) ? user.secondPreferredMusicId : null,
+		thirdPreferedMusicId: this.showProfileItem(user.showPreferedMusics, visibilty) ? user.thirdPreferredMusicId : null,
+		ownedPlaylists: this.showProfileItem(user.showCreatedPlaylist, visibilty) ? ownedPlaylists : null,
+		invitedPlaylists: this.showProfileItem(user.showInvitedPlaylist, visibilty) ? invitedPlaylists : null
+	};
+	return result;
   }
 }

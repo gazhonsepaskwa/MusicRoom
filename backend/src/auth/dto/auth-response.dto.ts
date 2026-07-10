@@ -10,7 +10,7 @@ export class AuthMessageResponseDto {
   message!: string;
 }
 
-export class UserProfileResponseDto {
+export class AuthProfileResponseDto {
   @ApiProperty({ example: 1 })
   id!: number;
 

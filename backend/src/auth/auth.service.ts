@@ -27,7 +27,7 @@ export class AuthService {
     pass: string,
   ): Promise<{ access_token: string }> {
     const userByUsername = await this.usersService.user({ username: username });
-    const userByEmail = await this.usersService.user({ email: username });
+    const userByEmail = await this.usersService.user({ email: username.toLowerCase() });
     const user = userByUsername ?? userByEmail;
     if (user == undefined || user.username == null)
       throw new UnprocessableEntityException(
@@ -56,7 +56,7 @@ export class AuthService {
   }
 
   async signUp(username: string, password: string, email: string) {
-    const userByEmail = await this.usersService.user({ email });
+    const userByEmail = await this.usersService.user({ email: email.toLowerCase() });
     if (userByEmail && userByEmail.verifiedEmail)
       throw new UnprocessableEntityException(
         `email already used: ${email}`,
@@ -76,7 +76,7 @@ export class AuthService {
     const user = await this.usersService.createUser({
       password: hash,
       username: username,
-      email: email,
+      email: email.toLowerCase(),
     });
     if (!user.email)
       throw new BadRequestException('Missing email for verification');

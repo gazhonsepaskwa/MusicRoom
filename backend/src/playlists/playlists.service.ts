@@ -402,6 +402,92 @@ export class PlaylistsService {
 		}));
   }
 
+  async getOwned(userId: number, requesterId: number) {
+	const ownedPlaylists = await this.prisma.playlist.findMany({
+	  where: {
+		AND: [
+		{ userId },
+		{
+			OR: [
+				{ isPublic: true },
+				{
+					playlistships: {
+						some: {
+							addresseeId: requesterId,
+							status: 'ACCEPTED',
+						},
+					},
+				},
+			],
+		}
+		]},
+		include: {
+		musics: {
+			include: {
+					music: {
+						select: {
+							duration: true,
+						},
+					},
+				},
+			},
+		},
+	});
+	return ownedPlaylists.map((playlist) => ({
+		id: playlist.id,
+		title: playlist.title,
+		songs: playlist.musics.length,
+		duration: playlist.musics.reduce(
+			(sum, musics) => sum + musics.music.duration,
+			0,
+		),
+		}));
+  }
+
+  async getInvited(userId: number, requesterId: number) {
+	const invitedPlaylists = await this.prisma.playlist.findMany({
+	  where: {
+		AND: [
+		{
+			playlistships: {
+			some: {
+				addresseeId: userId,
+				status: 'ACCEPTED',
+			},
+		},
+		},
+		{
+			playlistships: {
+			some: {
+				addresseeId: requesterId,
+				status: 'ACCEPTED',
+			},
+		},
+		}
+	  ]},
+	   include: {
+		musics: {
+			include: {
+					music: {
+						select: {
+							duration: true,
+						},
+					},
+				},
+			},
+		},
+	});
+	return invitedPlaylists.map((playlist) => ({
+		id: playlist.id,
+		title: playlist.title,
+		songs: playlist.musics.length,
+		duration: playlist.musics.reduce(
+			(sum, musics) => sum + musics.music.duration,
+			0,
+		),
+		}));
+  }
+
   async canAccess(playlistId: number, userId: number): Promise<boolean> {
 	const playlist = await this.prisma.playlist.findUnique({
 		where: {
@@ -420,4 +506,22 @@ export class PlaylistsService {
 	});
 	return playlist?.userId === userId;
   }
+
+  async getPlaylistCounts(userId: number): Promise<{ ownedPlaylistsCount: number; invitedPlaylistsCount: number }> {
+	const ownedPlaylistsCount = await this.prisma.playlist.count({
+		where: {
+			userId: userId,
+		},
+		});
+	const invitedPlaylistsCount = await this.prisma.playlist.count({
+		where: {
+			playlistships: {
+			some: {
+				addresseeId: userId,
+			},
+			},
+		},
+		});
+		return { ownedPlaylistsCount, invitedPlaylistsCount };
+	}
 }

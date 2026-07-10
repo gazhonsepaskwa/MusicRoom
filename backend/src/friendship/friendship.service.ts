@@ -9,6 +9,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 export class FriendshipService {
 	constructor(
 		private prisma: PrismaService, 
+		@Inject(forwardRef(() => UsersService))
 		private usersService: UsersService, 
 		@Inject(forwardRef(() => NotificationsService))
 		private notificationsService: NotificationsService) {}
@@ -125,5 +126,28 @@ export class FriendshipService {
 		if (!friendship)
 			throw new InternalServerErrorException("Friendship was not recognized")
 		return friendship
+	}
+
+	async isFriend(userId1: number, userId2: number): Promise<boolean> {
+		const friendship = await this.prisma.friendship.findFirst({
+			where: {
+				OR: [
+					{ requesterId: userId1, addresseeId: userId2, status: invitationStatus.ACCEPTED },
+					{ requesterId: userId2, addresseeId: userId1, status: invitationStatus.ACCEPTED },
+				],
+			},
+		});
+		return friendship !== null;
+	}
+
+	async getFriendsCount(userId: number): Promise<number> {
+		return await this.prisma.friendship.count({
+			where: {
+				OR: [
+				{ addresseeId: userId },
+				{ requesterId: userId },
+				],
+			},
+			});
 	}
 }

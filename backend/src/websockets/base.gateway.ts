@@ -8,7 +8,6 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { WebSocketsService } from './websockets.service';
-import { AuthService } from '../auth/auth.service';
 
 @WebSocketGateway({
   cors: { origin: '*' },
@@ -19,7 +18,6 @@ export class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     protected jwtService: JwtService,
     private readonly websocketsService: WebSocketsService,
-    private readonly authService: AuthService,
   ) {}
 
   async handleConnection(client: Socket) {

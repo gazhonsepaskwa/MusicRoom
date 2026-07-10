@@ -9,7 +9,9 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
-import { UserResponseDto } from './dto/user.dto';
+import { UserProfileResponseDto, UserResponseDto } from './dto/user.dto';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { ParseSafeIntPipe } from '../common/pipe/parse_safe_int.pipe';
 
 @Controller('users')
 export class UsersController {
@@ -38,5 +40,11 @@ export class UsersController {
       username: user.username,
       email: user.email,
     };
+  }
+
+  @ApiOkResponse({type: UserProfileResponseDto})
+  @Get('profile/:id')
+  async getProfile(@CurrentUser() userId: number, @Param('id', ParseSafeIntPipe) profileId: number) {
+	return await this.usersService.getUserProfile(profileId, userId);
   }
 }

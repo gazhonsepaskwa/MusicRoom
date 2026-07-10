@@ -19,7 +19,7 @@ import { NewUserDto } from './dto/newUser.dto';
 import { EmailDto } from './dto/email.dto';
 import { SignInDto } from './dto/signIn.dto';
 import { ApiBody, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
-import { AuthMessageResponseDto, AuthTokenResponseDto, UserProfileResponseDto } from './dto/auth-response.dto';
+import { AuthMessageResponseDto, AuthTokenResponseDto, AuthProfileResponseDto } from './dto/auth-response.dto';
 import { Response } from 'express';
 
 @Controller('auth')
@@ -45,7 +45,7 @@ export class AuthController {
     return this.authService.signUp(username, password, email);
   }
 
-  @ApiOkResponse({ type: UserProfileResponseDto })
+  @ApiOkResponse({ type: AuthProfileResponseDto })
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;

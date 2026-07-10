@@ -6,12 +6,15 @@ import {
   Body,
   Query,
   BadRequestException,
+  Patch,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
-import { UserProfileResponseDto, UserResponseDto } from './dto/user.dto';
+import { UserProfileResponseDto, UserResponseDto, UserUpdateDto } from './dto/user.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ParseSafeIntPipe } from '../common/pipe/parse_safe_int.pipe';
+import { profile } from 'console';
 
 @Controller('users')
 export class UsersController {
@@ -46,5 +49,18 @@ export class UsersController {
   @Get('profile/:id')
   async getProfile(@CurrentUser() userId: number, @Param('id', ParseSafeIntPipe) profileId: number) {
 	return await this.usersService.getUserProfile(profileId, userId);
+  }
+
+  @Patch('update/:id')
+  async updateProfile(
+	@CurrentUser() userId: number,
+	@Param('id', ParseSafeIntPipe) profileId: number,
+	@Body() data: UserUpdateDto)
+  {
+	if (userId != profileId)
+		throw new UnauthorizedException("You do not own this profile")
+	if (data.password)
+		data.password = await this.usersService.encryptPassword(data.password);
+	await this.usersService.updateUser({ where:{id: profileId}, data})
   }
 }

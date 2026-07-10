@@ -1,5 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PlaylistListItemDto } from '../../playlists/dto/playlists.dto';
+import { visibilityStatus } from '../../../generated/prisma/client';
+import { IsString, MinLength, MaxLength, IsAlphanumeric, IsEmail, Matches } from 'class-validator';
+
+
 
 export class UserResponseDto {
   @ApiProperty({ example: 1 })
@@ -51,4 +55,57 @@ export class UserProfileResponseDto {
 
   @ApiProperty({ type: [PlaylistListItemDto] })
   invitedPlaylists!: PlaylistListItemDto[] | null
+}
+
+export class UserUpdateDto {
+	@ApiProperty({
+		example: 'john_doe',
+		minLength: 3,
+		maxLength: 20,
+	})
+	@IsString()
+	@MinLength(3)
+	@MaxLength(20)
+	username?: string
+
+	@IsString()
+	@MinLength(8)
+	@MaxLength(30)
+	@Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&,.°§+])/,
+		{
+			message: "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character. (And a sacrifice to the coding gods)"
+		})
+	password?: string
+
+	@ApiProperty({example: 1})
+	firstPreferredMusicId?: number
+	@ApiProperty({example: 2})
+	secondPreferredMusicId?: number
+	@ApiProperty({example: 3})
+	thirdPreferredMusicId?: number
+	@ApiProperty({
+    	enum: visibilityStatus,
+    	example: visibilityStatus.PRIVATE,
+    	description: 'The new visibility status.',
+  	})
+	showAddress?: visibilityStatus
+	@ApiProperty({
+    	enum: visibilityStatus,
+    	example: visibilityStatus.PRIVATE,
+    	description: 'The new visibility status.',
+  	})
+	showCreatedPlaylist?: visibilityStatus
+	@ApiProperty({
+    	enum: visibilityStatus,
+    	example: visibilityStatus.PRIVATE,
+    	description: 'The new visibility status.',
+  	})
+	showFriends?: visibilityStatus
+	@ApiProperty({
+    	enum: visibilityStatus,
+    	example: visibilityStatus.PRIVATE,
+    	description: 'The new visibility status.',
+  	})
+	showInvitedPlaylist?: visibilityStatus
+
 }

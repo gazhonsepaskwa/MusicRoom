@@ -10,6 +10,8 @@ import {
 import { PlaylistsService } from '../playlists/playlists.service.js';
 import { UserProfileResponseDto } from './dto/user.dto.js';
 import { FriendshipService } from '../friendship/friendship.service.js';
+import * as bcrypt from 'bcrypt';
+
 
 export const VisibilityLevel: Record<visibilityStatus, number> = {
   PRIVATE: 0,
@@ -84,6 +86,11 @@ export class UsersService {
     return this.prisma.user.create({
       data,
     });
+  }
+
+  async encryptPassword(password: string): Promise<string> {
+	const salt = await bcrypt.genSalt();
+	return await bcrypt.hash(password, salt);
   }
 
   async updateUser(params: {

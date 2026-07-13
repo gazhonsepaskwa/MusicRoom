@@ -11,6 +11,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import be.nalebrun.musicroom.repositories.CredentialRepository
+import be.nalebrun.musicroom.ui.screen.ArtistUI
 import be.nalebrun.musicroom.ui.screen.AuthUi
 import be.nalebrun.musicroom.ui.screen.FavoriteUi
 import be.nalebrun.musicroom.ui.screen.FriendsUi

@@ -108,4 +108,11 @@ export class UserUpdateDto {
   	})
 	showInvitedPlaylist?: visibilityStatus
 
+	@ApiProperty({
+    	enum: visibilityStatus,
+    	example: visibilityStatus.PRIVATE,
+    	description: 'The new visibility status.',
+  	})
+	showPreferedMusics: visibilityStatus
+
 }

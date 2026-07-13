@@ -51,16 +51,13 @@ export class UsersController {
 	return await this.usersService.getUserProfile(profileId, userId);
   }
 
-  @Patch('update/:id')
+  @Patch('update')
   async updateProfile(
 	@CurrentUser() userId: number,
-	@Param('id', ParseSafeIntPipe) profileId: number,
 	@Body() data: UserUpdateDto)
   {
-	if (userId != profileId)
-		throw new UnauthorizedException("You do not own this profile")
 	if (data.password)
 		data.password = await this.usersService.encryptPassword(data.password);
-	await this.usersService.updateUser({ where:{id: profileId}, data})
+	await this.usersService.updateUser({ where:{id: userId}, data})
   }
 }

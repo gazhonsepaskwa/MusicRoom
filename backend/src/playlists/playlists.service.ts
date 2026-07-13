@@ -409,6 +409,7 @@ export class PlaylistsService {
 		{ userId },
 		{
 			OR: [
+				{ userId },
 				{ isPublic: true },
 				{
 					playlistships: {

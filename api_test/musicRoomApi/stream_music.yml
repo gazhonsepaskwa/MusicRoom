@@ -1,7 +1,7 @@
 info:
   name: stream_music
   type: http
-  seq: 20
+  seq: 14
 
 http:
   method: GET

@@ -7,6 +7,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
+import { user } from '../../generated/prisma/client.js';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from '../mail/mail.service';
@@ -42,13 +43,7 @@ export class AuthService {
       throw new UnprocessableEntityException(
         'Connect with your google account and change your password!',
       );
-    const hash = await bcrypt.compare(pass, user?.password);
-    if (hash == false) {
-      throw new UnprocessableEntityException(
-        'Incorrect Password or User',
-        'Invalid Log In Attempt ',
-      );
-    }
+    this.confirmPassword(user, pass);
     const payload = { sub: user.id, username: user.username };
     return {
       access_token: await this.jwtService.signAsync(payload),
@@ -85,6 +80,21 @@ export class AuthService {
       message:
         'Please Check your mailbox for the verfication email we have send you (you have 10 minutes)',
     };
+  }
+
+  async confirmPassword(user: user, password: string) {
+	if (!user.password)
+      throw new UnprocessableEntityException(
+        'Incorrect Password or User',
+        'Invalid Attempt ',
+      );
+	const hash = await bcrypt.compare(password, user?.password);
+    if (hash == false) {
+      throw new UnprocessableEntityException(
+        'Incorrect Password or User',
+        'Invalid Attempt ',
+      );
+    }
   }
 
   async getUserFromJWT(token: string) {

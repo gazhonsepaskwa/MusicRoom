@@ -15,16 +15,20 @@ import {
 import { AuthService } from './auth.service';
 import { Public } from './auth.guard';
 import { AuthGuard } from '@nestjs/passport';
-import { NewUserDto } from './dto/newUser.dto';
+import { DeleteAccountDto, NewUserDto } from './dto/newUser.dto';
 import { EmailDto } from './dto/email.dto';
 import { SignInDto } from './dto/signIn.dto';
 import { ApiBody, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { AuthMessageResponseDto, AuthTokenResponseDto, AuthProfileResponseDto } from './dto/auth-response.dto';
 import { Response } from 'express';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { UsersService } from '../users/users.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService,
+	private usersService: UsersService,
+  ) {}
 
   @ApiBody({ type: SignInDto })
   @ApiOkResponse({ type: AuthTokenResponseDto })
@@ -95,5 +99,12 @@ export class AuthController {
   async oauthCallback(@Req() req) {
     const user = req.user;
     return this.authService.validateOAuthLogin(user);
+  }
+
+  @Post('delete-account')
+  async deleteAccount(@CurrentUser() userId: number, @Body() data: DeleteAccountDto) {
+	const user = (await this.usersService.user({id: userId}))!
+	await this.authService.confirmPassword(user, data.password);
+	return await this.usersService.deleteUser({id: userId});
   }
 }

@@ -1,7 +1,7 @@
 info:
   name: SendFriendRequest
   type: http
-  seq: 22
+  seq: 18
 
 http:
   method: POST

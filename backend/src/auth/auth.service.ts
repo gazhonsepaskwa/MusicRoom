@@ -126,7 +126,7 @@ export class AuthService {
     this.mailService.sendVerificationEmail(email, link);
   }
 
-  async generateJWToken(user: any): Promise<{ access_token: string }> {
+  async generateJWToken(user: user): Promise<{ access_token: string }> {
     const Payload = { sub: user.id, username: user.username };
     return {
       access_token: await this.jwtService.signAsync(Payload),

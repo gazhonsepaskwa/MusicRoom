@@ -8,7 +8,7 @@ import {
   forwardRef
 } from '@nestjs/common';
 import { PlaylistsService } from '../playlists/playlists.service.js';
-import { UserProfileResponseDto } from './dto/user.dto.js';
+import { UserProfileResponseDto, UserResponseDto } from './dto/user.dto.js';
 import { FriendshipService } from '../friendship/friendship.service.js';
 import * as bcrypt from 'bcrypt';
 
@@ -104,9 +104,14 @@ export class UsersService {
     });
   }
 
-  async deleteUser(where: Prisma.userWhereUniqueInput): Promise<user> {
-    return this.prisma.user.delete({
+  async deleteUser(where: Prisma.userWhereUniqueInput): Promise<UserResponseDto> {
+    return await this.prisma.user.delete({
       where,
+	  select: {
+		id: true,
+		username: true,
+		email: true
+	  }
     });
   }
 

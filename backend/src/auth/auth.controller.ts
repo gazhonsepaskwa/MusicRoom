@@ -23,6 +23,7 @@ import { AuthMessageResponseDto, AuthTokenResponseDto, AuthProfileResponseDto } 
 import { Response } from 'express';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UsersService } from '../users/users.service';
+import { UserResponseDto } from '../users/dto/user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -101,6 +102,7 @@ export class AuthController {
     return this.authService.validateOAuthLogin(user);
   }
 
+  @ApiOkResponse({type: UserResponseDto})
   @Post('delete-account')
   async deleteAccount(@CurrentUser() userId: number, @Body() data: DeleteAccountDto) {
 	const user = (await this.usersService.user({id: userId}))!

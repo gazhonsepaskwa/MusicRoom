@@ -5,17 +5,13 @@ info:
 
 http:
   method: GET
-  url: https://localhost/auth/profile
+  url: https://localhost:8443/users/profile/3
   headers:
     - name: ""
       value: ""
-  params:
-    - name: ""
-      value: ""
-      type: query
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInVzZXJuYW1lIjoibGVvIiwiaWF0IjoxNzgyNzQ3MzkyLCJleHAiOjE3ODU0MjU3OTJ9.73g8sgEimFwzObP1nQxg8GfV0_bXIWws8S2NY2m8ShM
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInVzZXJuYW1lIjoibGVvMSIsImlhdCI6MTc4Mzk3NzkzNywiZXhwIjoxNzg2NjU2MzM3fQ.cInsMReuVDlhXswG_Z2kVEtgT3eCsuD7RE16Gv8_XYc
 
 settings:
   encodeUrl: true

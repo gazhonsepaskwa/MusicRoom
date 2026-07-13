@@ -14,9 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -26,9 +23,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import be.nalebrun.musicroom.R
-import be.nalebrun.musicroom.apiJsonStruct.responds.apiMusicJson
+import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
 import be.nalebrun.musicroom.viewmodel.MusicViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 
@@ -48,7 +44,7 @@ fun MiniPlayer() {
     }
 
     val currentSong: Int by musicViewModel.currentSong.collectAsStateWithLifecycle()
-    val musicJson: apiMusicJson by musicViewModel.music.collectAsStateWithLifecycle()
+    val musicJson: MusicJson by musicViewModel.music.collectAsStateWithLifecycle()
     val playing by musicViewModel.isPlaying.collectAsStateWithLifecycle()
 
     // on song change, fetch the info of the next song

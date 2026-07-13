@@ -53,6 +53,6 @@ fun CreateNavGraph(
         composable(route = "friends")       { FriendsUi() }
         composable(route = "settings")      { SettingsUi() }
         composable(route = "music-player")  { MusicPlayerUi() }
-        // composable(route = "search") { SearchUi(navigationViewModel) }
+        composable(route = "search")        { SearchUi() }
     }
 }

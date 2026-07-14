@@ -54,5 +54,17 @@ fun CreateNavGraph(
         composable(route = "settings")      { SettingsUi() }
         composable(route = "music-player")  { MusicPlayerUi() }
         composable(route = "search")        { SearchUi() }
+        composable(route = "artist/{id}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id")
+            // ArtistUi(id = id)
+        }
+        composable(route = "playlist/{id}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id")
+            // PlaylistUi(id = id)
+        }
+        composable(route = "album/{id}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id")
+            // AlbumUi(id = id)
+        }
     }
 }

@@ -1,6 +1,6 @@
 package be.nalebrun.musicroom.ui.screen
 
-import android.util.Log
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,9 +13,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -30,15 +33,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
 import be.nalebrun.musicroom.R
+import be.nalebrun.musicroom.apiJsonStruct.responds.SearchResponseJson
 import be.nalebrun.musicroom.ui.element.ActiveScreen
 import be.nalebrun.musicroom.ui.element.BottomScreenMenu
 import be.nalebrun.musicroom.ui.element.CustomTextField
+import be.nalebrun.musicroom.viewmodel.MusicViewModel
+import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import be.nalebrun.musicroom.viewmodel.SearchViewModel
-import androidx.compose.foundation.lazy.items
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import be.nalebrun.musicroom.apiJsonStruct.responds.SearchResponseJson
 
 enum class ResultType {
     ARTIST,
@@ -101,6 +104,7 @@ fun SearchUi() {
                             }
 
                             SearchResultCard(
+                                id = item.id,
                                 resultType = ResultType.MUSIC,
                                 title = item.title,
                                 subtitle = subtitle
@@ -108,6 +112,7 @@ fun SearchUi() {
                         }
                         is SearchResponseJson.Album -> {
                             SearchResultCard(
+                                id = item.id,
                                 resultType = ResultType.ALBUM,
                                 title = item.title,
                                 subtitle = "${item.music.size} songs"
@@ -115,6 +120,7 @@ fun SearchUi() {
                         }
                         is SearchResponseJson.Artist -> {
                             SearchResultCard(
+                                id = item.id,
                                 resultType = ResultType.ARTIST,
                                 title = item.title,
                                 subtitle = "${item.albums.size} albums"
@@ -122,6 +128,7 @@ fun SearchUi() {
                         }
                         is SearchResponseJson.User -> {
                             SearchResultCard(
+                                id = item.id,
                                 resultType = ResultType.USER,
                                 title = item.username,
                                 subtitle = ""
@@ -142,15 +149,27 @@ fun SearchUi() {
 
 /**
  * Component to display a search result
+ * @param id ID of the result
  * @param resultType Type of the result
  * @param title First line to display
  * @param subtitle Second line to display
  */
 @Composable
 fun SearchResultCard(
+    id: Int,
     resultType: ResultType,
     title: String,
-    subtitle : String
+    subtitle : String,
+    navigationViewModel: NavigationViewModel = if (LocalActivity.current != null) {
+        hiltViewModel(LocalActivity.current as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    },
+    musicViewModel: MusicViewModel = if (LocalActivity.current != null) {
+        hiltViewModel(LocalActivity.current as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
 ) {
     Row (
         horizontalArrangement = Arrangement
@@ -161,6 +180,17 @@ fun SearchResultCard(
             .background(Color.White)
             .height(50.dp)
             .fillMaxWidth()
+            .clickable(onClick = {
+               when(resultType) {
+                   // navigate
+                   ResultType.ARTIST    -> navigationViewModel.navigateTo("artist/$id")
+                   ResultType.ALBUM     -> navigationViewModel.navigateTo("album/$id")
+                   ResultType.PLAYLIST  -> navigationViewModel.navigateTo("playlist/$id")
+                   // other action
+                   ResultType.USER -> navigationViewModel.navigateTo("album/$id")
+                   ResultType.MUSIC -> navigationViewModel.navigateTo("playlist/$id")
+               }
+            })
         ,
         verticalAlignment = Alignment.CenterVertically
     ){

@@ -8,6 +8,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { WebSocketsService } from './websockets.service';
+import { AuthService } from '../auth/auth.service';
 
 @WebSocketGateway({
   cors: { origin: '*' },
@@ -18,6 +19,7 @@ export class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     protected jwtService: JwtService,
     private readonly websocketsService: WebSocketsService,
+    private readonly authService: AuthService,
   ) {}
 
   async handleConnection(client: Socket) {
@@ -27,41 +29,25 @@ export class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       let token = client.handshake.auth?.token;
       if (!token) token = client.handshake.headers.authorization;
-      console.log(client.handshake);
       if (!token) {
-        console.log('Missing token');
-        client.emit('app_error', { message: 'Missing token' });
-        client.disconnect(true);
-        return;
+        throw new Error('Token not found');
+      }
+
+      const id = await this.authService.getUserFromJWT(token);
+      if (!id) {
+        throw new Error('Invaldid token');
       }
 
       let device = client.handshake.auth?.device;
       if (!device) device = client.handshake.headers.device;
       if (!device) {
-        console.log('Missing device');
-        client.emit('app_error', { message: 'Missing device' });
-        client.disconnect(true);
-        return;
+        throw new Error('Device not found');
       }
-      if (token.startsWith('Bearer ')) {
-        token = token.slice(7, token.length);
-      }
-      const payload = await this.jwtService.verifyAsync(token);
-      if (!payload.sub) {
-        console.log('Invalid token');
-        client.emit('app_error', { message: 'Invalid token' });
-        client.disconnect(true);
-        return;
-      }
-
-      client.data.userId = payload.sub;
+      client.data.userId = id;
       client.data.deviceId = device;
-      console.log(`Client ${client.id} (userID: ${payload.sub}) connected`);
-      this.websocketsService.addSocket(
-        payload.sub.toString(),
-        client.id,
-        device,
-      );
+
+      console.log(`Client ${client.id} (userID: ${id}) connected`);
+      this.websocketsService.addSocket(id, client.id, device);
     } catch (err) {
       console.log(err);
       console.log('Auth failed');

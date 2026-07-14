@@ -11,6 +11,8 @@ import { DevicesModule } from '../devices/devices.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { WebsocketsModule } from '../websockets/websockets.module';
 import { forwardRef } from '@nestjs/common';
+import { DevicesService } from '../devices/devices.service';
+import { WebSocketsService } from '../websockets/websockets.service';
 
 @Module({
   imports: [

@@ -99,8 +99,16 @@ export class PlaylistshipService {
 				in: status,
 			};
 		}
-		return this.prisma.playlistship.findMany({
+		const playlistships = await this.prisma.playlistship.findMany({
 			where,
+			include: {
+				playlist: {
+					select: {
+						id: true,
+						name: true,
+					}
+				}
+			}
 		});
 	}
 

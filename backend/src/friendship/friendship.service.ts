@@ -2,8 +2,9 @@ import { BadRequestException, forwardRef, Inject, Injectable, InternalServerErro
 import { friendship, Prisma, invitationStatus } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
-import { friendReqAnswerDto, friendRequestDto } from './dto/friendRequest.dto';
+import { friendReqAnswerDto } from './dto/friendRequest.dto';
 import { NotificationsService } from '../notifications/notifications.service';
+import { FriendshipDto } from './dto/friendship-response.dto';
 
 @Injectable()
 export class FriendshipService {
@@ -95,22 +96,55 @@ export class FriendshipService {
 		});
 	}
 
-	async getFriendRequests(userId: number, status?: invitationStatus[]): Promise<friendship[]> {
-		const where: Prisma.friendshipWhereInput = {
-			OR: [
-					{ addresseeId: userId },
-					{ requesterId: userId },
-				],
-		};
-
+	async getFriendRequests(userId: number, status?: invitationStatus[]): Promise<FriendshipDto[]> {
+		let where: Prisma.friendshipWhereInput;
+		if (status != invitationStatus.ACCEPTED){
+			where = {
+				addresseeId: userId ,
+			};
+		}
+		else {
+			where = {
+				OR: [
+					{addresseId: userId},
+					{requesterId: userId},
+				]
+			}
+		}
 		if (status?.length) {
 			where.status = {
 				in: status,
 			};
 		}
-		return this.prisma.friendship.findMany({
+		const friendRequests = await this.prisma.friendship.findMany({
 			where,
+			include: {
+				requester: {
+					select: {
+						id: true,
+						username: true,
+					}
+				},
+				addressee:  {
+					select: {
+						id: true,
+						username: true,
+					}
+				}
+			}
 		});
+
+		return friendRequests.map((friendship) => {
+			const otherUser = friendship.requesterId == userId ? friendship.addresse : friendship.requester;
+
+			return {
+				id: friendship.id,
+				status: friendship.status,
+				otherId: otherUser.id,
+				otherUserName: otherUser.username
+			}
+		}
+		)
 	}
 
 	async answerFriendRequest(friendRequestDto: friendReqAnswerDto, receiverId: number): Promise<friendship> {

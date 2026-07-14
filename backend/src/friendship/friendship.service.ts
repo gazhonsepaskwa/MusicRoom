@@ -15,7 +15,7 @@ export class FriendshipService {
 		private notificationsService: NotificationsService) {}
 	async sendFriendRequest(senderId: number, receiverId: number): Promise<void> {
 		if (senderId === receiverId) {
-			throw new Error('Cannot send friend request to yourself');
+			throw new BadRequestException('Cannot send friend request to yourself');
 		}
 		if (await this.friendshipExists(senderId, receiverId)) {
 			throw new BadRequestException('Friendship already sent');
@@ -98,18 +98,18 @@ export class FriendshipService {
 
 	async getFriendRequests(userId: number, status?: invitationStatus[]): Promise<FriendshipDto[]> {
 		let where: Prisma.friendshipWhereInput;
-		if (status != invitationStatus.ACCEPTED){
-			where = {
-				addresseeId: userId ,
-			};
-		}
-		else {
+		if (status?.includes(invitationStatus.ACCEPTED)){
 			where = {
 				OR: [
-					{addresseId: userId},
+					{addresseeId: userId},
 					{requesterId: userId},
 				]
 			}
+		}
+		else {
+			where = {
+				addresseeId: userId ,
+			};
 		}
 		if (status?.length) {
 			where.status = {
@@ -135,13 +135,13 @@ export class FriendshipService {
 		});
 
 		return friendRequests.map((friendship) => {
-			const otherUser = friendship.requesterId == userId ? friendship.addresse : friendship.requester;
+			const otherUser = friendship.requesterId == userId ? friendship.addressee : friendship.requester;
 
 			return {
-				id: friendship.id,
 				status: friendship.status,
 				otherId: otherUser.id,
-				otherUserName: otherUser.username
+				otherUsername: otherUser.username,
+				createdAt: friendship.createdAt
 			}
 		}
 		)

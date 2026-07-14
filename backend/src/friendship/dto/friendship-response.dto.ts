@@ -8,9 +8,6 @@ export class FriendshipResponseDto {
 }
 
 export class FriendshipDto {
-	@ApiProperty({example: 42})
-	id!: number
-
 	@ApiProperty({
 		enum: invitationStatus,
 		example: invitationStatus.ACCEPTED,
@@ -22,4 +19,7 @@ export class FriendshipDto {
 
 	@ApiProperty({example: "Chuck Yesrris"})
 	otherUsername!: string
+
+	@ApiProperty({example: "2026-07-03T20:43:40.367Z"})
+	createdAt!: Date
 }

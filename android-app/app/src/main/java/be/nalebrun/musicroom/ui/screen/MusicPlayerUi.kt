@@ -153,7 +153,7 @@ fun SongProgressBar(viewModel: MusicViewModel) {
         val sliderPosition = if (songEnd > 0) songNow.toFloat() / songEnd.toFloat() else 0f
         Slider(
             value = sliderPosition,
-            onValueChange = { 
+            onValueChange = {
                 val newPosition = (it * songEnd).toLong()
                 viewModel.seekTo(newPosition)
             },

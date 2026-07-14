@@ -203,6 +203,6 @@ export class DevicesGateway {
       return;
     }
 
-    this.server.to(roomName).emit('playback_state', payload, userId);
+    this.server.to(roomName).emit('playback_state', payload, {userId: userId});
   }
 }

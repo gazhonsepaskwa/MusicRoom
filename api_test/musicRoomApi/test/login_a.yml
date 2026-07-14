@@ -1,7 +1,7 @@
 info:
-  name: login
+  name: login_a
   type: http
-  seq: 15
+  seq: 1
 
 http:
   method: POST
@@ -11,7 +11,7 @@ http:
     data: |-
       {
       "username": "player_a",
-      "password": "password_a1@",
+      "password": "Password_a1@",
       "deviceID": "device_a",
       "deviceName": "device_a"
       }

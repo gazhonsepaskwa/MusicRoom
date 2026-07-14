@@ -1,28 +1,22 @@
 info:
-  name: login
+  name: new_account_a
   type: http
-  seq: 15
+  seq: 3
 
 http:
   method: POST
-  url: https://localhost:8443/auth/login
+  url: https://localhost:8443/auth/new_account
   body:
     type: json
     data: |-
       {
       "username": "player_a",
-      "password": "password_a1@",
+      "password": "Password_a1@",
+      "email": "mail_a@a.aa",
       "deviceID": "device_a",
       "deviceName": "device_a"
       }
   auth: inherit
-
-runtime:
-  variables:
-    - name: deviceID
-      value: suefhs
-    - name: deviceName
-      value: qsd
 
 settings:
   encodeUrl: true

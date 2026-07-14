@@ -1,7 +1,7 @@
-// src/websockets/base.gateway.ts
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
@@ -21,24 +21,35 @@ export class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {}
 
   async handleConnection(client: Socket) {
+    client.onAny((event, ...args) => {
+      console.log('Event reçu:', event, args);
+    });
     try {
       let token = client.handshake.auth?.token;
       if (!token) token = client.handshake.headers.authorization;
+      console.log(client.handshake);
       if (!token) {
         console.log('Missing token');
+        client.emit('app_error', { message: 'Missing token' });
         client.disconnect(true);
         return;
       }
 
-      const device = client.handshake.auth?.device;
+      let device = client.handshake.auth?.device;
+      if (!device) device = client.handshake.headers.device;
       if (!device) {
         console.log('Missing device');
+        client.emit('app_error', { message: 'Missing device' });
         client.disconnect(true);
         return;
+      }
+      if (token.startsWith('Bearer ')) {
+        token = token.slice(7, token.length);
       }
       const payload = await this.jwtService.verifyAsync(token);
       if (!payload.sub) {
         console.log('Invalid token');
+        client.emit('app_error', { message: 'Invalid token' });
         client.disconnect(true);
         return;
       }
@@ -54,6 +65,7 @@ export class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     } catch (err) {
       console.log(err);
       console.log('Auth failed');
+      client.emit('app_error', { message: 'Auth failed' });
       client.disconnect(true);
     }
   }
@@ -81,5 +93,11 @@ export class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(socketId).emit(event, data);
 
     return true;
+  }
+
+  @SubscribeMessage('ping')
+  handlePing(client: Socket) {
+    console.log(`Ping from ${client.id}`);
+    client.emit('pong');
   }
 }

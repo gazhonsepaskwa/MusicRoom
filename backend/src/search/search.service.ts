@@ -36,6 +36,10 @@ export class SearchService {
     );
     const results: any[] = [];
 
+    await this.prisma.$executeRaw`
+      SELECT set_limit(0.1);
+    `;
+
     if (types.includes('music')) {
       const musicResults = await this.prisma.$queryRaw<
         { id: number; score: number }[]

@@ -5,10 +5,10 @@ info:
 
 http:
   method: GET
-  url: http://localhost:80/search?query=hexa&offset=0&limit=10
+  url: https://localhost:8443/search?query=ky&offset=0&limit=10
   params:
     - name: query
-      value: hexa
+      value: ky
       type: query
     - name: offset
       value: "0"

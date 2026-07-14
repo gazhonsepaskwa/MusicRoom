@@ -1,7 +1,7 @@
 info:
-  name: login
+  name: login_b
   type: http
-  seq: 15
+  seq: 4
 
 http:
   method: POST
@@ -10,10 +10,10 @@ http:
     type: json
     data: |-
       {
-      "username": "player_a",
-      "password": "password_a1@",
-      "deviceID": "device_a",
-      "deviceName": "device_a"
+      "username": "player_b",
+      "password": "Password_b1@",
+      "deviceID": "device_b",
+      "deviceName": "device_b"
       }
   auth: inherit
 

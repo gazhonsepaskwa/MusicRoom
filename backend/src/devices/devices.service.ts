@@ -130,7 +130,13 @@ export class DevicesService {
     return devices;
   }
 
-  async canConnectToDevice(userId: number, deviceId: string) {
+  async canConnectToDevice(
+    userId: number,
+    deviceId: string,
+  ): Promise<
+    | undefined
+    | { canSeek: boolean; canTogglePlayPause: boolean; canModifyMusic: boolean }
+  > {
     const deviceship = await this.prisma.deviceship.findUnique({
       where: {
         deviceId_userId: {
@@ -141,7 +147,7 @@ export class DevicesService {
     });
 
     if (!deviceship) {
-      return false;
+      return undefined;
     }
 
     if (
@@ -149,7 +155,7 @@ export class DevicesService {
       !deviceship.canSeek &&
       !deviceship.canTogglePlayPause
     ) {
-      return false;
+      return undefined;
     }
 
     return deviceship;

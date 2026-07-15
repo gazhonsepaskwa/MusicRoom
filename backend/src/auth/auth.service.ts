@@ -54,7 +54,7 @@ export class AuthService {
     const userByEmail = await this.usersService.user({ email: email.toLowerCase() });
     if (userByEmail && userByEmail.verifiedEmail)
       throw new UnprocessableEntityException(
-        `email already used: ${email}`,
+        `email already used: ${email.toLowerCase()}`,
         'Invalid Account Creation',
       );
 	else if (userByEmail && !userByEmail.verifiedEmail) {

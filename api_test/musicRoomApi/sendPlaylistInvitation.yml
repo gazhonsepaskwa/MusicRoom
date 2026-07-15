@@ -4,9 +4,18 @@ info:
   seq: 19
 
 http:
-  method: GET
+  method: POST
   url: https://localhost:8443/playlistship/send-playlist-invitation
-  auth: inherit
+  body:
+    type: json
+    data: |-
+      {
+        "playlistId": 4,
+        "addresseeId": 4
+      }
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInVzZXJuYW1lIjoibGVvIiwiaWF0IjoxNzg0MDU4MjcwLCJleHAiOjE3ODY3MzY2NzB9._QucMoFpSWMjFFDezCR_VoLUinEyKtgmXcu5BAV8G0E
 
 settings:
   encodeUrl: true

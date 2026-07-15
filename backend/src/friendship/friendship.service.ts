@@ -2,8 +2,9 @@ import { BadRequestException, forwardRef, Inject, Injectable, InternalServerErro
 import { friendship, Prisma, invitationStatus } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
-import { friendReqAnswerDto, friendRequestDto } from './dto/friendRequest.dto';
+import { friendReqAnswerDto } from './dto/friendRequest.dto';
 import { NotificationsService } from '../notifications/notifications.service';
+import { FriendshipDto } from './dto/friendship-response.dto';
 
 @Injectable()
 export class FriendshipService {
@@ -15,7 +16,7 @@ export class FriendshipService {
 		private notificationsService: NotificationsService) {}
 	async sendFriendRequest(senderId: number, receiverId: number): Promise<void> {
 		if (senderId === receiverId) {
-			throw new Error('Cannot send friend request to yourself');
+			throw new BadRequestException('Cannot send friend request to yourself');
 		}
 		if (await this.friendshipExists(senderId, receiverId)) {
 			throw new BadRequestException('Friendship already sent');
@@ -96,22 +97,55 @@ export class FriendshipService {
 		});
 	}
 
-	async getFriendRequests(userId: number, status?: invitationStatus[]): Promise<friendship[]> {
-		const where: Prisma.friendshipWhereInput = {
-			OR: [
-					{ addresseeId: userId },
-					{ requesterId: userId },
-				],
-		};
-
+	async getFriendRequests(userId: number, status?: invitationStatus[]): Promise<FriendshipDto[]> {
+		let where: Prisma.friendshipWhereInput;
+		if (status?.includes(invitationStatus.ACCEPTED)){
+			where = {
+				OR: [
+					{addresseeId: userId},
+					{requesterId: userId},
+				]
+			}
+		}
+		else {
+			where = {
+				addresseeId: userId ,
+			};
+		}
 		if (status?.length) {
 			where.status = {
 				in: status,
 			};
 		}
-		return this.prisma.friendship.findMany({
+		const friendRequests = await this.prisma.friendship.findMany({
 			where,
+			include: {
+				requester: {
+					select: {
+						id: true,
+						username: true,
+					}
+				},
+				addressee:  {
+					select: {
+						id: true,
+						username: true,
+					}
+				}
+			}
 		});
+
+		return friendRequests.map((friendship) => {
+			const otherUser = friendship.requesterId == userId ? friendship.addressee : friendship.requester;
+
+			return {
+				status: friendship.status,
+				otherId: otherUser.id,
+				otherUsername: otherUser.username,
+				createdAt: friendship.createdAt
+			}
+		}
+		)
 	}
 
 	async answerFriendRequest(friendRequestDto: friendReqAnswerDto, receiverId: number): Promise<friendship> {

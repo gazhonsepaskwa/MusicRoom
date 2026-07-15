@@ -20,9 +20,6 @@ fun FavoriteUi() {
             Text("TODO : Favorite page")
         }
         BottomScreenMenu(
-            playing = true,
-            title = "La fin de nation Glory",
-            artist = "Fuze III",
             activeScreen = ActiveScreen.FAVORITE,
         )
     }

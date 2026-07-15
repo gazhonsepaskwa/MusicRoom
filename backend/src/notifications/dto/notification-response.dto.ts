@@ -14,6 +14,12 @@ export class NotificationResponseDto {
   @ApiProperty({ example: 2, required: false })
   requesterId?: number;
 
+  @ApiProperty({ example: "Ada Likelace", required: false })
+  requesterName?: string;
+
   @ApiProperty({ example: 1, required: false })
   playlistId?: number;
+
+  @ApiProperty({ example: "Not My Playlist", required: false })
+  playlistName?: string;
 }

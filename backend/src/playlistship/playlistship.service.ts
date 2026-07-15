@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { invitationStatus, playlistship, Prisma } from '../../generated/prisma/browser';
 import { PlaylistsService } from '../playlists/playlists.service';
 import { PlaylistshipAnswerDto, PlaylistshipDto } from './dto/playlistship.dto';
+import { InvitationNotification } from './dto/playlistshipResponse.dto';
 
 @Injectable()
 export class PlaylistshipService {
@@ -21,10 +22,19 @@ export class PlaylistshipService {
 		if (await this.playlistshipExists(playlistshipDto.playlistId, playlistshipDto.addresseeId)) {
 			throw new BadRequestException('User Already has already received an invitation to the playlist');
 		}
+
+		const playlist = (await this.playlistsService.findOne({id: playlistshipDto.playlistId}))!
+		if (playlist.isPublic)
+			throw new BadRequestException('Playlist is public! No Invitaion Possible')
+		if (playlist.userId === playlistshipDto.addresseeId){
+			throw new BadRequestException('You can not invite yourself to your playlist')
+		}
+
 		await this.createPlaylistship({
 			playlistId: playlistshipDto.playlistId,
 			addresseeId: playlistshipDto.addresseeId,
 		})
+
 		const playlistName = (await this.playlistsService.findOne({id: playlistshipDto.playlistId}))?.title;
 		this.notificationsService.sendNotification(
 			playlistshipDto.addresseeId,
@@ -89,7 +99,7 @@ export class PlaylistshipService {
 		});
 	}
 
-	async getPlaylistInvitations(userId: number, status?: invitationStatus[]): Promise<playlistship[]> {
+	async getPlaylistInvitations(userId: number, status?: invitationStatus[]): Promise<InvitationNotification[]> {
 		const where: Prisma.playlistshipWhereInput = {
 			addresseeId: userId ,
 		};
@@ -99,9 +109,23 @@ export class PlaylistshipService {
 				in: status,
 			};
 		}
-		return this.prisma.playlistship.findMany({
+		const playlistships = await this.prisma.playlistship.findMany({
 			where,
+			include: {
+				playlist: {
+					select: {
+						id: true,
+						title: true,
+					}
+				}
+			}
 		});
+		return playlistships.map((playlistship) => ({
+			playlistId: playlistship.playlist.id,
+			status: playlistship.status,
+			playlistName: playlistship.playlist.title,
+			createdAt: playlistship.createdAt
+		}))
 	}
 
 	async getPlaylistUsers(id: number): Promise<playlistship[] | null>{

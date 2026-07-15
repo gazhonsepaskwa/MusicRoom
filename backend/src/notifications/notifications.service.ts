@@ -31,7 +31,8 @@ export class NotificationsService {
 			type: NotificationType.FRIEND_REQUEST,
 			createdAt: f.createdAt,
 			status: f.status,
-			requesterId: f.requesterId,
+			requesterId: f.otherId,
+			requesterName: f.otherUsername
 			})),
 
 			...playlistNotif.map((p) => ({
@@ -39,6 +40,7 @@ export class NotificationsService {
 			createdAt: p.createdAt,
 			status: p.status,
 			playlistId: p.playlistId,
+			playlistName: p.playlistName
 			})),
 		].sort(
 			(a, b) =>

@@ -151,6 +151,7 @@ export class AuthService {
 				},
 			}, 
 			});
+			return this.generateJWToken(user); // can be removed once redirect link work
 		}
     } catch {
       throw new UnauthorizedException(

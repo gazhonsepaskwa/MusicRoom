@@ -8,10 +8,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { jwtConstants } from './constant';
 import { UsersService } from '../users/users.service';
-// import { Observable } from 'rxjs';
-
 export const IS_PUBLIC_KEY = 'isPublic';
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 
@@ -39,7 +36,8 @@ export class AuthGuard implements CanActivate {
     try {
       const payload = await this.jwtService.verifyAsync(token);
       request['user'] = payload;
-	  if (await this.usersService.user({ id: payload.sub }) === null) {
+	  const user = await this.usersService.user({ id: payload.sub })
+	  if (!user || !user.verifiedEmail) {
 		throw new UnauthorizedException("Invalid JWT.");
 	  }
     } catch {

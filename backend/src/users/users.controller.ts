@@ -46,6 +46,12 @@ export class UsersController {
   }
 
   @ApiOkResponse({type: UserProfileResponseDto})
+  @Get('profile')
+  async getOwnerProfile(@CurrentUser() userId: number) {
+	return await this.usersService.getUserProfile(userId, userId);
+  }
+
+  @ApiOkResponse({type: UserProfileResponseDto})
   @Get('profile/:id')
   async getProfile(@CurrentUser() userId: number, @Param('id', ParseSafeIntPipe) profileId: number) {
 	return await this.usersService.getUserProfile(profileId, userId);

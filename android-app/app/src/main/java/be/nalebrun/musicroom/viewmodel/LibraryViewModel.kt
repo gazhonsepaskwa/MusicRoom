@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import be.nalebrun.musicroom.APIRepository
 import be.nalebrun.musicroom.IAPIRepository
 import be.nalebrun.musicroom.apiJsonStruct.responds.libraryJson
-import be.nalebrun.musicroom.apiJsonStruct.responds.libraryPlayistsJson
 import be.nalebrun.musicroom.repositories.ICredentialRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +35,8 @@ class LibraryViewModel @Inject constructor(
                 val res = Json.decodeFromString<List<libraryJson>>(response.body?.string() ?: "")
 //                response.body?.string()?.let { Log.d("LIBRARY",it) }
                 _playlists.value = res
+                Log.d("LIBRARY", "HA S BE EN CALLED")
+
             },
             onFailure = { _, _ -> }
         )

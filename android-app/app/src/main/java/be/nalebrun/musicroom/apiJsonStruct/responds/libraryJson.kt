@@ -9,7 +9,3 @@ data class libraryJson(
     val songs: Int,
     val duration: Int
 )
-@Serializable
-data class libraryPlayistsJson(
-    val playlists: List<libraryJson>
-)

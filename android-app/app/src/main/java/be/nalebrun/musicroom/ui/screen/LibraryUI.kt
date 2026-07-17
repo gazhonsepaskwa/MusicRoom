@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,7 +29,6 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.apiJsonStruct.responds.libraryJson
-import be.nalebrun.musicroom.apiJsonStruct.responds.libraryPlayistsJson
 import be.nalebrun.musicroom.ui.element.ActiveScreen
 import be.nalebrun.musicroom.ui.element.BottomScreenMenu
 import be.nalebrun.musicroom.ui.element.LibraryCard
@@ -46,7 +46,9 @@ fun LibraryUi() {
     }
 
     val playlists: List<libraryJson>? by viewModel.playlists.collectAsStateWithLifecycle()
+
     viewModel.getPlaylists()
+
 
     Column(
         modifier = Modifier
@@ -54,7 +56,7 @@ fun LibraryUi() {
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column() {
-            Text("Library", fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, fontSize = 20.sp,
+            Text("Library", fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, fontSize = 25.sp,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 10.dp))

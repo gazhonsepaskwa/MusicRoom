@@ -1,34 +1,26 @@
 package be.nalebrun.musicroom.ui.screen
 
-
-/**
- *
- *
- * Do not use, needs to be refactored
- *
- *
- */
-
-
-
-
-
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,84 +29,147 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
 import be.nalebrun.musicroom.R
+import be.nalebrun.musicroom.apiJsonStruct.responds.SearchResponseJson
+import be.nalebrun.musicroom.ui.element.ActiveScreen
+import be.nalebrun.musicroom.ui.element.BottomScreenMenu
+import be.nalebrun.musicroom.ui.element.CustomTextField
+import be.nalebrun.musicroom.viewmodel.MusicViewModel
+import be.nalebrun.musicroom.viewmodel.NavigationViewModel
+import be.nalebrun.musicroom.viewmodel.SearchViewModel
 
 enum class ResultType {
     ARTIST,
     MUSIC,
     PLAYLIST,
-    ALBUM
+    ALBUM,
+    USER
 }
 
 @Composable
 fun SearchUi() {
+    val viewModel: SearchViewModel = hiltViewModel()
+
+    val selectedFilters = remember { mutableStateListOf<String>("artist", "music", "album", "playlist", "user") }
+    var tfSearch by remember { mutableStateOf("") }
+    val results by viewModel.results.collectAsState()
+
+    // search if the search bar is updated or if a filter is edited
+    LaunchedEffect(tfSearch) {
+        viewModel.search(tfSearch, 0, 10, filters = selectedFilters)
+    }
+    LaunchedEffect(selectedFilters.size) {
+        viewModel.search(tfSearch, 0, 10, filters = selectedFilters)
+    }
+
     Column(
         modifier = Modifier
-            .padding(top = 50.dp)
-            .background(Color.White)
+            .fillMaxHeight(),
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        SearchBar()
-        SearchResultCard(
-            ResultType.MUSIC,
-            "Scared of the dark",
-            "Em Beihold ● Tales of a failed shapeshifter"
-        )
-        HorizontalDivider(thickness = 1.dp, color = Color.Gray)
-        SearchResultCard(ResultType.PLAYLIST, "Bestof '26", "nalebrun")
-        HorizontalDivider(thickness = 1.dp, color = Color.Gray)
-        SearchResultCard(ResultType.ALBUM, "Tales of a failed shapeshifter", "Em Beihold ● 11 song")
-        HorizontalDivider(thickness = 1.dp, color = Color.Gray)
-        SearchResultCard(ResultType.ARTIST, "Em Beihold", "5 albums ● 34 songs")
-    }
-}
+        Column(modifier = Modifier.weight(1f)) {
+            // search bar
+            CustomTextField("", tfSearch, { tfSearch = it })
 
-@Composable
-fun SearchBar() {
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 10.dp)
-            .clip(shape = RoundedCornerShape(99.dp))
-            .background(Color.White)
-            .border(
-                width = 2.dp,
-                color = Color.Black,
-                shape = RoundedCornerShape(99.dp)
+            Filters(
+                filters = arrayOf("artist", "music", "album", "playlist", "user"),
+                selectedFilters = selectedFilters,
+                onToggle = { filter ->
+                    if (selectedFilters.contains(filter)) {
+                        selectedFilters.remove(filter)
+                    } else {
+                        selectedFilters.add(filter)
+                    }
+                }
             )
-            .fillMaxWidth()
-    ) {
-        var text by remember { mutableStateOf("") }
 
-        TextField(
-            value = text,
-            onValueChange = { text = it },
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color.Transparent,
-                focusedContainerColor = Color.Transparent
-            ),
-            textStyle = TextStyle(fontSize = 13.sp),
-            modifier = Modifier
-                .height(45.dp)
+            LazyColumn(
+                modifier = Modifier.weight(1f)
+            ) {
+                items(results) { item ->
+                    when (item) {
+                        is SearchResponseJson.Music -> {
+                            var subtitle : String = ""
+                            item.artists.forEach { it ->
+                                if (subtitle.isEmpty()) {
+                                    subtitle += it.title
+                                } else {
+                                    subtitle += ", ${it.title}"
+                                }
+                            }
+
+                            SearchResultCard(
+                                id = item.id,
+                                resultType = ResultType.MUSIC,
+                                title = item.title,
+                                subtitle = subtitle
+                            )
+                        }
+                        is SearchResponseJson.Album -> {
+                            SearchResultCard(
+                                id = item.id,
+                                resultType = ResultType.ALBUM,
+                                title = item.title,
+                                subtitle = "${item.music.size} songs"
+                            )
+                        }
+                        is SearchResponseJson.Artist -> {
+                            SearchResultCard(
+                                id = item.id,
+                                resultType = ResultType.ARTIST,
+                                title = item.title,
+                                subtitle = "${item.albums.size} albums"
+                            )
+                        }
+                        is SearchResponseJson.User -> {
+                            SearchResultCard(
+                                id = item.id,
+                                resultType = ResultType.USER,
+                                title = item.username,
+                                subtitle = ""
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        BottomScreenMenu(
+            playing = true,
+            title = "La fin de nation Glory",
+            artist = "Fuze III",
+            activeScreen = ActiveScreen.SEARCH,
         )
     }
-    Filters(arrayOf("Artist", "Music", "Album", "Playlist", "User"))
 }
 
 /**
  * Component to display a search result
+ * @param id ID of the result
  * @param resultType Type of the result
  * @param title First line to display
  * @param subtitle Second line to display
  */
 @Composable
 fun SearchResultCard(
+    id: Int,
     resultType: ResultType,
     title: String,
-    subtitle : String
+    subtitle : String,
+    navigationViewModel: NavigationViewModel = if (LocalActivity.current != null) {
+        hiltViewModel(LocalActivity.current as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    },
+    musicViewModel: MusicViewModel = if (LocalActivity.current != null) {
+        hiltViewModel(LocalActivity.current as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
 ) {
     Row (
         horizontalArrangement = Arrangement
@@ -125,14 +180,20 @@ fun SearchResultCard(
             .background(Color.White)
             .height(50.dp)
             .fillMaxWidth()
+            .clickable(onClick = {
+               when(resultType) {
+                   // navigate
+                   ResultType.ARTIST    -> navigationViewModel.navigateTo("artist/$id")
+                   ResultType.ALBUM     -> navigationViewModel.navigateTo("album/$id")
+                   ResultType.PLAYLIST  -> navigationViewModel.navigateTo("playlist/$id")
+                   // other action
+                   ResultType.USER -> navigationViewModel.navigateTo("album/$id")
+                   ResultType.MUSIC -> navigationViewModel.navigateTo("playlist/$id")
+               }
+            })
         ,
         verticalAlignment = Alignment.CenterVertically
     ){
-//        AsyncImage(
-//            modifier = Modifier.padding(5.dp),
-//            model = "https://i.scdn.co/image/ab67616d0000b273dd3a17393ca3f47e4c523c26",
-//            contentDescription = null,
-//        )
         Image(
             modifier = Modifier
                 .padding(2.dp),
@@ -141,29 +202,44 @@ fun SearchResultCard(
                 ResultType.MUSIC -> R.drawable.note_1
                 ResultType.PLAYLIST -> R.drawable.playlist_tmp
                 ResultType.ALBUM -> R.drawable.album
+                ResultType.USER -> R.drawable.baseline_account_circle_24
             }),
             contentDescription = ""
         )
         Column (
         ) {
             Text(title, fontWeight = FontWeight.Bold)
-            Text(subtitle)
+            if (resultType != ResultType.USER) {
+                Text(subtitle)
+            }
         }
     }
 }
 
 // Filters
 @Composable
-fun Filters(filters: Array<String>) {
+fun Filters(
+    filters: Array<String>,
+    selectedFilters: List<String>,
+    onToggle: (String) -> Unit
+) {
     Column() {
         filters.toList().chunked(2).forEach { chunk ->
-            FilterRow(filters = chunk.toTypedArray())
+            FilterRow(
+                filters = chunk.toTypedArray(),
+                selectedFilters = selectedFilters,
+                onToggle = onToggle
+            )
         }
     }
 }
 
 @Composable
-fun FilterRow(filters : Array<String>) {
+fun FilterRow(
+    filters : Array<String>,
+    selectedFilters: List<String>,
+    onToggle: (String) -> Unit
+) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(2.5f.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -171,7 +247,12 @@ fun FilterRow(filters : Array<String>) {
             .padding(horizontal = 5.dp)
     ) {
         for (filter in filters) {
-            FilterButton(text = filter, modifier = Modifier.weight(1f), active = false)
+            FilterButton(
+                text = filter,
+                modifier = Modifier.weight(1f),
+                active = selectedFilters.contains(filter),
+                onClick = { onToggle(filter) }
+            )
         }
     }
 }
@@ -180,7 +261,8 @@ fun FilterRow(filters : Array<String>) {
 fun FilterButton(
     text : String,
     modifier: Modifier = Modifier,
-    active : Boolean
+    active : Boolean,
+    onClick : () -> Unit
 ) {
     Row(
         modifier = modifier
@@ -195,7 +277,8 @@ fun FilterButton(
                 true -> Color.Black
                 false -> Color.White
             })
-            .height(30.dp),
+            .height(30.dp)
+            .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -206,7 +289,8 @@ fun FilterButton(
                 false -> Color.Black
             },
             modifier = Modifier
-                .fillMaxWidth())
+                .fillMaxWidth()
+        )
     }
 }
 

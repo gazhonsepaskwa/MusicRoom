@@ -8,10 +8,6 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun BottomScreenMenu(
-    // MiniPlayer var
-    playing: Boolean,
-    title: String,
-    artist: String,
     // var for Navigation
     activeScreen: ActiveScreen
 ) {

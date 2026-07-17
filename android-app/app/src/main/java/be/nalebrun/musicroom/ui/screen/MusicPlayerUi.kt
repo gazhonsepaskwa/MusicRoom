@@ -8,10 +8,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,8 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,13 +43,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import be.nalebrun.musicroom.R
-import be.nalebrun.musicroom.apiJsonStruct.responds.apiMusicJson
 import be.nalebrun.musicroom.ui.element.PageTopBackButton
-import be.nalebrun.musicroom.viewmodel.AuthViewModel
 import be.nalebrun.musicroom.viewmodel.MusicViewModel
-import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import coil3.compose.AsyncImage
 import androidx.compose.runtime.collectAsState
+import be.nalebrun.musicroom.apiJsonStruct.responds.apiMusicJson
 
 enum class Repeat{
     NO,
@@ -159,7 +153,7 @@ fun SongProgressBar(viewModel: MusicViewModel) {
         val sliderPosition = if (songEnd > 0) songNow.toFloat() / songEnd.toFloat() else 0f
         Slider(
             value = sliderPosition,
-            onValueChange = { 
+            onValueChange = {
                 val newPosition = (it * songEnd).toLong()
                 viewModel.seekTo(newPosition)
             },

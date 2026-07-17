@@ -24,6 +24,7 @@ enum class ActiveScreen{
     LIBRARY,
     FRIENDS,
     SETTINGS,
+    SEARCH,
     NONE
 }
 
@@ -46,6 +47,7 @@ fun Navigation(
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
+        // like
         BottomScreenMenuButton(
             buttonText = "Favorite",
             buttonIcon = if (activeScreen == ActiveScreen.FAVORITE)
@@ -57,6 +59,17 @@ fun Navigation(
                 }
             }
         )
+        // search
+        BottomScreenMenuButton(
+            buttonText = "Search",
+            buttonIcon = if (activeScreen == ActiveScreen.SEARCH)
+                R.drawable.outline_saved_search_24
+            else R.drawable.outline_search_24,
+            onClick = {
+                    navigationViewModel.navigateTo("search")
+            }
+        )
+        // library
         BottomScreenMenuButton(
             buttonText = "Library",
             buttonIcon = if (activeScreen == ActiveScreen.LIBRARY)
@@ -68,6 +81,7 @@ fun Navigation(
                 }
             }
         )
+        // friends page
         BottomScreenMenuButton(
             buttonText = "Friends",
             buttonIcon = if (activeScreen == ActiveScreen.FRIENDS)
@@ -79,13 +93,14 @@ fun Navigation(
                 }
             }
         )
+        // settings
         BottomScreenMenuButton(
             buttonText = "Settings",
             buttonIcon = if (activeScreen == ActiveScreen.SETTINGS)
                 R.drawable.baseline_egg_alt_24
                 else R.drawable.outline_egg_alt_24,
             onClick = {
-                // No 'if' because will have sub screens so clicking will get back to main settings screen
+                // No reclick protection because will have sub screens so clicking will get back to main settings screen
                 navigationViewModel.navigateTo("settings")
             }
         )

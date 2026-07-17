@@ -63,10 +63,14 @@ class MusicRepository @Inject constructor(
     private var controller: MediaController?    = null
 
     // music data
-    private val _music = MutableStateFlow(apiMusicJson(id = 0, title = "", album = AlbumJson(
-        title = "",
-        images = listOf("", "", "")
-    ), duration = 0))
+    private val _music = MutableStateFlow(
+        apiMusicJson(
+            id = 0, title = "", album = AlbumJson(
+                title = "",
+                images = listOf("", "", "")
+            ), duration = 0
+        )
+    )
     override val music : StateFlow<apiMusicJson> = _music
 
     // Playing state
@@ -203,6 +207,7 @@ class MusicRepository @Inject constructor(
             .setTitle(_music.value.title)
             .setAlbumTitle(_music.value.album?.title)
             .build()
+        // TODO : add the artist and cover art
 
         val mediaItem = MediaItem.Builder()
             .setUri("https://musicroom.nalebrun.be/music/stream/$id")

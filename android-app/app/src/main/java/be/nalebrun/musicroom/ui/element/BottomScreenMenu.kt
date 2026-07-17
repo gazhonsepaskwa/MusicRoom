@@ -17,7 +17,7 @@ fun BottomScreenMenu(
 ) {
     Column() {
         HorizontalDivider(thickness = 1.dp, color = Color.Black)
-        MiniPlayer(playing = playing, title = title, artist = artist)
+        MiniPlayer()
         Navigation(activeScreen)
     }
 }

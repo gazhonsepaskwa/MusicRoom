@@ -9,8 +9,8 @@ import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 @JsonIgnoreUnknownKeys
 data class MusicJson(
     val id:       Int,
-    val title:    String,
-    val duration: Int,
+    val title:    String = "",
+    val duration: Long = 0,
     val album:    AlbumJson? = null,
     val artists:  List<ArtistJson> = emptyList()
 )

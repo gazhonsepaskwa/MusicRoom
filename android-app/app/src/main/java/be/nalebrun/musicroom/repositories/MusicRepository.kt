@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -41,12 +42,33 @@ interface IMusicRepository {
     val duration: StateFlow<Long>
     val currentSong: StateFlow<Int>
 
+
+    // music playback
+
     fun fetchMusicById(id: Int)
     fun goToNextSong()
     fun goToPreviousSong()
     fun play()
     fun pause()
     fun seekTo(newPosition: Long)
+
+
+    // Waiting list control
+
+    fun addSongToWaitingListNext(music: MusicJson)
+
+    fun addSongToWaitingListEnd(music: MusicJson)
+
+    fun removeSongFromWaitingListByMusic(music: MusicJson)
+
+    fun removeSongFromWaitingListByIndex(index: Int)
+
+    fun clearWaitingList()
+
+    fun replaceWaitingList(newWaitingList: List<MusicJson>)
+
+    // other
+    fun release()
 }
 
 @OptIn(UnstableApi::class)
@@ -81,29 +103,30 @@ class MusicRepository @Inject constructor(
     private val _duration = MutableStateFlow(0L)
     override val duration = _duration.asStateFlow()
 
-    // tmp waiting list
-    private val _waitingList = MutableStateFlow(listOf(1, 2, 5))
+    // Waiting list
+    private val _waitingList = MutableStateFlow<List<MusicJson>>(emptyList())
+    val waitingList: StateFlow<List<MusicJson>> = _waitingList
     private val _currentSongIndex = MutableStateFlow(0)
-
-    // id of the song that is playing now (guard to don't fetch 2 time the same song)
-    private var currentPlayingId: Int? = null
 
     // bool that prevent multiple setups
     private var isFirstLoad = true
 
-    // scope of coroutines
+    // scope for coroutines
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
+    // id of the song that is playing now (guard to don't fetch 2 time the same song)
+    private var currentPlayingId: Int? = null
 
     // song supposed to play now (It may be not accurate if the song is currently being fetched)
     override val currentSong: StateFlow<Int> = combine(
         _waitingList,
         _currentSongIndex
     ) { list, index ->
-        if (index in list.indices) list[index] else list.firstOrNull() ?: 0
+        if (index in list.indices) list[index].id else list.firstOrNull()?.id ?: 0
     }.stateIn(
         scope = scope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = _waitingList.value.firstOrNull() ?: 0
+        initialValue = _waitingList.value.firstOrNull()?.id ?: 0
     )
 
     // player listener
@@ -126,7 +149,7 @@ class MusicRepository @Inject constructor(
         controllerFuture.addListener({
             controller = controllerFuture.get()
             controller?.addListener(playerListener)
-        }, MoreExecutors.directExecutor()) 
+        }, MoreExecutors.directExecutor())
 
         // update current position every sec
         scope.launch {
@@ -217,7 +240,44 @@ class MusicRepository @Inject constructor(
         }
     }
 
-    fun release() {
+    override fun addSongToWaitingListEnd(music : MusicJson) {
+        _waitingList.value += music
+    }
+
+    override fun addSongToWaitingListNext(music: MusicJson) {
+        if (_waitingList.value.isNotEmpty()) {
+            val currentList = _waitingList.value.toMutableList()
+            val insertIndex = _currentSongIndex.value + 1
+            currentList.add(insertIndex, music)
+            _waitingList.value = currentList
+        } else {
+            _waitingList.value = listOf(music)
+            _currentSongIndex.value = 0
+        }
+    }
+
+    override fun removeSongFromWaitingListByMusic(music: MusicJson) {
+        val index = _waitingList.value.indexOf(music)
+        removeSongFromWaitingListByIndex(index)
+    }
+
+    override fun removeSongFromWaitingListByIndex(index: Int) {
+        val currentList = _waitingList.value.toMutableList()
+        if (index in currentList.indices) {
+            currentList.removeAt(index)
+            _waitingList.value = currentList
+        }
+    }
+
+    override fun clearWaitingList() {
+        _waitingList.value = emptyList()
+    }
+
+    override fun replaceWaitingList(newWaitingList: List<MusicJson>) {
+        _waitingList.value = newWaitingList
+    }
+
+    override fun release() {
         MediaController.releaseFuture(controllerFuture)
     }
 }

@@ -21,7 +21,11 @@ sealed class SearchResponseJson {
         val             album:      AlbumJson,
         val             artists:    List<ArtistJson>,
         override val    type:       String = "music"
-    ) : SearchResponseJson()
+    ) : SearchResponseJson() {
+        fun toMusicJson(): MusicJson {
+            return MusicJson(this.id, this.title, this.duration, this.album, this.artists)
+        }
+    }
 
     @Serializable
     @SerialName("album")

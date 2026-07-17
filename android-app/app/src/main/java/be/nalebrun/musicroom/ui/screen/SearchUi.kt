@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import be.nalebrun.musicroom.R
+import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.SearchResponseJson
 import be.nalebrun.musicroom.ui.element.ActiveScreen
 import be.nalebrun.musicroom.ui.element.BottomScreenMenu
@@ -53,7 +54,7 @@ enum class ResultType {
 
 @Composable
 fun SearchUi() {
-    val viewModel: SearchViewModel = hiltViewModel()
+    val viewModel:      SearchViewModel = hiltViewModel()
 
     val selectedFilters = remember { mutableStateListOf<String>("artist", "music", "album", "playlist", "user") }
     var tfSearch by remember { mutableStateOf("") }
@@ -104,7 +105,8 @@ fun SearchUi() {
                             }
 
                             SearchResultCard(
-                                id = item.id,
+                                id = item.id, // unused
+                                music = item.toMusicJson(),
                                 resultType = ResultType.MUSIC,
                                 title = item.title,
                                 subtitle = subtitle
@@ -113,6 +115,7 @@ fun SearchUi() {
                         is SearchResponseJson.Album -> {
                             SearchResultCard(
                                 id = item.id,
+                                music = null,
                                 resultType = ResultType.ALBUM,
                                 title = item.title,
                                 subtitle = "${item.music.size} songs"
@@ -121,6 +124,7 @@ fun SearchUi() {
                         is SearchResponseJson.Artist -> {
                             SearchResultCard(
                                 id = item.id,
+                                music = null,
                                 resultType = ResultType.ARTIST,
                                 title = item.title,
                                 subtitle = "${item.albums.size} albums"
@@ -129,6 +133,7 @@ fun SearchUi() {
                         is SearchResponseJson.User -> {
                             SearchResultCard(
                                 id = item.id,
+                                music = null,
                                 resultType = ResultType.USER,
                                 title = item.username,
                                 subtitle = ""
@@ -154,6 +159,7 @@ fun SearchUi() {
 @Composable
 fun SearchResultCard(
     id: Int,
+    music: MusicJson?,
     resultType: ResultType,
     title: String,
     subtitle : String,
@@ -180,12 +186,12 @@ fun SearchResultCard(
             .clickable(onClick = {
                when(resultType) {
                    // navigate
-                   ResultType.ARTIST    -> navigationViewModel.navigateTo("artist/$id")
-                   ResultType.ALBUM     -> navigationViewModel.navigateTo("album/$id")
-                   ResultType.PLAYLIST  -> navigationViewModel.navigateTo("playlist/$id")
+                   ResultType.ARTIST    -> navigationViewModel.navigateTo("artist/${id}")
+                   ResultType.ALBUM     -> navigationViewModel.navigateTo("album/${id}")
+                   ResultType.PLAYLIST  -> navigationViewModel.navigateTo("playlist/${id}")
                    // other action
-                   ResultType.USER -> navigationViewModel.navigateTo("album/$id")
-                   ResultType.MUSIC -> navigationViewModel.navigateTo("playlist/$id")
+                   ResultType.USER -> navigationViewModel.navigateTo("album/${id}")
+                   ResultType.MUSIC -> musicViewModel.addSongToWaitingListNext(music ?: MusicJson(-1))
                }
             })
         ,

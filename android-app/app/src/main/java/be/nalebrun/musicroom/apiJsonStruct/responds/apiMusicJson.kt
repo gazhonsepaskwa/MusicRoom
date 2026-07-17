@@ -7,7 +7,7 @@ import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 @JsonIgnoreUnknownKeys
-data class MusicJson(
+data class apiMusicJson(
     val id:       Int,
     val title:    String,
     val duration: Int,

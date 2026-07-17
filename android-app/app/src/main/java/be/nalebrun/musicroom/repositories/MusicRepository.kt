@@ -12,7 +12,7 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import be.nalebrun.musicroom.APIRepository
 import be.nalebrun.musicroom.apiJsonStruct.responds.AlbumJson
-import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
+import be.nalebrun.musicroom.apiJsonStruct.responds.apiMusicJson
 import be.nalebrun.musicroom.services.PlaybackService
 import com.google.common.util.concurrent.MoreExecutors
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -35,7 +35,7 @@ import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 
 interface IMusicRepository {
-    val music: StateFlow<MusicJson>
+    val music: StateFlow<apiMusicJson>
     val isPlaying: StateFlow<Boolean>
     val currentPosition: StateFlow<Long>
     val duration: StateFlow<Long>
@@ -63,11 +63,15 @@ class MusicRepository @Inject constructor(
     private var controller: MediaController?    = null
 
     // music data
-    private val _music = MutableStateFlow(MusicJson(id = 0, title = "", album = AlbumJson(
-        title = "",
-        images = listOf("", "", "")
-    ), duration = 0))
-    override val music : StateFlow<MusicJson> = _music
+    private val _music = MutableStateFlow(
+        apiMusicJson(
+            id = 0, title = "", album = AlbumJson(
+                title = "",
+                images = listOf("", "", "")
+            ), duration = 0
+        )
+    )
+    override val music : StateFlow<apiMusicJson> = _music
 
     // Playing state
     private val _isPlaying = MutableStateFlow(false)
@@ -167,7 +171,7 @@ class MusicRepository @Inject constructor(
                         if (response.code in 200..<300) {
                             val body = response.body?.string() ?: ""
                             scope.launch {
-                                _music.value = Json.decodeFromString<MusicJson>(body)
+                                _music.value = Json.decodeFromString<apiMusicJson>(body)
                                 currentPlayingId = id
                                 val shouldPlay = if (isFirstLoad) {
                                     isFirstLoad = false

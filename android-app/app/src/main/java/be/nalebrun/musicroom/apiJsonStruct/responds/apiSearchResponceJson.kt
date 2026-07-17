@@ -30,7 +30,7 @@ sealed class SearchResponseJson {
         val             title:      String,
         val             date:       String,
         val             images:     List<String>,
-        val             music:      List<MusicJson>,
+        val             music:      List<apiMusicJson>,
         val             artists:    List<ArtistJson>,
         override val    type:       String = "album"
     ) : SearchResponseJson()

@@ -43,11 +43,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import be.nalebrun.musicroom.R
-import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
 import be.nalebrun.musicroom.ui.element.PageTopBackButton
 import be.nalebrun.musicroom.viewmodel.MusicViewModel
 import coil3.compose.AsyncImage
 import androidx.compose.runtime.collectAsState
+import be.nalebrun.musicroom.apiJsonStruct.responds.apiMusicJson
 
 enum class Repeat{
     NO,
@@ -70,7 +70,7 @@ fun MusicPlayerUi() {
 
     var lyrics  by remember { mutableStateOf(""      ) }
 
-    val musicJson: MusicJson by viewModel.music.collectAsStateWithLifecycle()
+    val musicJson: apiMusicJson by viewModel.music.collectAsStateWithLifecycle()
 
     // on song change, fetch the info of the next song
     LaunchedEffect(currentSong) {

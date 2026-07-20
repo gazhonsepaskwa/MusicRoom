@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UsersModule } from '../users/users.module';
@@ -7,12 +7,12 @@ import { jwtConstants } from './constant';
 import { MailModule } from '../mail/mail.module';
 import { PassportModule } from '@nestjs/passport';
 import { OAuthStrategy } from './oauth.strategy';
+import { AuthGuard } from './auth.guard';
+import { PlaylistsModule } from '../playlists/playlists.module';
 import { DevicesModule } from '../devices/devices.module';
-import { PrismaService } from '../prisma/prisma.service';
 import { WebsocketsModule } from '../websockets/websockets.module';
-import { forwardRef } from '@nestjs/common';
-import { DevicesService } from '../devices/devices.service';
-import { WebSocketsService } from '../websockets/websockets.service';
+
+
 
 @Module({
   imports: [
@@ -24,11 +24,13 @@ import { WebSocketsService } from '../websockets/websockets.service';
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '31day' },
     }),
+	PlaylistsModule,
     forwardRef(() => DevicesModule),
     forwardRef(() => WebsocketsModule),
   ],
   controllers: [AuthController],
-  providers: [AuthService, OAuthStrategy, PrismaService],
-  exports: [AuthService],
+  providers: [AuthGuard, AuthService, OAuthStrategy],
+  exports: [AuthService, AuthGuard],
 })
 export class AuthModule {}
+  

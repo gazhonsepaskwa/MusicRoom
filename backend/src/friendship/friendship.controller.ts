@@ -3,6 +3,8 @@ import { FriendshipService } from './friendship.service';
 import { friendReqAnswerDto, friendRequestDto } from './dto/friendRequest.dto';
 import { invitationStatus } from '../../generated/prisma/enums';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
+import { FriendshipDto, FriendshipResponseDto } from './dto/friendship-response.dto';
 
 @Controller('friendship')
 export class FriendshipController {
@@ -10,19 +12,18 @@ export class FriendshipController {
 		private readonly friendshipService: FriendshipService,
 	) {}
 
+	@ApiBody({ type: friendRequestDto })
+	@ApiOkResponse({ type: FriendshipResponseDto })
 	@Post('send-friend-request')
 	async sendFriendRequest(
 		@CurrentUser() userId: number,
 		@Body() friendRequestDto : friendRequestDto){
-		try {
-			await this.friendshipService.sendFriendRequest(userId, friendRequestDto.receiverId);
-		}
-		catch (error){
-			return {message: error};
-		}
+		await this.friendshipService.sendFriendRequest(userId, friendRequestDto.receiverId);
 		return {message: "Friend Request Send!"};
 	}
 
+	@ApiBody({ type: friendReqAnswerDto })
+	@ApiOkResponse({ type: FriendshipResponseDto })
 	@Post('answer-friend-request')
 	async answerFriendRequest(
 		@CurrentUser() userId: number,
@@ -35,6 +36,7 @@ export class FriendshipController {
 		}
 	}
 
+	@ApiOkResponse({ type: [FriendshipDto] })
 	@Get('friend-list')
 	async getFriendList(@CurrentUser() userId) {
 		return await this.friendshipService.getFriendRequests(userId, [invitationStatus.ACCEPTED])

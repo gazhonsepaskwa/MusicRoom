@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: https://localhost/auth/login
+  url: https://localhost:8443/auth/login
   body:
     type: json
     data: |-

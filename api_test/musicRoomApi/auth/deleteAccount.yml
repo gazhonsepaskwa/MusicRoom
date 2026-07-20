@@ -1,0 +1,23 @@
+info:
+  name: deleteAccount
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: https://localhost:8443/auth/delete-account
+  body:
+    type: json
+    data: |-
+      {
+        "password": "Test123!"
+      }
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInVzZXJuYW1lIjoieGVraCIsImlhdCI6MTc4Mzk4MDU3MywiZXhwIjoxNzg2NjU4OTczfQ.iO_7hRfXM055Cb_a_GPgnV0KWrAhJ7K7J2XdR81Yoz8
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

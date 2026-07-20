@@ -1,35 +1,31 @@
 import { Module } from '@nestjs/common';
 import { SearchService } from './search.service';
 import { SearchController } from './search.controller';
-import { PrismaService } from '../prisma/prisma.service';
-import { AlbumService } from '../album/album.service';
-import { ArtistService } from '../artist/artist.service';
-import { MusicService } from '../music/music.service';
-import { PlaylistsService } from '../playlists/playlists.service';
-import { AuthService } from '../auth/auth.service';
-import { UsersService } from '../users/users.service';
-import { AuthGuard } from '../auth/auth.guard';
-import { MailService } from '../mail/mail.service';
-import { DevicesService } from '../devices/devices.service';
+import { AuthModule } from '../auth/auth.module';
+import { UsersModule } from '../users/users.module';
+import { PlaylistsModule } from '../playlists/playlists.module';
+import { AlbumModule } from '../album/album.module';
+import { ArtistModule } from '../artist/artist.module';
+import { MusicModule } from '../music/music.module';
+import { PrismaModule } from '../prisma/prisma.module';
+import { DevicesModule } from '../devices/devices.module';
 import { WebsocketsModule } from '../websockets/websockets.module';
-import { WebSocketsService } from '../websockets/websockets.service';
 
 @Module({
+  imports: [AuthModule, 
+	MusicModule, 
+	ArtistModule, 
+	AlbumModule, 
+	PlaylistsModule, 
+	UsersModule,
+	PrismaModule,
+	WebsocketsModule,
+	DevicesModule
+],
   controllers: [SearchController],
   providers: [
     SearchService,
-    PrismaService,
-    MusicService,
-    ArtistService,
-    AlbumService,
-    PlaylistsService,
-    AuthService,
-    UsersService,
-    AuthGuard,
-    MailService,
-    DevicesService,
-    WebSocketsService,
   ],
-  imports: [WebsocketsModule],
+  exports: [SearchService]
 })
 export class SearchModule {}

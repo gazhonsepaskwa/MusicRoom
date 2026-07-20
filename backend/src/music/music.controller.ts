@@ -10,11 +10,15 @@ import { MusicService } from './music.service';
 import { ParseSafeIntPipe } from '../common/pipe/parse_safe_int.pipe';
 import * as fs from 'fs';
 import { Response } from 'express';
+import { ApiOkResponse, ApiParam } from '@nestjs/swagger';
+import { MusicResponseDto } from './dto/music.dto';
 
 @Controller('music')
 export class MusicController {
   constructor(private readonly musicService: MusicService) {}
 
+  @ApiParam({ name: 'id', type: Number })
+  @ApiOkResponse({ type: MusicResponseDto })
   @Get(':id')
   getMusic(@Param('id', ParseSafeIntPipe) id: number) {
     return this.musicService.music({

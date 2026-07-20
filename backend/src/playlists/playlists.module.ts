@@ -1,12 +1,12 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { PlaylistsService } from './playlists.service';
 import { PlaylistsController } from './playlists.controller';
-import { PrismaService } from '../prisma/prisma.service';
-import { AuthGuard } from '../auth/auth.guard';
 import { PlaylistsGateway } from './playlists.gateway';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-  providers: [PlaylistsService, PrismaService, AuthGuard, PlaylistsGateway],
+  imports: [PrismaModule],
+  providers: [PlaylistsService, PlaylistsGateway],
   controllers: [PlaylistsController],
   exports: [PlaylistsService]
 })

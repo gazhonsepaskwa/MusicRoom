@@ -13,7 +13,10 @@ export interface NotificationDto {
 
   // data needed by frontend
   requesterId?: number;
+  requesterName?: string;
+
   playlistId?: number;
+  playlistName?: string;
 }
 
 export class NotificationBodyDto {

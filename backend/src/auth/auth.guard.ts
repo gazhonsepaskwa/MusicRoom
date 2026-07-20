@@ -8,9 +8,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { jwtConstants } from './constant';
-// import { Observable } from 'rxjs';
-
+import { UsersService } from '../users/users.service';
 export const IS_PUBLIC_KEY = 'isPublic';
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 
@@ -19,6 +17,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly reflector: Reflector,
+	private readonly usersService: UsersService
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -32,13 +31,17 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException("No JWT found.");
     }
     try {
       const payload = await this.jwtService.verifyAsync(token);
       request['user'] = payload;
+	  const user = await this.usersService.user({ id: payload.sub })
+	  if (!user || !user.verifiedEmail) {
+		throw new UnauthorizedException("Invalid JWT.");
+	  }
     } catch {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException("Invalid JWT.");
     }
     return true;
   }
@@ -61,3 +64,4 @@ export class AuthGuard implements CanActivate {
     }
   }
 }
+ 

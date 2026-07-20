@@ -14,45 +14,43 @@ import { FirebaseService } from './firebase/firebase.service';
 
 @Injectable()
 export class NotificationsService {
-  constructor(
-    @Inject(forwardRef(() => PlaylistshipService))
-    private playlistshipService: PlaylistshipService,
-    @Inject(forwardRef(() => FriendshipService))
-    private friendshipService: FriendshipService,
-    private websocketService: WebSocketsService,
-    private baseGateway: BaseGateway,
-    private usersService: UsersService,
-    private pushNotification: FirebaseService,
-  ) {}
+	constructor(
+		@Inject(forwardRef(() => PlaylistshipService))
+		private playlistshipService: PlaylistshipService,
+		 @Inject(forwardRef(() => FriendshipService))
+		private friendshipService: FriendshipService,
+		private websocketService: WebSocketsService,
+		private baseGateway: BaseGateway,
+		@Inject(forwardRef(() => UsersService))
+		private usersService: UsersService,
+		private pushNotification: FirebaseService
+	) {}
 
-  async getPendingNotifications(
-    userId: number,
-  ): Promise<NotificationDto[] | null> {
-    let friendshipNotif = await this.friendshipService.getFriendRequests(
-      userId,
-      [invitationStatus.PENDING, invitationStatus.NOTVIEWED],
-    );
-    let playlistNotif = await this.playlistshipService.getPlaylistInvitations(
-      userId,
-      [invitationStatus.PENDING, invitationStatus.NOTVIEWED],
-    );
+	async getPendingNotifications(userId: number): Promise<NotificationDto[] | null> {
+		let friendshipNotif = await this.friendshipService.getFriendRequests(userId, [invitationStatus.PENDING, invitationStatus.NOTVIEWED]);
+		let playlistNotif = await this.playlistshipService.getPlaylistInvitations(userId, [invitationStatus.PENDING, invitationStatus.NOTVIEWED]);
+		
+		return [
+			...friendshipNotif.map((f) => ({
+			type: NotificationType.FRIEND_REQUEST,
+			createdAt: f.createdAt,
+			status: f.status,
+			requesterId: f.otherId,
+			requesterName: f.otherUsername
+			})),
 
-    return [
-      ...friendshipNotif.map((f) => ({
-        type: NotificationType.FRIEND_REQUEST,
-        createdAt: f.createdAt,
-        status: f.status,
-        requesterId: f.requesterId,
-      })),
-
-      ...playlistNotif.map((p) => ({
-        type: NotificationType.PLAYLIST_INVITATION,
-        createdAt: p.createdAt,
-        status: p.status,
-        playlistId: p.playlistId,
-      })),
-    ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  }
+			...playlistNotif.map((p) => ({
+			type: NotificationType.PLAYLIST_INVITATION,
+			createdAt: p.createdAt,
+			status: p.status,
+			playlistId: p.playlistId,
+			playlistName: p.playlistName
+			})),
+		].sort(
+			(a, b) =>
+			b.createdAt.getTime() - a.createdAt.getTime(),
+		);
+	}
 
   async sendNotification(
     receiverId: number,

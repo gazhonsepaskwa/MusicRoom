@@ -10,7 +10,7 @@ import {
 import { DevicesService } from './devices.service';
 import { UpdatePermissionDto } from './dto/updatePermission.dto';
 import { UpdateNameDto } from './dto/updateName.dto';
-import { CurrentUser } from '../decorator/current-user.decorator';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @Controller('devices')
 export class DevicesController {

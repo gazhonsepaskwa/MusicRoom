@@ -1,0 +1,9 @@
+# --- HTTP Redirect (Port 80) ---
+# This replaces your Nginx server block listening on 80
+{$CADDY_DOMAIN_NAME}:{$CADDY_INTERNAL_PORT} {
+    reverse_proxy backend:3000 {
+        header_up X-Real-IP {remote_host}           # Forward Real IP (X-Real-IP)
+        header_up X-Forwarded-For {remote_host}     # Forward Proxy For (X-Forwarded-For)
+    }
+}
+

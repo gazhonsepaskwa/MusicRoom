@@ -1,5 +1,5 @@
 info:
-  name: login
+  name: get_artist_musics
   type: http
   seq: 15
 

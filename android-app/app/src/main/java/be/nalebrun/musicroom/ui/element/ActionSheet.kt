@@ -43,7 +43,7 @@ fun ActionSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
         containerColor = Color.White,
-        dragHandle = null // Remove drag handle to match Figma's clean look if desired, or keep default
+        dragHandle = null
     ) {
         Column(
             modifier = Modifier

@@ -31,7 +31,7 @@ export class BaseGateway implements OnGatewayConnection, OnGatewayDisconnect {
         throw new Error('Token not found');
       }
 
-      const id = await this.authService.getUserFromJWT(token);
+      const id = (await this.jwtService.verifyAsync(token))!.sub;
       if (!id) {
         throw new Error('Invaldid token');
       }

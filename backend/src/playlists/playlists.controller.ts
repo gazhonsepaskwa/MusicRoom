@@ -81,8 +81,7 @@ export class PlaylistsController {
   @ApiOkResponse({ type: [PlaylistListItemDto] })
   @Get('available')
   async getAvailable(@CurrentUser() userId: number) {
-    console.log('PlaylistController.available called with id:', userId);
-    return await this.playlistsService.getPersonnal(userId);
+	return await this.playlistsService.getPersonnal(userId);
   }
 
   @ApiOkResponse({ type: PlaylistVersionResponseDto })

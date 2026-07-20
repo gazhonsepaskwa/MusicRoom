@@ -24,16 +24,7 @@ export class SearchService {
     offset: number = 0,
     limit: number = 10,
   ) {
-    console.log(
-      'SearchService.search called with query:',
-      query,
-      'types:',
-      types,
-      'offset:',
-      offset,
-      'limit:',
-      limit,
-    );
+
     const results: any[] = [];
 
     await this.prisma.$executeRaw`

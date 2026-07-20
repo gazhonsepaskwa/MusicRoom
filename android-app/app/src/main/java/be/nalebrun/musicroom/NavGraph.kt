@@ -18,6 +18,9 @@ import be.nalebrun.musicroom.ui.screen.LibraryUi
 import be.nalebrun.musicroom.ui.screen.MusicPlayerUi
 import be.nalebrun.musicroom.ui.screen.SearchUi
 import be.nalebrun.musicroom.ui.screen.SettingsUi
+import be.nalebrun.musicroom.ui.screen.ProfileUi
+import be.nalebrun.musicroom.ui.screen.ServerSettingsUi
+import be.nalebrun.musicroom.ui.screen.ChangePasswordUi
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 
 /**
@@ -52,6 +55,9 @@ fun CreateNavGraph(
         composable(route = "library")       { LibraryUi() }
         composable(route = "friends")       { FriendsUi() }
         composable(route = "settings")      { SettingsUi() }
+        composable(route = "profile")       { ProfileUi() }
+        composable(route = "server-settings") { ServerSettingsUi() }
+        composable(route = "change-password") { ChangePasswordUi() }
         composable(route = "music-player")  { MusicPlayerUi() }
         composable(route = "search")        { SearchUi() }
         composable(route = "artist/{id}") { backStackEntry ->

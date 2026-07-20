@@ -1,16 +1,17 @@
 info:
-  name: get_artist_by_id
+  name: update_name
   type: http
-  seq: 8
+  seq: 2
 
 http:
-  method: GET
-  url: http://localhost:80/artist/122
+  method: PATCH
+  url: https://localhost/devices/update_name
   body:
     type: json
     data: |-
       {
-        "q" : "Kyougen - Ado"
+        "id": "1",
+        "name":"sqpij"
       }
   auth: inherit
 

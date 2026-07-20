@@ -3,10 +3,19 @@ import { ApiProperty } from '@nestjs/swagger';
 
 
 export class SignInDto {
-	@ApiProperty({})
-	@IsString()
-	username!: string;
-	@ApiProperty({})
-	@IsString()
-	password!: string;
+  @ApiProperty({example: ['john doe', 'john_doe@gmail.com']})
+  @IsString()
+  username!: string;
+  
+  @ApiProperty({})
+  @IsString()
+  password!: string;
+  
+  @ApiProperty({})
+  @IsString()
+  deviceID!: string;
+  
+  @ApiProperty({})
+  @IsString()
+  deviceName!: string;
 }

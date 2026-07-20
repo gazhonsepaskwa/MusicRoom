@@ -1,0 +1,15 @@
+info:
+  name: checkWebsocket
+  type: websocket
+  seq: 20
+
+websocket:
+  url: wss://localhost/1
+  message:
+    type: json
+    data: "{}"
+  auth: inherit
+
+settings:
+  timeout: 0
+  keepAliveInterval: 0

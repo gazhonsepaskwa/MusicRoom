@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { BaseGateway } from './base.gateway';
 import { WebSocketsService } from './websockets.service';
 import { JwtModule } from '@nestjs/jwt';
@@ -8,13 +8,16 @@ import { PrismaModule } from '../prisma/prisma.module';
 
 
 @Module({
-  imports: [JwtModule.register({
-		global: true,
-		secret: jwtConstants.secret,
-		signOptions: { expiresIn: '31day' },
-	  }),
+  imports: [
+    JwtModule.register({
+      global: true,
+      secret: jwtConstants.secret,
+      signOptions: { expiresIn: '31day' },
+    }),
+    forwardRef(() =>
 	  PrismaModule
-	],
+	),
+  ],
   providers: [BaseGateway, WebSocketsService],
   exports: [BaseGateway, WebSocketsService],
 })

@@ -1,7 +1,7 @@
 info:
-  name: new_account
+  name: new_account_b
   type: http
-  seq: 5
+  seq: 2
 
 http:
   method: POST
@@ -10,11 +10,11 @@ http:
     type: json
     data: |-
       {
-        "username": "monbeaucule",
-        "password": "esttresJolie1@",
-        "email": "aurele.josserand@gmail.comd",
-        "deviceID": "1",
-        "deviceName": "1"
+      "username": "player_b",
+      "password": "Password_b1@",
+      "email": "mail_b@b.bb",
+      "deviceID": "device_b",
+      "deviceName": "device_b"
       }
   auth: inherit
 

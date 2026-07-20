@@ -28,6 +28,8 @@ model user {
   sentFriendships     friendship[] @relation("Requester")
   receivedFriendships friendship[] @relation("Addressee")
   playlistships playlistship[]
+  deviceships deviceship[]
+
   firstPreferredMusicId Int?
   firstPreferredMusic music? @relation("FirstPreferredMusic", fields: [firstPreferredMusicId], references: [id])
   secondPreferredMusicId Int?
@@ -81,15 +83,33 @@ model playlistship {
 }
 
 model device {
-  id       Int           @id @default(autoincrement())
+  id       String           @id
   ownerId  Int
   name     String?
-  license  licenseStatus
-
+  
+  @@unique([name, ownerId])
   owner user @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+  deviceships deviceship[]
 
 }
+
+
+model deviceship {
+  deviceId String
+  userId   Int
+  createdAt DateTime @default(now())
+
+  canSeek            Boolean @default(false)
+  canTogglePlayPause Boolean @default(false)
+  canModifyMusic     Boolean @default(false)
+
+  user   user   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@id([deviceId, userId])
+}
+
 enum licenseStatus {
   NONE
   TRIAL

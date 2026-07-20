@@ -13,8 +13,6 @@ import {
 } from '@nestjs/common';
 import { PlaylistsService } from './playlists.service';
 import { ParseSafeIntPipe } from '../common/pipe/parse_safe_int.pipe';
-import { AuthGuard } from '../auth/auth.guard';
-import { Request } from 'express';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { MusicPlaylistDto, PlaylistListItemDto, PlaylistVersionResponseDto } from './dto/playlists.dto';
 import { ApiBody, ApiOkResponse, ApiParam } from '@nestjs/swagger';
@@ -83,8 +81,7 @@ export class PlaylistsController {
   @ApiOkResponse({ type: [PlaylistListItemDto] })
   @Get('available')
   async getAvailable(@CurrentUser() userId: number) {
-    console.log('PlaylistController.available called with id:', userId);
-    return await this.playlistsService.getPersonnal(userId);
+	return await this.playlistsService.getPersonnal(userId);
   }
 
   @ApiOkResponse({ type: PlaylistVersionResponseDto })

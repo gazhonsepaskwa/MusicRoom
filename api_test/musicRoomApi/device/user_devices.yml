@@ -1,11 +1,11 @@
 info:
-  name: get_profile
+  name: user_devices
   type: http
-  seq: 5
+  seq: 4
 
 http:
   method: GET
-  url: https://localhost/auth/profile
+  url: https://localhost/devices/user_devices
   auth: inherit
 
 settings:

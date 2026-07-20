@@ -18,7 +18,6 @@ class MusicViewModel @Inject constructor(
     val music = musicRepository.music
     val waitingList = musicRepository.waitingList
 
-
     // music control
     fun goToNextSong()              = musicRepository.goToNextSong()
     fun goToPreviousSong()          = musicRepository.goToPreviousSong()

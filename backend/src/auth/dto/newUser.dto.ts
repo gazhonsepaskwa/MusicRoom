@@ -34,3 +34,11 @@ export class NewUserDto {
 	@IsEmail()
 	email!: string;
 }
+
+export class DeleteAccountDto {
+	@ApiProperty({
+		example: '********',
+	})
+	@IsString()
+	password!: string;
+}

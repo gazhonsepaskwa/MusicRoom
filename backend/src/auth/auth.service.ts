@@ -7,6 +7,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
+import { user } from '../../generated/prisma/client.js';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from '../mail/mail.service';
@@ -42,13 +43,7 @@ export class AuthService {
       throw new UnprocessableEntityException(
         'Connect with your google account and change your password!',
       );
-    const hash = await bcrypt.compare(pass, user?.password);
-    if (hash == false) {
-      throw new UnprocessableEntityException(
-        'Incorrect Password or User',
-        'Invalid Log In Attempt ',
-      );
-    }
+    this.confirmPassword(user, pass);
     const payload = { sub: user.id, username: user.username };
     return {
       access_token: await this.jwtService.signAsync(payload),
@@ -57,11 +52,14 @@ export class AuthService {
 
   async signUp(username: string, password: string, email: string) {
     const userByEmail = await this.usersService.user({ email: email.toLowerCase() });
-    if (userByEmail)
+    if (userByEmail && userByEmail.verifiedEmail)
       throw new UnprocessableEntityException(
         `email already used: ${email.toLowerCase()}`,
         'Invalid Account Creation',
       );
+	else if (userByEmail && !userByEmail.verifiedEmail) {
+		await this.usersService.deleteUser({ id: userByEmail.id });
+	}
     const userByUsername = await this.usersService.user({ username });
     if (userByUsername)
       throw new UnprocessableEntityException(
@@ -80,8 +78,23 @@ export class AuthService {
     this.sendVerificationEmail(user.email, user.id);
     return {
       message:
-        'Please Check your mailbox for the verfication email we have send you (you have 1 hour)',
+        'Please Check your mailbox for the verfication email we have send you (you have 10 minutes)',
     };
+  }
+
+  async confirmPassword(user: user, password: string) {
+	if (!user.password)
+      throw new UnprocessableEntityException(
+        'Incorrect Password or User',
+        'Invalid Attempt ',
+      );
+	const hash = await bcrypt.compare(password, user?.password);
+    if (hash == false) {
+      throw new UnprocessableEntityException(
+        'Incorrect Password or User',
+        'Invalid Attempt ',
+      );
+    }
   }
 
   async getUserFromJWT(token: string) {
@@ -105,7 +118,7 @@ export class AuthService {
         purpose: 'verify-email',
       },
       {
-        expiresIn: '1h',
+        expiresIn: '10min',
       },
     );
 	const domainName = process.env.DOMAIN_NAME == 'localhost' ? process.env.DOMAIN_NAME + (process.env.EXTERNAL_PORT ? `:${process.env.EXTERNAL_PORT}` : '') : process.env.DOMAIN_NAME;
@@ -113,36 +126,53 @@ export class AuthService {
     this.mailService.sendVerificationEmail(email, link);
   }
 
-  async generateJWToken(user: any): Promise<{ access_token: string }> {
+  async generateJWToken(user: user): Promise<{ access_token: string }> {
     const Payload = { sub: user.id, username: user.username };
     return {
       access_token: await this.jwtService.signAsync(Payload),
     };
   }
-  async confirmEmail(token: string): Promise<{ access_token: string }> {
+  async confirmEmail(token: string) {
     try {
       const payload = await this.jwtService.verifyAsync(token);
-      const user = await this.usersService.updateUser({
-        where: { id: payload.sub },
-        data: { verifiedEmail: true },
-      });
-	  await this.playlistsService.create({
-		  isPublic: false, 
-		  title: "Favorite", 
-		  isDefault: true, 
-		  status: "FAVORITE",
-		  user: {
-			connect: {
-				id: +user.id,
-			},
-		}, 
+	  if ((await this.usersService.user({ id: payload.sub }))?.verifiedEmail == false) {
+		const user = await this.usersService.updateUser({
+			where: { id: payload.sub },
+			data: { verifiedEmail: true },
 		});
-      return this.generateJWToken(user);
+			await this.playlistsService.create({
+				isPublic: false, 
+				title: "Favorite", 
+				isDefault: true, 
+				status: "FAVORITE",
+				user: {
+				connect: {
+					id: +user.id,
+				},
+			}, 
+			});
+			return this.generateJWToken(user); // can be removed once redirect link work
+		}
     } catch {
       throw new UnauthorizedException(
         'The link has expired or was corrupted. The data you have Send have been deleted. Sign up again',
       );
     }
+  }
+
+  async loginFromVerificationToken(token: string): Promise<{ access_token: string }> {
+	try {
+	  const payload = await this.jwtService.verifyAsync(token);
+	  const user = await this.usersService.user({ id: payload.sub });
+	  if (!user || !user.verifiedEmail) {
+		throw new UnauthorizedException();
+	  }
+	  return await this.generateJWToken(user);
+	} catch {
+	  throw new UnauthorizedException(
+		'The link has expired or was corrupted. The data you have Send have been deleted. Sign up again',
+	  );
+	}
   }
 
   async validateOAuthLogin(profile: any): Promise<any> {
@@ -158,6 +188,11 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    return this.generateJWToken(user);
+    return await this.generateJWToken(user);
+  }
+
+  async deleteUserAccount(userId: number): Promise<void> {
+	await this.playlistsService.deleteAllUserPlaylists(userId);
+	await this.usersService.deleteUser({ id: userId });
   }
 }

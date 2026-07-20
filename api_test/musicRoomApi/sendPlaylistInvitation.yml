@@ -1,7 +1,7 @@
 info:
   name: sendPlaylistInvitation
   type: http
-  seq: 24
+  seq: 19
 
 http:
   method: POST

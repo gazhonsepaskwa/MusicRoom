@@ -1,7 +1,7 @@
 info:
   name: create_playlist
   type: http
-  seq: 21
+  seq: 15
 
 http:
   method: POST

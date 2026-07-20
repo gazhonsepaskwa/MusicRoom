@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { invitationStatus } from '../../../generated/prisma/client';
+import { invitationStatus } from '../../../generated/prisma/enums';
 
 
 export class FriendshipResponseDto {

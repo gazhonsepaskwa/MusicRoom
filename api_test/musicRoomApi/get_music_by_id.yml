@@ -1,7 +1,7 @@
 info:
   name: get_music_by_id
   type: http
-  seq: 15
+  seq: 12
 
 http:
   method: GET

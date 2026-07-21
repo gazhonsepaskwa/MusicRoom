@@ -1,5 +1,5 @@
 import { PrismaService } from '../prisma/prisma.service.js';
-import { user, Prisma, visibilityStatus } from '../../generated/prisma/client.js';
+import { user, Prisma, visibilityStatus, invitationStatus } from '../../generated/prisma/client.js';
 import {
   BadRequestException,
   Injectable,
@@ -128,7 +128,7 @@ export class UsersService {
   async getUserProfile(userId: number, requesterId: number): Promise<any> {
 	const user = await this.user({ id: userId });
 	const isFriend = await this.friendshipService.isFriend(requesterId, userId);
-	const visibilty = userId == requesterId ? visibilityStatus.PRIVATE : (isFriend ? visibilityStatus.FRIEND : visibilityStatus.PUBLIC)
+	const visibilty = userId == requesterId ? visibilityStatus.PRIVATE : (isFriend == invitationStatus.ACCEPTED ? visibilityStatus.FRIEND : visibilityStatus.PUBLIC)
 	if (!user) {
 	  throw new NotFoundException('User not found');
 	}
@@ -145,7 +145,7 @@ export class UsersService {
 		playlists: ownedPlaylistsCount + invitedPlaylistsCount,
 		invitedPlaylistsNbr: invitedPlaylistsCount,
 		ownedPlaylistsNbr: ownedPlaylistsCount,
-		isFriend: isFriend ? true : false,
+		isFriend: isFriend ? isFriend : null,
 		firstPreferedMusicId: this.showProfileItem(user.showPreferedMusics, visibilty) ? user.firstPreferredMusicId : null,
 		secondPreferedMusicId: this.showProfileItem(user.showPreferedMusics, visibilty) ? user.secondPreferredMusicId : null,
 		thirdPreferedMusicId: this.showProfileItem(user.showPreferedMusics, visibilty) ? user.thirdPreferredMusicId : null,

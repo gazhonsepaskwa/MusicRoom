@@ -162,16 +162,16 @@ export class FriendshipService {
 		return friendship
 	}
 
-	async isFriend(userId1: number, userId2: number): Promise<boolean> {
+	async isFriend(userId1: number, userId2: number): Promise<invitationStatus | undefined> {
 		const friendship = await this.prisma.friendship.findFirst({
 			where: {
 				OR: [
-					{ requesterId: userId1, addresseeId: userId2, status: invitationStatus.ACCEPTED },
-					{ requesterId: userId2, addresseeId: userId1, status: invitationStatus.ACCEPTED },
+					{ requesterId: userId1, addresseeId: userId2},
+					{ requesterId: userId2, addresseeId: userId1},
 				],
 			},
 		});
-		return friendship !== null;
+		return friendship?.status;
 	}
 
 	async getFriendsCount(userId: number): Promise<number> {
@@ -181,6 +181,7 @@ export class FriendshipService {
 				{ addresseeId: userId },
 				{ requesterId: userId },
 				],
+				status: 'ACCEPTED'
 			},
 			});
 	}

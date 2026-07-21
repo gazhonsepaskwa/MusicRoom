@@ -8,9 +8,10 @@ import {
   forwardRef
 } from '@nestjs/common';
 import { PlaylistsService } from '../playlists/playlists.service.js';
-import { UserProfileResponseDto, UserResponseDto } from './dto/user.dto.js';
+import { ChangePasswordDto, UserProfileResponseDto, UserResponseDto } from './dto/user.dto.js';
 import { FriendshipService } from '../friendship/friendship.service.js';
 import * as bcrypt from 'bcrypt';
+import { AuthService } from '../auth/auth.service.js';
 
 
 export const VisibilityLevel: Record<visibilityStatus, number> = {
@@ -24,7 +25,9 @@ export class UsersService {
   constructor(private prisma: PrismaService,
 	private playlistsService: PlaylistsService,
 	@Inject(forwardRef(() => FriendshipService))
-	private friendshipService: FriendshipService
+	private friendshipService: FriendshipService,
+	@Inject(forwardRef(() => AuthService))
+	private authService: AuthService
   ) {}
 
   async user(
@@ -150,5 +153,12 @@ export class UsersService {
 		invitedPlaylists: this.showProfileItem(user.showInvitedPlaylist, visibilty) ? invitedPlaylists : null
 	};
 	return result;
+  }
+
+  async changePassword(userId: number, data: ChangePasswordDto) {
+	const user = (await this.user({id: userId}))!;
+	await this.authService.confirmPassword(user, data.oldPassword)
+	data.newPassword = await this.encryptPassword(data.newPassword);
+	await this.updateUser({ where:{id: userId}, data: {password: data.newPassword}});
   }
 }

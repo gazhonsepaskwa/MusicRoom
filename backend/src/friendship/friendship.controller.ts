@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
 import { FriendshipService } from './friendship.service';
 import { friendReqAnswerDto, friendRequestDto } from './dto/friendRequest.dto';
 import { invitationStatus } from '../../generated/prisma/enums';
@@ -40,5 +40,18 @@ export class FriendshipController {
 	@Get('friend-list')
 	async getFriendList(@CurrentUser() userId) {
 		return await this.friendshipService.getFriendRequests(userId, [invitationStatus.ACCEPTED])
+	}
+
+	@ApiOkResponse({ type: FriendshipDto})
+	@ApiBody({ type: friendRequestDto })
+	@Delete('delete')
+	async deleteFriendship(@CurrentUser() userId: number, @Body() data: friendRequestDto) {
+		const isFriend = await this.friendshipService.isFriend(userId, data.receiverId);
+		if (isFriend !== invitationStatus.ACCEPTED)
+			throw new BadRequestException("You can not delete what does not exist", "Friendship does not Exist!");
+		await this.friendshipService.deleteFriendship(userId, data.receiverId);
+		return {
+			message: "Hello darkness my old friend..."
+		};
 	}
 }

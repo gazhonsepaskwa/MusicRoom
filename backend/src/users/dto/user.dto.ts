@@ -1,8 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { PlaylistListItemDto } from '../../playlists/dto/playlists.dto';
 import { visibilityStatus, invitationStatus } from '../../../generated/prisma/client';
-import { IsString, MinLength, MaxLength, IsAlphanumeric, IsEmail, Matches, IsEnum } from 'class-validator';
-// import { PartialType } from '@nestjs/mapped-types';
+import { IsString, MinLength, MaxLength, Matches, IsEnum } from 'class-validator';
 
 
 export class UserResponseDto {

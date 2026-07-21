@@ -47,7 +47,7 @@ export class AuthService {
       throw new UnprocessableEntityException(
         'Connect with your google account and change your password!',
       );
-    this.confirmPassword(user, pass);
+    await this.confirmPassword(user, pass);
     const payload = { sub: user.id, username: user.username };
     await this.devicesService.addDevice(user.id, deviceID, deviceName);
     return {

@@ -25,8 +25,6 @@ export class PlaylistshipService {
 		}
 
 		const playlist = (await this.playlistsService.findOne({id: playlistshipDto.playlistId}))!
-		if (playlist.isPublic)
-			throw new BadRequestException('Playlist is public! No Invitaion Possible')
 		if (playlist.userId === playlistshipDto.addresseeId){
 			throw new BadRequestException('You can not invite yourself to your playlist')
 		}

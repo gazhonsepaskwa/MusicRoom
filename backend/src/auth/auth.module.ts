@@ -16,7 +16,6 @@ import { WebsocketsModule } from '../websockets/websockets.module';
 
 @Module({
   imports: [
-    UsersModule,
     MailModule,
     PassportModule,
     JwtModule.register({
@@ -26,6 +25,7 @@ import { WebsocketsModule } from '../websockets/websockets.module';
     }),
 	PlaylistsModule,
     forwardRef(() => DevicesModule),
+	forwardRef(() =>UsersModule),
     forwardRef(() => WebsocketsModule),
   ],
   controllers: [AuthController],

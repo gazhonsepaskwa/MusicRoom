@@ -8,8 +8,8 @@ import {
   Patch,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
-import { UserProfileResponseDto, UserResponseDto, UserUpdateDto } from './dto/user.dto';
+import { ApiBody, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import { ChangePasswordDto, UserProfileResponseDto, UserResponseDto, UserUpdateDto } from './dto/user.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ParseSafeIntPipe } from '../common/pipe/parse_safe_int.pipe';
 
@@ -54,13 +54,22 @@ export class UsersController {
 	return await this.usersService.getUserProfile(profileId, userId);
   }
 
+  @ApiBody({type: UserUpdateDto})
   @Patch('update')
   async updateProfile(
 	@CurrentUser() userId: number,
 	@Body() data: UserUpdateDto)
   {
-	if (data.password)
-		data.password = await this.usersService.encryptPassword(data.password);
 	await this.usersService.updateUser({ where:{id: userId}, data})
   }
+
+  @ApiBody({type: ChangePasswordDto})
+  @Patch('change-password')
+  async changePassword(@CurrentUser() userId: number, @Body() data: ChangePasswordDto) {
+	await this.usersService.changePassword(userId, data);
+	return {
+		message: "Password changes Succesfully!",
+	}
+  }
 }
+ 

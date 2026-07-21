@@ -5,8 +5,10 @@ info:
 
 http:
   method: GET
-  url: http://localhost:80/auth/profile
-  auth: inherit
+  url: https://localhost:8443/users/profile/2
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInVzZXJuYW1lIjoibW9uYmVhdWN1bCIsImlhdCI6MTc4NDYzNjQ2OCwiZXhwIjoxNzg3MzE0ODY4fQ.92flD7l5YZanjBNt06BeLyaT7JRqcvgImSu949KU1ow
 
 settings:
   encodeUrl: true

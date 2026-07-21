@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { PlaylistListItemDto } from '../../playlists/dto/playlists.dto';
-import { visibilityStatus } from '../../../generated/prisma/client';
+import { visibilityStatus, invitationStatus } from '../../../generated/prisma/client';
 import { IsString, MinLength, MaxLength, IsAlphanumeric, IsEmail, Matches, IsEnum } from 'class-validator';
 // import { PartialType } from '@nestjs/mapped-types';
 
@@ -38,8 +38,10 @@ export class UserProfileResponseDto {
   @ApiProperty({ example: 2 })
   ownedPlaylistsNbr!: number
   
-  @ApiProperty({ example: true })
-  isFriend!: boolean
+  @ApiProperty({ 
+	enum: invitationStatus,
+	example: 'ACCEPTED' })
+  isFriend!: invitationStatus | null
 
   @ApiProperty({ example: 12 })
   firstPreferedMusicId!: number | null

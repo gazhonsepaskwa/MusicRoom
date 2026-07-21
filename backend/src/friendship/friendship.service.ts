@@ -81,7 +81,7 @@ export class FriendshipService {
 	}
 
 	async deleteFriendship(id1: number, id2: number) {
-		await this.prisma.friendship.deleteMany({
+		return await this.prisma.friendship.deleteMany({
 			where: {
 				OR: [
 				{

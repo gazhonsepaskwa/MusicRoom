@@ -45,9 +45,7 @@ fun ChangePasswordUi() {
         Column(modifier = Modifier.weight(1f)) {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
                 Title("Change Password")
-                PageTopBackButton(onClick = {
-                    navigationViewModel.navigateTo("settings")
-                })
+                PageTopBackButton(onClick = { navigationViewModel.navigateBack() })
             }
             Column(modifier = Modifier.padding(top = 20.dp)) {
                 CustomTextField(title = "Old Password", text = oldPassword, onValueChange = { oldPassword = it })

@@ -18,9 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import be.nalebrun.musicroom.ui.element.ActiveScreen
-import be.nalebrun.musicroom.ui.element.BlackOrWhiteButton
 import be.nalebrun.musicroom.ui.element.BottomScreenMenu
-import be.nalebrun.musicroom.ui.element.CustomTextField
 import be.nalebrun.musicroom.ui.element.PageTopBackButton
 import be.nalebrun.musicroom.ui.element.Title
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
@@ -44,9 +42,7 @@ fun ProfileUi() {
         Column(modifier = Modifier.weight(1f)) {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
                 Title("My Profile")
-                PageTopBackButton(onClick = {
-                    navigationViewModel.navigateTo("settings")
-                })
+                PageTopBackButton(onClick = { navigationViewModel.navigateBack() })
             }
             Column(modifier = Modifier.padding(top = 20.dp)) {
             }

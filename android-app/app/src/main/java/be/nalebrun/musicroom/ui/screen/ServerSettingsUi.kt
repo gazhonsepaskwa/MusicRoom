@@ -47,9 +47,7 @@ fun ServerSettingsUi() {
         Column(modifier = Modifier.weight(1f)) {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
                 Title("Server Settings")
-                PageTopBackButton(onClick = {
-                    navigationViewModel.navigateTo("settings")
-                })
+                PageTopBackButton(onClick = { navigationViewModel.navigateBack() })
             }
             Column(modifier = Modifier.padding(top = 20.dp)) {
                 CustomTextField(title = "Server URL", text = serverUrl, onValueChange = { serverUrl = it })

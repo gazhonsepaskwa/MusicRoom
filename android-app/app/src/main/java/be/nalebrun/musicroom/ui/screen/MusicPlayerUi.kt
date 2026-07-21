@@ -92,11 +92,7 @@ fun MusicPlayerUi() {
             .fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        PageTopBackButton(onClick = {
-            // Need a way to go back, maybe search or home? 
-            // For now let's just use navigateTo("search") or similar if we don't have popBackStack
-            navigationViewModel.navigateTo("search")
-        })
+        PageTopBackButton(onClick = { navigationViewModel.navigateBack() })
 
         CoverArt(musicJson.album?.images?.getOrNull(1) ?: "", lyrics) // take the second image because the screen quality is low
 

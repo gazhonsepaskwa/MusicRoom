@@ -190,7 +190,7 @@ fun SearchResultCard(
                    ResultType.ALBUM     -> navigationViewModel.navigateTo("album/${id}")
                    ResultType.PLAYLIST  -> navigationViewModel.navigateTo("playlist/${id}")
                    // other action
-                   ResultType.USER -> navigationViewModel.navigateTo("album/${id}")
+                   ResultType.USER -> navigationViewModel.navigateTo("user/${id}")
                    ResultType.MUSIC -> musicViewModel.addSongToWaitingListNext(music ?: MusicJson(-1))
                }
             })

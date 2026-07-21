@@ -1,16 +1,13 @@
 package be.nalebrun.musicroom
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import be.nalebrun.musicroom.repositories.CredentialRepository
 import be.nalebrun.musicroom.ui.screen.AuthUi
 import be.nalebrun.musicroom.ui.screen.FavoriteUi
 import be.nalebrun.musicroom.ui.screen.FriendsUi
@@ -19,6 +16,7 @@ import be.nalebrun.musicroom.ui.screen.MusicPlayerUi
 import be.nalebrun.musicroom.ui.screen.SearchUi
 import be.nalebrun.musicroom.ui.screen.SettingsUi
 import be.nalebrun.musicroom.ui.screen.ProfileUi
+import be.nalebrun.musicroom.ui.screen.UserProfileUi
 import be.nalebrun.musicroom.ui.screen.ServerSettingsUi
 import be.nalebrun.musicroom.ui.screen.ChangePasswordUi
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
@@ -38,11 +36,19 @@ fun CreateNavGraph(
 ) {
     val navigationViewModel: NavigationViewModel = hiltViewModel()
     val navigationEvent by navigationViewModel.navigationEvent.observeAsState()
+    val backEvent by navigationViewModel.backEvent.observeAsState()
 
     LaunchedEffect(navigationEvent) {
         navigationEvent?.let { route ->
             navController.navigate(route)
             navigationViewModel.clearNavigationEvent()
+        }
+    }
+
+    LaunchedEffect(backEvent) {
+        if (backEvent == true) {
+            navController.popBackStack()
+            navigationViewModel.clearBackEvent()
         }
     }
 
@@ -71,6 +77,10 @@ fun CreateNavGraph(
         composable(route = "album/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")
             // AlbumUi(id = id)
+        }
+        composable(route = "user/{id}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: -1
+            UserProfileUi(userId = id)
         }
     }
 }

@@ -46,7 +46,7 @@ class AuthViewModel @Inject constructor(
             .build()
 
         apiRepository.post(
-            url = "https://musicroom.nalebrun.be/auth/login",
+            url = "auth/login",
             body = body,
             onResponse = { _, response ->
                 if (response.code in 200..<300) {
@@ -82,7 +82,7 @@ class AuthViewModel @Inject constructor(
             .build()
 
         apiRepository.post(
-            url = "https://musicroom.nalebrun.be/auth/new_account",
+            url = "auth/new_account",
             body = body,
             onResponse = { _, response ->
                 if (response.code in 200..<300) {
@@ -103,7 +103,7 @@ class AuthViewModel @Inject constructor(
             credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
                 if (jwt.isNotEmpty()) {
                     apiRepository.get(
-                        url = "https://musicroom.nalebrun.be/auth/profile",
+                        url = "auth/profile",
                         auth = "Bearer $jwt",
                         onResponse = { _, response ->
                             if (response.code in 200..<300) {

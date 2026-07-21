@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,6 +25,7 @@ import be.nalebrun.musicroom.ui.element.CustomTextField
 import be.nalebrun.musicroom.ui.element.PageTopBackButton
 import be.nalebrun.musicroom.ui.element.Title
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
+import be.nalebrun.musicroom.viewmodel.SettingsViewModel
 
 @Composable
 fun ServerSettingsUi() {
@@ -33,8 +35,10 @@ fun ServerSettingsUi() {
     } else {
         hiltViewModel()
     }
+    val settingsViewModel: SettingsViewModel = hiltViewModel()
+    val savedServerUrl by settingsViewModel.serverUrl.collectAsState()
 
-    var serverUrl by remember { mutableStateOf("") }
+    var serverUrl by remember(savedServerUrl) { mutableStateOf(savedServerUrl) }
 
     Column(
         modifier = Modifier.fillMaxHeight(),
@@ -49,7 +53,20 @@ fun ServerSettingsUi() {
             }
             Column(modifier = Modifier.padding(top = 20.dp)) {
                 CustomTextField(title = "Server URL", text = serverUrl, onValueChange = { serverUrl = it })
-                BlackOrWhiteButton(text = "Connect", active = true, onClick = { /* TODO */ }, modifier = Modifier.padding(top = 20.dp, start = 10.dp, end = 10.dp))
+                BlackOrWhiteButton(
+                    text = "Connect",
+                    active = true,
+                    onClick = {
+                        // TODO: check that the server is valid
+                        settingsViewModel.updateServerUrl(serverUrl) {
+                            navigationViewModel.navigateTo("auth")
+                        }
+                        if (serverUrl == savedServerUrl) {
+                            navigationViewModel.navigateTo("settings")
+                        }
+                    },
+                    modifier = Modifier.padding(top = 20.dp, start = 10.dp, end = 10.dp)
+                )
             }
         }
         BottomScreenMenu(activeScreen = ActiveScreen.SETTINGS)

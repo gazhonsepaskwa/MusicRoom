@@ -31,7 +31,7 @@ class FriendsViewModel @Inject constructor(
         credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
             if (jwt.isNotEmpty()) {
                 apiRepository.get(
-                    "https://musicroom.nalebrun.be/friendship/friend-list",
+                    "friendship/friend-list",
                     "Bearer $jwt",
                     { _, response ->
                         if (response.code in 200 ..<300) {

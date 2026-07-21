@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -184,7 +185,7 @@ class MusicRepository @Inject constructor(
         scope.launch {
             credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
                 apiRepository.get(
-                    url = "https://musicroom.nalebrun.be/music/$id",
+                    url = "music/$id",
                     auth = "Bearer $jwt",
                     onResponse = { _, response ->
                         if (response.code in 200..<300) {
@@ -228,8 +229,9 @@ class MusicRepository @Inject constructor(
             .build()
         // TODO : add the artist and cover art
 
+        val baseUrl = runBlocking { apiRepository.getBaseUrl() }
         val mediaItem = MediaItem.Builder()
-            .setUri("https://musicroom.nalebrun.be/music/stream/$id")
+            .setUri("https://$baseUrl/music/stream/$id")
             .setMediaMetadata(metadata)
             .build()
 

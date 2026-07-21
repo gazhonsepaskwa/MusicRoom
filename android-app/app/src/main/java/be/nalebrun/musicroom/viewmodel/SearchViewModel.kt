@@ -32,7 +32,7 @@ class SearchViewModel @Inject constructor(
             var url: String = ""
             if (filters.isNotEmpty()){
                 val serializedFilters: String = filters.joinToString(",")
-                url = "https://musicroom.nalebrun.be/search?query=$query&offset=$offset&limit=$limit&type=$serializedFilters"
+                url = "search?query=$query&offset=$offset&limit=$limit&type=$serializedFilters"
             }
             credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
                 if (jwt.isNotEmpty() && url.isNotEmpty()) {

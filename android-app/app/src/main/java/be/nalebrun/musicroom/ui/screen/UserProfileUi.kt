@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import be.nalebrun.musicroom.R
+import be.nalebrun.musicroom.apiJsonStruct.responds.FriendRequestStatus
 import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.PlaylistJson
 import be.nalebrun.musicroom.ui.element.ActiveScreen
@@ -43,7 +44,8 @@ fun UserProfileUi(userId: Int) {
     
     val profile by viewModel.profile.collectAsState()
     val favoriteMusics by viewModel.favoriteMusics.collectAsState()
-    
+    val friendRequestState by viewModel.friendRequestState.collectAsState()
+
     var selectedPlaylistTab by remember { mutableStateOf("owned") }
 
     LaunchedEffect(userId) {
@@ -103,14 +105,23 @@ fun UserProfileUi(userId: Int) {
                             Text("${user.friends} friends", fontWeight = FontWeight.Bold)
                         }
                         Button(
-                            onClick = { 
-                                // TODO: send friend request
+                            onClick = {
+                                if (friendRequestState == null) {
+                                    viewModel.sendFriendRequest(userId)
+                                }
                             },
                             modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+                            colors = ButtonDefaults.buttonColors(containerColor = when (friendRequestState) {
+                                null -> Color.Black
+                                else -> Color.Gray
+                            }),
                             shape = RoundedCornerShape(8.dp)
                         ) {
-                            Text("send friend request", color = Color.White)
+                            Text(when (friendRequestState) {
+                                FriendRequestStatus.PENDING -> "pending"
+                                FriendRequestStatus.NOTVIEWED -> "pending"
+                                FriendRequestStatus.ACCEPTED -> "already friends !"
+                                else -> "send friend request" }, color = Color.White)
                         }
                     }
                 }
@@ -143,18 +154,19 @@ fun UserProfileUi(userId: Int) {
                 }
 
                 val displayPlaylists = if (selectedPlaylistTab == "owned") user.ownedPlaylists else user.invitedPlaylists
-                items(displayPlaylists) { playlist ->
-                    PlaylistItem(playlist)
-                }
-                
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
+                if (displayPlaylists != null) {
+                    items(displayPlaylists) { playlist ->
+                        PlaylistItem(playlist)
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
             }
         } ?: Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(color = Color.Black)
         }
-        
+
         BottomScreenMenu(activeScreen = ActiveScreen.SEARCH)
     }
 }

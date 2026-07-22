@@ -1,6 +1,7 @@
 package be.nalebrun.musicroom.ui.screen
 
 import android.R.attr.contentDescription
+import android.util.Log
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -48,6 +49,12 @@ import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 @Composable
 fun FriendsUi() {
     val viewModel: FriendsViewModel = hiltViewModel()
+    val activity = LocalActivity.current
+    val navigationViewModel: NavigationViewModel = if (activity != null) {
+        hiltViewModel(activity as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
     val friends by viewModel.friends.collectAsState()
 
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -75,6 +82,18 @@ fun FriendsUi() {
                     icon = R.drawable.outline_account_circle_24,
                     onClick = {
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            if (!sheetState.isVisible) {
+                                showBottomSheet = false
+                            }
+                        }
+                    }
+                ),
+                ActionItem(
+                    label = "See profile",
+                    icon = R.drawable.outline_account_circle_24,
+                    onClick = {
+                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            navigationViewModel.navigateTo("user/$selectedFriendId")
                             if (!sheetState.isVisible) {
                                 showBottomSheet = false
                             }

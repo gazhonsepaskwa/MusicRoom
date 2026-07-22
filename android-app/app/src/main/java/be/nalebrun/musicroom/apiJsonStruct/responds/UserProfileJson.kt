@@ -11,16 +11,16 @@ data class UserProfileJson(
     val id: Int,
     val username: String,
     val email: String? = null,
-    val friends: Int = 0,
+    val friends: Int? = 0,
     val playlists: Int = 0,
     val invitedPlaylistsNbr: Int = 0,
     val ownedPlaylistsNbr: Int = 0,
-    val isFriend: Boolean = false,
+    val isFriend: FriendRequestStatus? = null,
     val firstPreferedMusicId: Int? = null,
     val secondPreferedMusicId: Int? = null,
     val thirdPreferedMusicId: Int? = null,
-    val ownedPlaylists: List<PlaylistJson> = emptyList(),
-    val invitedPlaylists: List<PlaylistJson> = emptyList()
+    val ownedPlaylists: List<PlaylistJson>? = emptyList(),
+    val invitedPlaylists: List<PlaylistJson>? = emptyList()
 )
 
 @OptIn(ExperimentalSerializationApi::class)

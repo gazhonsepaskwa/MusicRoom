@@ -56,7 +56,7 @@ enum class ResultType {
 fun SearchUi() {
     val viewModel:      SearchViewModel = hiltViewModel()
 
-    val selectedFilters = remember { mutableStateListOf<String>("artist", "music", "album", "playlist", "user") }
+    val selectedFilters = remember { mutableStateListOf<String>("music", "artist", "album", "playlist", "user") }
     var tfSearch by remember { mutableStateOf("") }
     val results by viewModel.results.collectAsState()
 
@@ -78,7 +78,7 @@ fun SearchUi() {
             CustomTextField("", tfSearch, { tfSearch = it })
 
             Filters(
-                filters = arrayOf("artist", "music", "album", "playlist", "user"),
+                filters = arrayOf("music", "artist", "album", "playlist", "user"),
                 selectedFilters = selectedFilters,
                 onToggle = { filter ->
                     if (selectedFilters.contains(filter)) {

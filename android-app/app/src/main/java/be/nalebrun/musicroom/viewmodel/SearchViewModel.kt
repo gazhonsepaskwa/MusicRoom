@@ -1,5 +1,6 @@
 package be.nalebrun.musicroom.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import be.nalebrun.musicroom.IAPIRepository
@@ -34,6 +35,7 @@ class SearchViewModel @Inject constructor(
                 val serializedFilters: String = filters.joinToString(",")
                 url = "search?query=$query&offset=$offset&limit=$limit&type=$serializedFilters"
             }
+            //Log.d("API_RESPONSE", url)
             credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
                 if (jwt.isNotEmpty() && url.isNotEmpty()) {
                     apiRepository.get(
@@ -46,6 +48,7 @@ class SearchViewModel @Inject constructor(
                                     try {
                                         val parsedResults = Json.decodeFromString<List<SearchResponseJson>>(body)
                                         _results.value = parsedResults
+                                        //Log.d("API_RESPONSE", "Search results: $parsedResults")
                                     } catch (e: Exception) {
                                         e.printStackTrace()
                                     }

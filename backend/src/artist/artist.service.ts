@@ -38,7 +38,6 @@ export class ArtistService {
       return result;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-		console.log(error);
         throw new BadRequestException('Invalid artist ID');
       }
       throw error;

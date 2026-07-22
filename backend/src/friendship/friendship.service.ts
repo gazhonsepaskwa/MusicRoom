@@ -157,6 +157,9 @@ export class FriendshipService {
 			friendRequestDto.senderId, 
 			status
 		)
+		if (status === invitationStatus.REJECTED) {
+			await this.deleteFriendship(receiverId, friendRequestDto.senderId);
+		}
 		if (!friendship)
 			throw new InternalServerErrorException("Friendship was not recognized")
 		return friendship

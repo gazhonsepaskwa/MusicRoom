@@ -32,7 +32,7 @@ export class FriendshipController {
 		return {
 			message: "Friend request " + friendship.status == 
 			invitationStatus.ACCEPTED ? "accepted" : 
-			friendship.status == invitationStatus.REJECTED ? "rejected" : "pending",
+			friendship.status == invitationStatus.REJECTED ? "rejected" : "accepted",
 		}
 	}
 

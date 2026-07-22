@@ -1,0 +1,24 @@
+info:
+  name: answer-friend-request
+  type: http
+  seq: 24
+
+http:
+  method: POST
+  url: https://localhost:8443/friendship/answer-friend-request
+  body:
+    type: json
+    data: |-
+      {
+        "senderId": 1,
+        "answer": "ACCEPTED"
+      }
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInVzZXJuYW1lIjoibW9uYmVhdWN1bCIsImlhdCI6MTc4NDc1MzgzMSwiZXhwIjoxNzg3NDMyMjMxfQ.5VRUGIKPYmGoadfIpL1QeaG_0dehCXAoHT2EUykQT3o
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

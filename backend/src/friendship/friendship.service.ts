@@ -153,8 +153,8 @@ export class FriendshipService {
 			throw new BadRequestException("Answer Needed for Friend Request")
 		const status = friendRequestDto.answer ? invitationStatus.ACCEPTED : invitationStatus.REJECTED
 		const friendship = await this.updateFriendshipStatus(
-			receiverId, 
 			friendRequestDto.senderId, 
+			receiverId, 
 			status
 		)
 		if (status === invitationStatus.REJECTED) {

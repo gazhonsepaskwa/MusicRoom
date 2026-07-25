@@ -3,6 +3,7 @@ package be.nalebrun.musicroom.ui.element
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,10 +20,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import coil3.compose.AsyncImage
 
 @Composable
-fun AlbumCard(image: String, title: String, id: Int) {
+fun AlbumCard(image: List<String>, title: String, id: Int, navigationViewModel: NavigationViewModel) {
     Column(
         modifier = Modifier.size(width = 160.dp, height = 200.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -35,8 +37,15 @@ fun AlbumCard(image: String, title: String, id: Int) {
         ) {
             AsyncImage(
                 modifier = Modifier
-                    .fillMaxSize(),
-                model = image,
+                    .fillMaxSize()
+                    .clickable(true, onClick = {
+                        navigationViewModel.navigateTo("album/$id")
+                    }),
+                model = if (image.size >= 2) {
+                    image[1]
+                } else {
+                    ""
+                },
                 contentDescription = null
             )
         }

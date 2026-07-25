@@ -11,7 +11,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import be.nalebrun.musicroom.repositories.CredentialRepository
-import be.nalebrun.musicroom.ui.screen.ArtistUI
+import be.nalebrun.musicroom.ui.screen.AlbumUi
+import be.nalebrun.musicroom.ui.screen.ArtistUi
 import be.nalebrun.musicroom.ui.screen.AuthUi
 import be.nalebrun.musicroom.ui.screen.FavoriteUi
 import be.nalebrun.musicroom.ui.screen.FriendsUi
@@ -57,7 +58,7 @@ fun CreateNavGraph(
         composable(route = "search")        { SearchUi() }
         composable(route = "artist/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")
-            // ArtistUi(id = id)
+             ArtistUi(artistId = id!!.toInt())
         }
         composable(route = "playlist/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")
@@ -65,7 +66,7 @@ fun CreateNavGraph(
         }
         composable(route = "album/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")
-            // AlbumUi(id = id)
+             AlbumUi(albumId = id!!.toInt())
         }
     }
 }

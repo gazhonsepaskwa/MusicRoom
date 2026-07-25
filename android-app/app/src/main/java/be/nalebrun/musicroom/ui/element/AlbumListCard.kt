@@ -25,22 +25,22 @@ import be.nalebrun.musicroom.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ArtistCard(title: String, artist: String) {
-    var showbottomSheet by remember { mutableStateOf(false) }
-    var sheetState = rememberModalBottomSheetState()
+fun AlbumListCard(title: String, artist: String) {
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
 
-    if (showbottomSheet) {
+    if (showBottomSheet) {
         ActionSheet(
-            onDismissRequest = { showbottomSheet = false },
+            onDismissRequest = { showBottomSheet = false },
             actions = listOf(
                 ActionItem(
-                    label = "add to playlist",
-                    icon = R.drawable.playlist_tmp,
+                    label = "remove",
+                    icon = R.drawable.outline_devices_other_24,
                     onClick = {}
                 ),
                 ActionItem(
                     label = "add to queue",
-                    icon = R.drawable.playlist_tmp,
+                    icon = R.drawable.outline_devices_other_24,
                     onClick = {}
                 )
             ),
@@ -62,9 +62,11 @@ fun ArtistCard(title: String, artist: String) {
             Text(artist)
         }
         Image(
+            modifier = Modifier.clickable(true, onClick = {
+                showBottomSheet = true
+            }),
             painter = painterResource(R.drawable.menu),
-            contentDescription = "",
-            modifier = Modifier.clickable(true, onClick = { showbottomSheet = true })
+            contentDescription = ""
         )
     }
 }

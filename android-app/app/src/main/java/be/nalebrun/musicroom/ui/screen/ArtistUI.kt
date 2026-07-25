@@ -1,5 +1,6 @@
 package be.nalebrun.musicroom.ui.screen
 
+import android.util.Log
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,6 +17,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -30,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,8 +41,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import be.nalebrun.musicroom.R
-import be.nalebrun.musicroom.apiJsonStruct.responds.AlbumsJson
-import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
+import be.nalebrun.musicroom.apiJsonStruct.responds.AlbumsArtistJson
+import be.nalebrun.musicroom.apiJsonStruct.responds.MusicArtistJson
 import be.nalebrun.musicroom.ui.element.ActiveScreen
 import be.nalebrun.musicroom.ui.element.AlbumCard
 import be.nalebrun.musicroom.ui.element.ArtistCard
@@ -53,7 +57,8 @@ enum class ArtistType {
 }
 
 @Composable
-fun ArtistUI(artistId: Int) {
+fun ArtistUi(artistId: Int) {
+    Log.d("ARTIST", "$artistId")
     val viewModel: ArtistViewModel = hiltViewModel()
     val activity = LocalActivity.current
     val navigationViewModel: NavigationViewModel = if (activity != null) {
@@ -63,8 +68,8 @@ fun ArtistUI(artistId: Int) {
     }
 
     val artist: String? by viewModel.artist.collectAsStateWithLifecycle()
-    val musics: List<MusicJson>? by viewModel.musics.collectAsStateWithLifecycle()
-    val albums: List<AlbumsJson>? by viewModel.albums.collectAsStateWithLifecycle()
+    val musics: List<MusicArtistJson> by viewModel.musics.collectAsStateWithLifecycle()
+    val albums: List<AlbumsArtistJson> by viewModel.albums.collectAsStateWithLifecycle()
     val image: String? by viewModel.artistImage.collectAsStateWithLifecycle()
 
     var type by remember { mutableStateOf(ArtistType.SONGS) }
@@ -75,23 +80,13 @@ fun ArtistUI(artistId: Int) {
         viewModel.getSongsFromArtist(artistId)
 
     Column (
-
         modifier = Modifier
             .fillMaxHeight(),
         verticalArrangement = Arrangement.SpaceBetween
     ){
-        Column {
-//            Row(
-//                modifier = Modifier
-//                    .padding(horizontal = 10.dp)
-//                    .clip(shape = RoundedCornerShape(99.dp))
-//                    .border(
-//                        width = 2.dp,
-//                        color = Color.Black,
-//                        shape = RoundedCornerShape(99.dp)
-//                    )
-//                    .fillMaxWidth()
-//            ) {}
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
             Box(
                 modifier = Modifier
                     .height(100.dp)
@@ -154,34 +149,37 @@ fun ArtistUI(artistId: Int) {
             }
 //            HorizontalDivider(thickness = 2.dp, color = Color.Black)
             if (type == ArtistType.ALBUM) {
-                if (albums != null) {
-                    FlowRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 10.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly
+                LazyColumn(
+                    Modifier.weight(1f)
+                ) {
+                    item {
+                        FlowRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly
 
-                    ) {
-                        albums!!.forEach { item ->
-                            AlbumCard(item.images[1], item.title, item.id)
+                        ) {
+                            albums.forEach { item ->
+                                AlbumCard(item.images, item.title, item.id, navigationViewModel)
+                            }
                         }
                     }
                 }
             } else {
-                if (musics != null) {
-                    for (it in musics!!) {
+                LazyColumn(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    items(musics) { it ->
                         ArtistCard(it.title, "note")
                         HorizontalDivider(thickness = 1.dp, color = Color.Black)
                     }
                 }
             }
         }
-//        BottomScreenMenu(
-//            playing = true,
-//            title = "La fin de nation Glory",
-//            artist = "Fuze III",
-//            activeScreen = ActiveScreen.FRIENDS,
-//        )
+        BottomScreenMenu(
+            activeScreen = ActiveScreen.FAVORITE,
+        )
 
     }
 }

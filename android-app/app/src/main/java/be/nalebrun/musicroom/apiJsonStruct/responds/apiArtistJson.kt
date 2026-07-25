@@ -3,14 +3,14 @@ package be.nalebrun.musicroom.apiJsonStruct.responds
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MusicJson(
+data class MusicArtistJson(
     val id: Int,
     val title: String,
     val duration: Int,
 )
 
 @Serializable
-data class AlbumsJson(
+data class AlbumsArtistJson(
     val id: Int,
     val title: String,
     val date: String,
@@ -22,7 +22,7 @@ data class ArtistSongsJson(
     val id: Int,
     val title: String,
     val images: List<String>,
-    val musics: List<MusicJson>,
+    val musics: List<MusicArtistJson>,
     val type: String
 )
 
@@ -31,7 +31,7 @@ data class ArtistAlbumsJson(
     val id: Int,
     val title: String,
     val images: List<String>,
-    val albums: List<AlbumsJson>,
+    val albums: List<AlbumsArtistJson>,
     val type: String
 
 )

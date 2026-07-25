@@ -1,5 +1,6 @@
 package be.nalebrun.musicroom.ui.element
 
+import android.app.Activity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
@@ -24,27 +25,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import be.nalebrun.musicroom.R
-import be.nalebrun.musicroom.apiJsonStruct.responds.apiMusicJson
+import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
 import be.nalebrun.musicroom.viewmodel.MusicViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 
-@Preview
 @Composable
-fun MiniPlayer() {
-    val activity = LocalActivity.current
-    val navigationViewModel: NavigationViewModel = if (activity != null) {
-        hiltViewModel(activity as ViewModelStoreOwner)
-    } else {
-        hiltViewModel()
-    }
-    val musicViewModel: MusicViewModel = if (activity != null) {
-        hiltViewModel(activity as ViewModelStoreOwner)
-    } else {
-        hiltViewModel()
-    }
+fun MiniPlayer(musicViewModel: MusicViewModel, activity: Activity) {
+    val navigationViewModel: NavigationViewModel = hiltViewModel(activity as ViewModelStoreOwner)
 
     val currentSong: Int by musicViewModel.currentSong.collectAsStateWithLifecycle()
-    val musicJson: apiMusicJson by musicViewModel.music.collectAsStateWithLifecycle()
+    val musicJson: MusicJson by musicViewModel.music.collectAsStateWithLifecycle()
     val playing by musicViewModel.isPlaying.collectAsStateWithLifecycle()
 
     // on song change, fetch the info of the next song

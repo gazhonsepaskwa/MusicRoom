@@ -43,11 +43,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import be.nalebrun.musicroom.R
+import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
 import be.nalebrun.musicroom.ui.element.PageTopBackButton
+import be.nalebrun.musicroom.ui.element.QueueBottomSheet
 import be.nalebrun.musicroom.viewmodel.MusicViewModel
 import coil3.compose.AsyncImage
 import androidx.compose.runtime.collectAsState
-import be.nalebrun.musicroom.apiJsonStruct.responds.apiMusicJson
 
 enum class Repeat{
     NO,
@@ -70,7 +71,9 @@ fun MusicPlayerUi() {
 
     var lyrics  by remember { mutableStateOf(""      ) }
 
-    val musicJson: apiMusicJson by viewModel.music.collectAsStateWithLifecycle()
+    val musicJson: MusicJson by viewModel.music.collectAsStateWithLifecycle()
+
+    var showQueueSheet by remember { mutableStateOf(false) }
 
     // on song change, fetch the info of the next song
     LaunchedEffect(currentSong) {
@@ -97,7 +100,15 @@ fun MusicPlayerUi() {
 
         MusicControlButtons(viewModel)
 
-        BottomButtons()
+        BottomButtons(onQueueClick = { showQueueSheet = true })
+    }
+
+    if (showQueueSheet) {
+        @OptIn(ExperimentalMaterial3Api::class)
+        QueueBottomSheet(
+            viewModel,
+            onDismissRequest = { showQueueSheet = false }
+        )
     }
 }
 
@@ -277,7 +288,7 @@ fun MusicControlButtons(viewModel: MusicViewModel) {
 }
 
 @Composable
-fun BottomButtons() {
+fun BottomButtons(onQueueClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -303,9 +314,11 @@ fun BottomButtons() {
 
         // musique queue
         Image(
-            painter = painterResource(id = R.drawable.outline_devices_other_24),
+            painter = painterResource(id = R.drawable.outline_event_list_24),
             contentDescription = "",
-            Modifier.size(25.dp)
+            Modifier
+                .size(25.dp)
+                .clickable(onClick = onQueueClick)
         )
     }
 }

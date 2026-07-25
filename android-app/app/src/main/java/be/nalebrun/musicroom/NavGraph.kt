@@ -1,21 +1,18 @@
 package be.nalebrun.musicroom
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import be.nalebrun.musicroom.repositories.CredentialRepository
 import be.nalebrun.musicroom.ui.screen.AuthUi
-import be.nalebrun.musicroom.ui.screen.FavoriteUi
 import be.nalebrun.musicroom.ui.screen.FriendsUi
 import be.nalebrun.musicroom.ui.screen.LibraryUi
 import be.nalebrun.musicroom.ui.screen.MusicPlayerUi
+import be.nalebrun.musicroom.ui.screen.PlaylistUi
 import be.nalebrun.musicroom.ui.screen.SearchUi
 import be.nalebrun.musicroom.ui.screen.SettingsUi
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
@@ -48,7 +45,7 @@ fun CreateNavGraph(
         startDestination =  startDestination,
     ) {
         composable(route = "auth")          { AuthUi() }
-        composable(route = "favorite")      { FavoriteUi() }
+        composable(route = "favorite")      { PlaylistUi(1) }
         composable(route = "library")       { LibraryUi() }
         composable(route = "friends")       { FriendsUi() }
         composable(route = "settings")      { SettingsUi() }
@@ -60,7 +57,7 @@ fun CreateNavGraph(
         }
         composable(route = "playlist/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")
-            // PlaylistUi(id = id)
+//            PlaylistUi(id = id!!.toInt())
         }
         composable(route = "album/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")

@@ -8,10 +8,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,23 +31,23 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.apiJsonStruct.responds.PlaylistMusicJson
+import be.nalebrun.musicroom.ui.element.ActionItem
+import be.nalebrun.musicroom.ui.element.ActionSheet
 import be.nalebrun.musicroom.ui.element.ActiveScreen
 import be.nalebrun.musicroom.ui.element.BottomScreenMenu
 import be.nalebrun.musicroom.ui.element.PlaylistCard
 import be.nalebrun.musicroom.viewmodel.PlaylistViewModel
 
-//TODO: change friends to api call
 @Composable
-fun FavoriteUi(id: Int) {
+fun PlaylistUi(id: Int) {
     val viewModel: PlaylistViewModel = hiltViewModel()
 
     val friends: Int? by viewModel.friends.collectAsStateWithLifecycle()
     val title: String? by viewModel.title.collectAsStateWithLifecycle()
     val isPublic: Boolean? by viewModel.isPublic.collectAsStateWithLifecycle()
-    val musics: List<PlaylistMusicJson>? by viewModel.musics.collectAsStateWithLifecycle()
-    val number = musics?.size ?: 0
+    val musics: List<PlaylistMusicJson> by viewModel.musics.collectAsState()
+    val number = musics.size
 
-    //TODO: change id to real id
     viewModel.getPlaylist(id)
 
     Column(
@@ -48,7 +56,9 @@ fun FavoriteUi(id: Int) {
             .padding(top = 20.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Column {
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
@@ -66,8 +76,6 @@ fun FavoriteUi(id: Int) {
                         "private"
                     }, modifier = Modifier.clickable(true, onClick = {
                         viewModel.updatePublicState(id)
-//            publicMode = !publicMode
-                        // change mode
                     })
                 )
             }
@@ -105,18 +113,16 @@ fun FavoriteUi(id: Int) {
                 }
             }
         HorizontalDivider(thickness = 2.dp, color = Color.Black)
-        if (musics != null) {
-            for (it in musics!!) {
-                PlaylistCard(it.music.title, it.music.artists[0].title)
+        LazyColumn(
+            modifier = Modifier.weight(1f)
+        ) {
+            items(musics) { item ->
+                PlaylistCard(item.music.title, item.music.artists[0].title)
                 HorizontalDivider(thickness = 1.dp, color = Color.Black)
-            }
-        }
+            }}
         }
 
         BottomScreenMenu(
-            playing = true,
-            title = "La fin de nation Glory",
-            artist = "Fuze III",
             activeScreen = ActiveScreen.FAVORITE,
         )
     }

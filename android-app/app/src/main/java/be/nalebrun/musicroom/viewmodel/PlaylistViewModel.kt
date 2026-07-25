@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import okhttp3.FormBody
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,15 +24,16 @@ class PlaylistViewModel @Inject constructor(
     val apiRepository: IAPIRepository,
     val credentialRepository: ICredentialRepository
 ) : ViewModel() {
-    private val _title = MutableStateFlow<String?>(null)
-    private val _friends = MutableStateFlow<Int?>(0)
-    private val _isPublic = MutableStateFlow<Boolean?>(false)
-    private val _musics = MutableStateFlow<List<PlaylistMusicJson>?>(null)
+    private val _title = MutableStateFlow<String>("")
+    private val _friends = MutableStateFlow<Int>(0)
+    private val _isPublic = MutableStateFlow<Boolean>(false)
+    private val _musics = MutableStateFlow<List<PlaylistMusicJson>>(emptyList())
 
-    val title: StateFlow<String?> = _title
-    val friends: StateFlow<Int?> = _friends
-    val isPublic: StateFlow<Boolean?> = _isPublic
-    val musics: StateFlow<List<PlaylistMusicJson>?> = _musics
+    val title: StateFlow<String> = _title
+    val friends: StateFlow<Int> = _friends
+    val isPublic: StateFlow<Boolean> = _isPublic
+    val musics: StateFlow<List<PlaylistMusicJson>> = _musics
+
 
     fun getPlaylist(id: Int) { viewModelScope.launch {
         credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
@@ -38,26 +41,29 @@ class PlaylistViewModel @Inject constructor(
                 url = "https://musicroom.nalebrun.be/playlists/get/$id", //+ id
                 auth = "Bearer $jwt",
                 onResponse = { _, response ->
-                    val res = Json.decodeFromString<playlistJson>(response.body?.string() ?: "")
-                    _title.value = res.title
-                    _isPublic.value = res.isPublic
-                    _musics.value = res.musics
-                             },
+                    if (response.code in 200 ..<300) {
+                        val res = Json.decodeFromString<playlistJson>(response.body?.string() ?: "")
+                        _title.value = res.title
+                        _isPublic.value = res.isPublic
+                        _musics.value = res.musics
+                    }},
                 onFailure = { _, _ -> }
             )
         }
     }}
 
     fun updatePublicState(id: Int) { viewModelScope.launch {
-        val body = FormBody.Builder()
-            .add("isPublic", _isPublic.toString())
-            .build()
+        val body = """{"isPublic":${!_isPublic.value}}""".toRequestBody("application/json".toMediaType())
         credentialRepository.jwtFlow.firstOrNull().let { jwt ->
             apiRepository.patch(
                 url = "https://musicroom.nalebrun.be/playlists/update/$id",
                 body = body,
                 auth = "Bearer $jwt",
-                onResponse = { _, response -> Log.i("STATUS", response.body.toString()) },
+                onResponse = { _, response ->
+                    if (response.code in 200 ..<300) {
+                        _isPublic.value = !_isPublic.value
+                    }
+                },
                 onFailure = { _, e -> e.message?.let { Log.i("STATUS 2", it) } }
             )
         }

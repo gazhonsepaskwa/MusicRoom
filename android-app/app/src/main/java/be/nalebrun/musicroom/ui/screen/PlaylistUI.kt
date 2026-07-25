@@ -48,6 +48,9 @@ fun PlaylistUi(id: Int) {
     val musics: List<PlaylistMusicJson> by viewModel.musics.collectAsState()
     val number = musics.size
 
+    var playlistOn by remember { mutableStateOf(false) }
+    var shuffleOn by remember { mutableStateOf(false) }
+
     viewModel.getPlaylist(id)
 
     Column(
@@ -91,12 +94,17 @@ fun PlaylistUi(id: Int) {
                         .spacedBy(8.dp),
                 ) {
                     Image(
-                        painter = painterResource(R.drawable.artist),
-                        contentDescription = ""
+                        painter = painterResource(R.drawable.outline_play_arrow_24),
+                        contentDescription = "",
+                        modifier = Modifier.clickable(true, onClick = {})
                     )
                     Image(
-                        painter = painterResource(R.drawable.note_1),
-                        contentDescription = ""
+                        painter = painterResource(if (shuffleOn) { R.drawable.outline_shuffle_on_24}
+                        else {
+                            R.drawable.outline_shuffle_24
+                        }),
+                        contentDescription = "",
+                        modifier = Modifier.clickable(true, onClick = { shuffleOn = !shuffleOn })
                     )
                 }
                 Column(

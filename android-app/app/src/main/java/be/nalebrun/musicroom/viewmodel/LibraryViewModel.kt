@@ -22,10 +22,13 @@ class LibraryViewModel @Inject constructor(
     val apiRepository: IAPIRepository,
     val credentialRepository: ICredentialRepository
 ) : ViewModel() {
-    private val _playlists = MutableStateFlow<List<libraryJson>?>(null)
+    private val _playlists = MutableStateFlow<List<libraryJson>>(emptyList())
 
-    val playlists: StateFlow<List<libraryJson>?> = _playlists
+    val playlists: StateFlow<List<libraryJson>> = _playlists
 
+    init {
+        getPlaylists()
+    }
     fun getPlaylists() { viewModelScope.launch {
         credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
             apiRepository.get(

@@ -37,6 +37,11 @@ fun PlaylistCard(title: String, artist: String) {
                     label = "remove",
                     icon = R.drawable.outline_devices_other_24,
                     onClick = {}
+                ),
+                ActionItem(
+                    label = "add to queue",
+                    icon = R.drawable.outline_devices_other_24,
+                    onClick = {}
                 )
             ),
             sheetState = sheetState

@@ -57,7 +57,7 @@ fun CreateNavGraph(
         }
         composable(route = "playlist/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")
-//            PlaylistUi(id = id!!.toInt())
+            PlaylistUi(id = id!!.toInt())
         }
         composable(route = "album/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")

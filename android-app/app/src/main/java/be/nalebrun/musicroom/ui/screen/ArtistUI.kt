@@ -73,6 +73,7 @@ fun ArtistUi(artistId: Int) {
     val image: String? by viewModel.artistImage.collectAsStateWithLifecycle()
 
     var type by remember { mutableStateOf(ArtistType.SONGS) }
+    var shuffleOn by remember { mutableStateOf(false) }
 
     if (type == ArtistType.ALBUM)
         viewModel.getAlbumsFromArtist(artistId)
@@ -104,7 +105,7 @@ fun ArtistUi(artistId: Int) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 5.dp, vertical = 10.dp),
+                    .padding(horizontal = 40.dp, vertical = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 if (artist != "") {
@@ -112,14 +113,17 @@ fun ArtistUi(artistId: Int) {
                 } else {
                     Text("???", fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 }
-                Row {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ){
                     Image(
                         painter = painterResource(R.drawable.outline_play_arrow_24),
                         contentDescription = ""
                     )
                     Image(
-                        painter = painterResource(R.drawable.playlist_tmp),
-                        contentDescription = ""
+                        painter = painterResource(if (shuffleOn) { R.drawable.outline_shuffle_on_24} else { R.drawable.outline_shuffle_24 }),
+                        contentDescription = "",
+                        modifier = Modifier.clickable(true, onClick = { shuffleOn = !shuffleOn })
                     )
 
                 }

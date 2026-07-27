@@ -61,6 +61,22 @@ interface IAPIRepository {
         onResponse: (call: Call, response: Response) -> Unit,
         onFailure: (call: Call, e: IOException) -> Unit
     )
+
+    /**
+     * Make a DELETE query to a given url
+     * @param url the url where the request goes
+     * @param auth the JWT Token
+     * @param body the posted body of the request
+     * @param onResponse callback function that execute when the api respond to the request
+     * @param onFailure callback function that execute whet there is an error communicating with api
+     */
+    fun delete(
+        url: String,
+        body: RequestBody? = null,
+        auth: String = "",
+        onResponse: (call: Call, response: Response) -> Unit,
+        onFailure: (call: Call, e: IOException) -> Unit
+    )
 }
 
 /**
@@ -143,6 +159,31 @@ class APIRepository @Inject constructor(
         val request = Request.Builder()
             .url(resolveUrl(url))
             .patch(body)
+            .addHeader("Authorization", auth)
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                onFailure(call, e)
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                onResponse(call,response)
+                response.close()
+            }
+        })
+    }
+
+    override fun delete(
+        url: String,
+        body: RequestBody?,
+        auth: String,
+        onResponse: (call: Call, response: Response) -> Unit,
+        onFailure: (call: Call, e: IOException) -> Unit
+    ) {
+        val request = Request.Builder()
+            .url(resolveUrl(url))
+            .delete(body)
             .addHeader("Authorization", auth)
             .build()
 

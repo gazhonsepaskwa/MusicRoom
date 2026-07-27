@@ -6,6 +6,7 @@ import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.util.Log
 import be.nalebrun.musicroom.repositories.ISettingsRepository
+import be.nalebrun.musicroom.repositories.ISocketIORepository
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.first
@@ -25,6 +26,7 @@ class MusicRoomApp : Application() {
     @Inject
     lateinit var settingsRepository: ISettingsRepository
 
+    @Inject
     override fun onCreate() {
         super.onCreate()
 

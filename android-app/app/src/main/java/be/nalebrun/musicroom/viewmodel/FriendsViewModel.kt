@@ -179,4 +179,28 @@ class FriendsViewModel @Inject constructor(
         }
     }
 
+    fun removeFriend(friendId: Int?) {
+        viewModelScope.launch {
+            credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
+                if (jwt.isNotEmpty()) {
+                    val bodyString = Json.encodeToString(mapOf("receiverId" to friendId))
+                    val body = bodyString.toRequestBody("application/json".toMediaType())
+                    apiRepository.delete(
+                        "friendship/delete",
+                        body,
+                        "Bearer $jwt",
+                        { _, response ->
+                            Log.d("FriendsViewModel", "Remove friend response: ${response.code}")
+                            if (response.code in 200..<300) {
+                                getFriendList()
+                            }
+                        },
+                        { _, e ->
+                            Log.e("FriendsViewModel", "Remove friend failed", e)
+                        }
+                    )
+                }
+            }
+        }
+    }
 }

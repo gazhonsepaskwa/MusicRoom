@@ -25,6 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import be.nalebrun.musicroom.viewmodel.AuthViewModel
 import be.nalebrun.musicroom.ui.element.BlackOrWhiteButton
 import be.nalebrun.musicroom.ui.element.CustomTextField
+import be.nalebrun.musicroom.viewmodel.DevicesViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 
 @Composable
@@ -38,6 +39,11 @@ fun AuthUi() {
     } else {
         hiltViewModel()
     }
+    val deviceViewModel: DevicesViewModel = if (activity != null) {
+        hiltViewModel(activity as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
 
     // get the viewModel var in the AuthUi to update ui when value change
     val loginResult:  String?  by viewModel.loginResult.collectAsStateWithLifecycle()
@@ -46,7 +52,10 @@ fun AuthUi() {
 
     // navigation triggers
     LaunchedEffect(loginOk) {
+        // launch when login is done or when the token already exist
         if (loginOk == true) {
+            // when the login is ok, connect the socket and then navigate to the fav page
+            deviceViewModel.connectSocket()
             navigationViewModel.navigateTo("favorite")
         }
     }

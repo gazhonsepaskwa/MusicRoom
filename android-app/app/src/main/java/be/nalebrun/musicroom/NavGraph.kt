@@ -20,6 +20,21 @@ import be.nalebrun.musicroom.ui.screen.UserProfileUi
 import be.nalebrun.musicroom.ui.screen.ServerSettingsUi
 import be.nalebrun.musicroom.ui.screen.ChangePasswordUi
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
+import be.nalebrun.musicroom.viewmodel.SocketViewModel
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.collectAsState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import android.util.Log
 
 /**
  * Function that Create the NavGraph.
@@ -29,14 +44,63 @@ import be.nalebrun.musicroom.viewmodel.NavigationViewModel
  * @param startDestination Name of the route to start the app
  * @author nalebrun
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateNavGraph(
     navController:        NavHostController,
     startDestination:     String
 ) {
     val navigationViewModel: NavigationViewModel = hiltViewModel()
+    val socketViewModel: SocketViewModel = hiltViewModel()
     val navigationEvent by navigationViewModel.navigationEvent.observeAsState()
     val backEvent by navigationViewModel.backEvent.observeAsState()
+    val incomingRequest by socketViewModel.incomingRequest.collectAsState()
+    val sheetState = rememberModalBottomSheetState()
+
+    LaunchedEffect(incomingRequest) {
+        Log.d("NavGraph", "incomingRequest state changed: $incomingRequest")
+    }
+
+    if (incomingRequest != null) {
+        ModalBottomSheet(
+            onDismissRequest = { 
+                Log.d("NavGraph", "Dismissing Sheet")
+                socketViewModel.dismissRequest() 
+            },
+            sheetState = sheetState
+        ) {
+            Log.d("NavGraph", "Rendering BottomSheet Content")
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Connection Request",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Device '${incomingRequest?.deviceId}' (User ID: ${incomingRequest?.userId}) wants to connect to your device. Do you accept?",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    TextButton(onClick = { socketViewModel.dismissRequest() }) {
+                        Text("No")
+                    }
+                    Button(onClick = { socketViewModel.acceptRequest() }) {
+                        Text("Yes")
+                    }
+                }
+                Spacer(modifier = Modifier.height(32.dp))
+            }
+        }
+    }
 
     LaunchedEffect(navigationEvent) {
         navigationEvent?.let { route ->

@@ -141,10 +141,11 @@ export class DevicesService {
 	  }
     });
 
-    return devices.map((device) => ({
-      ...device,
-      isOnlineDevice: this.websocketsService.isOnlineDevice(device.deviceId),
-    }));
+	return devices.map(({ device, ...rest }) => ({
+		name: device.name,
+		...rest,
+		isOnlineDevice: this.websocketsService.isOnlineDevice(rest.deviceId),
+	}));
   }
 
   async getUserDevices(userId: number) {

@@ -26,48 +26,54 @@ export class DevicesController {
   @ApiBody({ type: UpdatePermissionDto })
   @ApiOkResponse({ type: DeviceshipResponseDto })
   @Patch('update_permissions')
-  updateDevicesPerm(
+  async updateDevicesPerm(
     @CurrentUser() userId: number,
     @Body() updatePermissionDto: UpdatePermissionDto,
   ) {
     const { id, friendId, canSeek, canTogglePlayPause, canModifyMusic } =
       updatePermissionDto;
 
-    return this.devicesService.updateDevicePermission(id, userId, friendId, {
+    return await this.devicesService.updateDevicePermission(id, userId, friendId, {
       canSeek,
       canTogglePlayPause,
       canModifyMusic,
     });
   }
 
+  @Get('device-permission/:id')
+  @ApiOkResponse({ type: DeviceshipResponseDto })
+  async getDevicePermission(@CurrentUser() userId: number, @Param('id') deviceId: string) {
+	return await this.devicesService.deviceship(deviceId, userId);
+  }
+
   @ApiBody({ type: UpdateNameDto })
   @ApiOkResponse({ type: DeviceResponseDto })
   @Patch('update_name')
-  updateDeviceName(
+  async updateDeviceName(
     @CurrentUser() userId: number,
     @Body() updateNameDto: UpdateNameDto,
   ) {
     const { id, name } = updateNameDto;
 
-    return this.devicesService.updateDeviceName(id, userId, name);
+    return await this.devicesService.updateDeviceName(id, userId, name);
   }
 
   @ApiOkResponse({ type: [AvailableDeviceResponseDto] })
   @Get('available')
-  getAvailableDevices(@CurrentUser() userId: number) {
-    return this.devicesService.getAvailableDevices(userId);
+  async getAvailableDevices(@CurrentUser() userId: number) {
+    return await this.devicesService.getAvailableDevices(userId);
   }
 
   @ApiParam({ name: 'id', type: String })
   @ApiOkResponse({ type: DeviceResponseDto })
   @Delete(':id')
-  deleteDevice(@CurrentUser() userId: number, @Param('id') id: string) {
-    return this.devicesService.deleteDevice(id, userId);
+  async deleteDevice(@CurrentUser() userId: number, @Param('id') id: string) {
+    return await this.devicesService.deleteDevice(id, userId);
   }
 
   @ApiOkResponse({ type: [DeviceResponseDto] })
   @Get('user_devices')
-  getUserDevices(@CurrentUser() userId: number) {
-    return this.devicesService.getUserDevices(userId);
+  async getUserDevices(@CurrentUser() userId: number) {
+    return await this.devicesService.getUserDevices(userId);
   }
 }

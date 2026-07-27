@@ -20,8 +20,8 @@ export class MusicController {
   @ApiParam({ name: 'id', type: Number })
   @ApiOkResponse({ type: MusicResponseDto })
   @Get(':id')
-  getMusic(@Param('id', ParseSafeIntPipe) id: number) {
-    return this.musicService.music({
+  async getMusic(@Param('id', ParseSafeIntPipe) id: number) {
+    return await this.musicService.music({
       id,
     });
   }

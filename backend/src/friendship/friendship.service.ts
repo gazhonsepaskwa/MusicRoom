@@ -21,7 +21,7 @@ export class FriendshipService {
 		if (await this.friendshipExists(senderId, receiverId)) {
 			throw new BadRequestException('Friendship already sent');
 		}
-		this.createFriendship({
+		await this.createFriendship({
 			requesterId: senderId,
 			addresseeId: receiverId,
 		})
@@ -38,7 +38,7 @@ export class FriendshipService {
 	} 
 
 	async createFriendship(data: Prisma.friendshipUncheckedCreateInput): Promise<friendship> {
-		return this.prisma.friendship.create({
+		return await this.prisma.friendship.create({
 			data,
 		});
 	}
@@ -67,7 +67,7 @@ export class FriendshipService {
 		addresseeId: number,
 		status: invitationStatus,
 	): Promise<friendship> {
-		return this.prisma.friendship.update({
+		return await this.prisma.friendship.update({
 			where: { requesterId_addresseeId: { requesterId, addresseeId } },
 			data: { status },
 		});
@@ -80,21 +80,34 @@ export class FriendshipService {
 		})
 	}
 
-	async deleteFriendship(id1: number, id2: number) {
-		return await this.prisma.friendship.deleteMany({
-			where: {
-				OR: [
-				{
-					requesterId: id1,
-					addresseeId: id2,
-				},
-				{
-					requesterId: id2,
-					addresseeId: id1,
-				},
-				],
+	async deleteFriendship(id1: number, id2: number): Promise<friendship> {
+	const friendship = await this.prisma.friendship.findFirst({
+		where: {
+		OR: [
+			{
+			requesterId: id1,
+			addresseeId: id2,
 			},
-		});
+			{
+			requesterId: id2,
+			addresseeId: id1,
+			},
+		],
+		},
+	});
+
+	if (!friendship) {
+		throw new BadRequestException("No Friend Found at this address.")
+	}
+
+	return await this.prisma.friendship.delete({
+		where: {
+		requesterId_addresseeId: {
+			requesterId: friendship.requesterId,
+			addresseeId: friendship.addresseeId,
+		},
+		},
+	});
 	}
 
 	async getFriendRequests(userId: number, status?: invitationStatus[]): Promise<FriendshipDto[]> {
@@ -151,7 +164,7 @@ export class FriendshipService {
 	async answerFriendRequest(friendRequestDto: friendReqAnswerDto, receiverId: number): Promise<friendship> {
 		if (!friendRequestDto.answer)
 			throw new BadRequestException("Answer Needed for Friend Request")
-		const status = friendRequestDto.answer ? invitationStatus.ACCEPTED : invitationStatus.REJECTED
+		const status = friendRequestDto.answer;
 		const friendship = await this.updateFriendshipStatus(
 			friendRequestDto.senderId, 
 			receiverId, 

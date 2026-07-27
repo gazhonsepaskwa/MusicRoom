@@ -126,12 +126,26 @@ export class DevicesService {
       where: {
         userId,
       },
+	  select: {
+		deviceId: true,
+		device: {
+			select: {
+				name: true,
+			}
+		},
+		userId: true,
+		createdAt: true,
+		canSeek: true,
+		canTogglePlayPause: true,
+		canModifyMusic: true,
+	  }
     });
 
-    return devices.map((device) => ({
-      ...device,
-      isOnlineDevice: this.websocketsService.isOnlineDevice(device.deviceId),
-    }));
+	return devices.map(({ device, ...rest }) => ({
+		name: device.name,
+		...rest,
+		isOnlineDevice: this.websocketsService.isOnlineDevice(rest.deviceId),
+	}));
   }
 
   async getUserDevices(userId: number) {

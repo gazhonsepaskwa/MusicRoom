@@ -29,6 +29,8 @@ export class PlaylistshipService {
 			throw new BadRequestException('You can not invite yourself to your playlist')
 		}
 
+		if (playlist.isDefault)
+			throw new BadRequestException("No Invitation to Favorite Playlist allowed");
 		await this.createPlaylistship({
 			playlistId: playlistshipDto.playlistId,
 			addresseeId: playlistshipDto.addresseeId,

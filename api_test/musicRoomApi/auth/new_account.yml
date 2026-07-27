@@ -5,14 +5,16 @@ info:
 
 http:
   method: POST
-  url: https://localhost/auth/new_account
+  url: https://localhost:8443/auth/new_account
   body:
     type: json
     data: |-
       {
-        "username": "monbeaucul",
+        "username": "monbeaucule",
         "password": "esttresJolie1@",
-        "email": "aurele.josserand@gmail.com"
+        "email": "aurele.josserand@gmail.comd",
+        "deviceID": "1",
+        "deviceName": "1"
       }
   auth: inherit
 

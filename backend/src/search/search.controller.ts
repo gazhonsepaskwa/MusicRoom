@@ -10,6 +10,8 @@ import { SearchService } from './search.service';
 import { ParseSafeIntPipe } from '../common/pipe/parse_safe_int.pipe';
 import { AuthGuard } from '../auth/auth.guard';
 import { Request } from 'express';
+import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import { SearchQueryDto } from './dto/search.dto';
 
 @Controller('search')
 export class SearchController {
@@ -18,6 +20,11 @@ export class SearchController {
     private readonly authGuard: AuthGuard,
   ) {}
 
+  @ApiQuery({ name: 'query', required: true })
+  @ApiQuery({ name: 'type', required: false })
+  @ApiQuery({ name: 'offset', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiOkResponse({ type: [Object] })
   @Get()
   deep_search(
     @Req() req: Request,
@@ -26,14 +33,6 @@ export class SearchController {
     @Query('offset', ParseSafeIntPipe) offset: number,
     @Query('limit', ParseSafeIntPipe) limit: number,
   ) {
-    console.log(
-      'SearchController.deep_search called with query:',
-      query,
-      'offset:',
-      offset,
-      'limit:',
-      limit,
-    );
 
     const typeArray = types?.split(',') || [
       'artist',
@@ -47,7 +46,6 @@ export class SearchController {
     if (!userId) {
       throw new BadRequestException('User ID not found in request');
     }
-    console.log('User ID extracted from request:', userId);
     const validTypes = ['artist', 'music', 'album', 'playlist', 'user'];
     const invalidTypes = typeArray.filter((type) => !validTypes.includes(type));
     if (invalidTypes.length > 0) {

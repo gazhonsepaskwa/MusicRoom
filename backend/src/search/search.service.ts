@@ -24,17 +24,12 @@ export class SearchService {
     offset: number = 0,
     limit: number = 10,
   ) {
-    console.log(
-      'SearchService.search called with query:',
-      query,
-      'types:',
-      types,
-      'offset:',
-      offset,
-      'limit:',
-      limit,
-    );
+
     const results: any[] = [];
+
+    await this.prisma.$executeRaw`
+      SELECT set_limit(0.1);
+    `;
 
     if (types.includes('music')) {
       const musicResults = await this.prisma.$queryRaw<

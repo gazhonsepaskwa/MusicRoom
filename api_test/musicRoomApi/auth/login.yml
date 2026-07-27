@@ -5,13 +5,15 @@ info:
 
 http:
   method: POST
-  url: https://localhost/auth/login
+  url: https://localhost:8443/auth/login
   body:
     type: json
     data: |-
       {
       "username": "monbeaucul",
-      "password": "esttresJolie1@"
+      "password": "esttresJolie1@",
+      "deviceID": "1",
+      "deviceName":"1"
       }
   auth: inherit
 

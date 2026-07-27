@@ -1,0 +1,17 @@
+info:
+  name: getFriends
+  type: http
+  seq: 29
+
+http:
+  method: GET
+  url: https://localhost:8443/friendship/friend-list
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQsInVzZXJuYW1lIjoibGVvMiIsImlhdCI6MTc4NDA1ODUxNywiZXhwIjoxNzg2NzM2OTE3fQ.b9gKkifNApj_lPeAN3ncwBqVpBkQqUX8fwwxa9cWT-o
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

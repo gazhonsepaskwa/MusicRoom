@@ -2,19 +2,21 @@ import { BadRequestException, forwardRef, Inject, Injectable, InternalServerErro
 import { friendship, Prisma, invitationStatus } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
-import { friendReqAnswerDto, friendRequestDto } from './dto/friendRequest.dto';
+import { friendReqAnswerDto } from './dto/friendRequest.dto';
 import { NotificationsService } from '../notifications/notifications.service';
+import { FriendshipDto } from './dto/friendship-response.dto';
 
 @Injectable()
 export class FriendshipService {
 	constructor(
 		private prisma: PrismaService, 
+		@Inject(forwardRef(() => UsersService))
 		private usersService: UsersService, 
 		@Inject(forwardRef(() => NotificationsService))
 		private notificationsService: NotificationsService) {}
 	async sendFriendRequest(senderId: number, receiverId: number): Promise<void> {
 		if (senderId === receiverId) {
-			throw new Error('Cannot send friend request to yourself');
+			throw new BadRequestException('Cannot send friend request to yourself');
 		}
 		if (await this.friendshipExists(senderId, receiverId)) {
 			throw new BadRequestException('Friendship already sent');
@@ -33,11 +35,9 @@ export class FriendshipService {
 				FirebaseMessage: `${senderName} wish to connect with you. Will you accept it? This message will self-Destruct in 3... 2... 1...`,
 			}
 		)
-		console.log(`Friend request sent from ${senderId} to ${receiverId}`);
 	} 
 
 	async createFriendship(data: Prisma.friendshipUncheckedCreateInput): Promise<friendship> {
-		console.log(`Friendship added between ${data.requesterId} and ${data.addresseeId}`);
 		return this.prisma.friendship.create({
 			data,
 		});
@@ -67,7 +67,7 @@ export class FriendshipService {
 		addresseeId: number,
 		status: invitationStatus,
 	): Promise<friendship> {
-		return this.prisma.friendship.update({
+		return await this.prisma.friendship.update({
 			where: { requesterId_addresseeId: { requesterId, addresseeId } },
 			data: { status },
 		});
@@ -80,52 +80,125 @@ export class FriendshipService {
 		})
 	}
 
-	async deleteFriendship(id1: number, id2: number) {
-		await this.prisma.friendship.deleteMany({
-			where: {
-				OR: [
-				{
-					requesterId: id1,
-					addresseeId: id2,
-				},
-				{
-					requesterId: id2,
-					addresseeId: id1,
-				},
-				],
+	async deleteFriendship(id1: number, id2: number): Promise<friendship> {
+	const friendship = await this.prisma.friendship.findFirst({
+		where: {
+		OR: [
+			{
+			requesterId: id1,
+			addresseeId: id2,
 			},
-		});
+			{
+			requesterId: id2,
+			addresseeId: id1,
+			},
+		],
+		},
+	});
+
+	if (!friendship) {
+		throw new BadRequestException("No Friend Found at this address.")
 	}
 
-	async getFriendRequests(userId: number, status?: invitationStatus[]): Promise<friendship[]> {
-		const where: Prisma.friendshipWhereInput = {
-			OR: [
-					{ addresseeId: userId },
-					{ requesterId: userId },
-				],
-		};
+	return this.prisma.friendship.delete({
+		where: {
+		requesterId_addresseeId: {
+			requesterId: friendship.requesterId,
+			addresseeId: friendship.addresseeId,
+		},
+		},
+	});
+	}
 
+	async getFriendRequests(userId: number, status?: invitationStatus[]): Promise<FriendshipDto[]> {
+		let where: Prisma.friendshipWhereInput;
+		if (status?.includes(invitationStatus.ACCEPTED)){
+			where = {
+				OR: [
+					{addresseeId: userId},
+					{requesterId: userId},
+				]
+			}
+		}
+		else {
+			where = {
+				addresseeId: userId ,
+			};
+		}
 		if (status?.length) {
 			where.status = {
 				in: status,
 			};
 		}
-		return this.prisma.friendship.findMany({
+		const friendRequests = await this.prisma.friendship.findMany({
 			where,
+			include: {
+				requester: {
+					select: {
+						id: true,
+						username: true,
+					}
+				},
+				addressee:  {
+					select: {
+						id: true,
+						username: true,
+					}
+				}
+			}
 		});
+
+		return friendRequests.map((friendship) => {
+			const otherUser = friendship.requesterId == userId ? friendship.addressee : friendship.requester;
+
+			return {
+				status: friendship.status,
+				otherId: otherUser.id,
+				otherUsername: otherUser.username,
+				createdAt: friendship.createdAt
+			}
+		}
+		)
 	}
 
 	async answerFriendRequest(friendRequestDto: friendReqAnswerDto, receiverId: number): Promise<friendship> {
 		if (!friendRequestDto.answer)
 			throw new BadRequestException("Answer Needed for Friend Request")
-		const status = friendRequestDto.answer ? invitationStatus.ACCEPTED : invitationStatus.REJECTED
+		const status = friendRequestDto.answer;
 		const friendship = await this.updateFriendshipStatus(
-			receiverId, 
 			friendRequestDto.senderId, 
+			receiverId, 
 			status
 		)
+		if (status === invitationStatus.REJECTED) {
+			await this.deleteFriendship(receiverId, friendRequestDto.senderId);
+		}
 		if (!friendship)
 			throw new InternalServerErrorException("Friendship was not recognized")
 		return friendship
+	}
+
+	async isFriend(userId1: number, userId2: number): Promise<invitationStatus | undefined> {
+		const friendship = await this.prisma.friendship.findFirst({
+			where: {
+				OR: [
+					{ requesterId: userId1, addresseeId: userId2},
+					{ requesterId: userId2, addresseeId: userId1},
+				],
+			},
+		});
+		return friendship?.status;
+	}
+
+	async getFriendsCount(userId: number): Promise<number> {
+		return await this.prisma.friendship.count({
+			where: {
+				OR: [
+				{ addresseeId: userId },
+				{ requesterId: userId },
+				],
+				status: 'ACCEPTED'
+			},
+			});
 	}
 }

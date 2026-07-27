@@ -1,0 +1,22 @@
+info:
+  name: update_name
+  type: http
+  seq: 2
+
+http:
+  method: PATCH
+  url: https://localhost/devices/update_name
+  body:
+    type: json
+    data: |-
+      {
+        "id": "1",
+        "name":"sqpij"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

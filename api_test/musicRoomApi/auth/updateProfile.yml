@@ -1,0 +1,32 @@
+info:
+  name: updateProfile
+  type: http
+  seq: 9
+
+http:
+  method: PATCH
+  url: https://localhost:8443/users/update
+  body:
+    type: json
+    data: |-
+      {
+        "username": "Xekh",
+        "password": "Test123!!",
+        "firstPreferredMusicId": 1,
+        "secondPreferredMusicId": 2,
+        "thirdPreferredMusicId": 3,
+        "showAddress": "PRIVATE",
+        "showCreatedPlaylist": "PRIVATE",
+        "showFriends": "PRIVATE",
+        "showInvitedPlaylist": "PRIVATE",
+        "showPreferedMusics": "PRIVATE"
+      }
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsInVzZXJuYW1lIjoibGVvMiIsImlhdCI6MTc4Mzk3Njk1OCwiZXhwIjoxNzg2NjU1MzU4fQ.JsEM_8rmv5anxb9WgWoVXsrKxvu69JpB4gWGcvQ5L1s
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

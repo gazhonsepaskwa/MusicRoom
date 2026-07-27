@@ -1,0 +1,31 @@
+info:
+  name: get_artist_musics
+  type: http
+  seq: 15
+
+http:
+  method: POST
+  url: https://localhost:8443/auth/login
+  body:
+    type: json
+    data: |-
+      {
+      "username": "player_a",
+      "password": "password_a1@",
+      "deviceID": "device_a",
+      "deviceName": "device_a"
+      }
+  auth: inherit
+
+runtime:
+  variables:
+    - name: deviceID
+      value: suefhs
+    - name: deviceName
+      value: qsd
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { invitationStatus, playlistship, Prisma } from '../../generated/prisma/browser';
 import { PlaylistsService } from '../playlists/playlists.service';
 import { PlaylistshipAnswerDto, PlaylistshipDto } from './dto/playlistship.dto';
+import { InvitationNotification } from './dto/playlistshipResponse.dto';
 
 @Injectable()
 export class PlaylistshipService {
@@ -12,6 +13,7 @@ export class PlaylistshipService {
 		private prisma: PrismaService, 
 		@Inject(forwardRef(() => NotificationsService))
 		private notificationsService: NotificationsService,
+		@Inject(forwardRef(() => UsersService))
 		private usersService: UsersService,
 		private playlistsService: PlaylistsService
 	) {}
@@ -19,12 +21,19 @@ export class PlaylistshipService {
 	async sendPlaylistInvitation(playlistshipDto: PlaylistshipDto, senderId: number): Promise<void> {
 		await this.checkOwnership(senderId, playlistshipDto.playlistId);
 		if (await this.playlistshipExists(playlistshipDto.playlistId, playlistshipDto.addresseeId)) {
-			throw new BadRequestException('User Already has access to the playlist');
+			throw new BadRequestException('User Already has already received an invitation to the playlist');
 		}
+
+		const playlist = (await this.playlistsService.findOne({id: playlistshipDto.playlistId}))!
+		if (playlist.userId === playlistshipDto.addresseeId){
+			throw new BadRequestException('You can not invite yourself to your playlist')
+		}
+
 		await this.createPlaylistship({
 			playlistId: playlistshipDto.playlistId,
 			addresseeId: playlistshipDto.addresseeId,
 		})
+
 		const playlistName = (await this.playlistsService.findOne({id: playlistshipDto.playlistId}))?.title;
 		this.notificationsService.sendNotification(
 			playlistshipDto.addresseeId,
@@ -35,11 +44,9 @@ export class PlaylistshipService {
 				FirebaseMessage: `You have been invited to join ${playlistName}. Will you accept it? This message will self-Destruct in 3... 2... 1...`,
 			}
 		)
-		console.log(`Playlist invitation sent for ${playlistshipDto.playlistId} to ${playlistshipDto.addresseeId}`);
 	}
 
 	async createPlaylistship(data: Prisma.playlistshipUncheckedCreateInput): Promise<playlistship> {
-		console.log(`${data.addresseeId} has now access to playlist ${data.playlistId}`);
 		if (await this.playlistsService.playlist({id: data.playlistId}) == null)
 			throw new BadRequestException("PlaylistId not found");
 		if (await this.usersService.user({id: data.addresseeId}) == null)
@@ -60,7 +67,6 @@ export class PlaylistshipService {
 
 	async playlistshipExists(playlistId: number, addresseeId: number): Promise<boolean> {
 		let playlistship = await this.playlistship({playlistId_addresseeId: {playlistId, addresseeId}})
-		console.log("playlistship", playlistship, addresseeId);
 		return playlistship !== null;
 	}
 
@@ -92,7 +98,7 @@ export class PlaylistshipService {
 		});
 	}
 
-	async getPlaylistInvitations(userId: number, status?: invitationStatus[]): Promise<playlistship[]> {
+	async getPlaylistInvitations(userId: number, status?: invitationStatus[]): Promise<InvitationNotification[]> {
 		const where: Prisma.playlistshipWhereInput = {
 			addresseeId: userId ,
 		};
@@ -102,9 +108,23 @@ export class PlaylistshipService {
 				in: status,
 			};
 		}
-		return this.prisma.playlistship.findMany({
+		const playlistships = await this.prisma.playlistship.findMany({
 			where,
+			include: {
+				playlist: {
+					select: {
+						id: true,
+						title: true,
+					}
+				}
+			}
 		});
+		return playlistships.map((playlistship) => ({
+			playlistId: playlistship.playlist.id,
+			status: playlistship.status,
+			playlistName: playlistship.playlist.title,
+			createdAt: playlistship.createdAt
+		}))
 	}
 
 	async getPlaylistUsers(id: number): Promise<playlistship[] | null>{

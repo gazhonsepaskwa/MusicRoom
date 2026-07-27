@@ -1,5 +1,6 @@
 import { invitationStatus } from "../../../generated/prisma/enums";
 
+
 export enum NotificationType {
   FRIEND_REQUEST = 'FRIEND_REQUEST',
   PLAYLIST_INVITATION = 'PLAYLIST_INVITATION',
@@ -12,7 +13,10 @@ export interface NotificationDto {
 
   // data needed by frontend
   requesterId?: number;
+  requesterName?: string;
+
   playlistId?: number;
+  playlistName?: string;
 }
 
 export class NotificationBodyDto {

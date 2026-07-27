@@ -86,10 +86,10 @@ export class PlaylistsGateway {
 
     let newVersion: number | void;
     try {
-      newVersion = await this.playlistsService.addMusic(
+      newVersion = (await this.playlistsService.addMusic(
         playlistIdNum,
         songIdNum,
-      );
+      ))?.version;
     } catch (error) {
       throw error;
     }

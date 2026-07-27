@@ -22,6 +22,7 @@ export class ArtistService {
           images: true,
           albums: {
             select: {
+			  id: true,
               title: true,
               date: true,
               images: true,
@@ -32,12 +33,46 @@ export class ArtistService {
       if (!result) {
         throw new NotFoundException('Artist not found');
       }
+
+	  result['type'] = 'artist';
       return result;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
+		console.log(error);
         throw new BadRequestException('Invalid artist ID');
       }
       throw error;
     }
+  }
+
+  async artistMusic(artistWhereUniqueInput: Prisma.artistWhereUniqueInput): Promise<any> {
+	try {
+	  const result = await this.prisma.artist.findUnique({
+		where: artistWhereUniqueInput,
+		select: {
+		  id: true,
+		  title: true,
+		  images: true,
+		  musics: {
+			select: {
+			  id: true,
+			  title: true,
+			  duration: true,
+			}},
+	  }
+	});
+	if (!result) {
+	  throw new NotFoundException('Artist not found');
+	}
+
+	result['type'] = 'artist';
+	return result;
+	}
+	catch (error) {
+	  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+		throw new BadRequestException('Invalid artist ID');
+	  }
+	  throw error;
+	}
   }
 }

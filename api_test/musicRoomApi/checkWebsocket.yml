@@ -1,7 +1,7 @@
 info:
   name: checkWebsocket
   type: websocket
-  seq: 23
+  seq: 20
 
 websocket:
   url: wss://localhost/1
@@ -9,3 +9,7 @@ websocket:
     type: json
     data: "{}"
   auth: inherit
+
+settings:
+  timeout: 0
+  keepAliveInterval: 0

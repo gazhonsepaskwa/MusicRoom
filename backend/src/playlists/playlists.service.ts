@@ -105,6 +105,9 @@ export class PlaylistsService {
   }) {
     const { where, data } = params;
     try {
+	  const playlist = await this.findOne(params.where);
+	  if (playlist && playlist.isDefault && data.isPublic)
+		throw new BadRequestException("Favorite Playlist can not be public");
       const updatedPlaylist = await this.prisma.playlist.update({
         where,
         data,

@@ -11,8 +11,8 @@ export class ArtistController {
   @ApiParam({ name: 'id', type: Number })
   @ApiOkResponse({ type: ArtistResponseDto })
   @Get(':id')
-  getArtist(@Param('id', ParseSafeIntPipe) id: number) {
-    return this.artistService.artist({
+  async getArtist(@Param('id', ParseSafeIntPipe) id: number) {
+    return await this.artistService.artist({
       id,
     });
   }
@@ -20,8 +20,8 @@ export class ArtistController {
   @ApiParam({ name: 'id', type: Number })
   @ApiOkResponse({ type: ArtistMusicsResponseDto })
   @Get('musics/:id')
-  getArtistMusic(@Param('id', ParseSafeIntPipe) id: number) {
-    return this.artistService.artistMusic({
+  async getArtistMusic(@Param('id', ParseSafeIntPipe) id: number) {
+    return await this.artistService.artistMusic({
       id,
     });
   }

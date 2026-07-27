@@ -45,6 +45,17 @@ export class UpdatePlaylistDto {
   isPublic?: boolean;
 }
 
+export class PlaylistMusicAlbumDto {
+  @ApiProperty({ example: 'Album Title' })
+  title!: string;
+
+  @ApiProperty({ example: '2024-01-01' })
+  date!: string;
+
+  @ApiProperty({ example: [], description: 'Album image URLs.' })
+  images!: string[];
+}
+
 export class PlaylistMusicDetailDto {
   @ApiProperty({ example: 1 })
   id!: number;
@@ -54,6 +65,9 @@ export class PlaylistMusicDetailDto {
 
   @ApiProperty({ example: 180 })
   duration!: number;
+
+  @ApiProperty({ type: PlaylistMusicAlbumDto })
+  album!: PlaylistMusicAlbumDto;
 
   @ApiProperty({ type: [MusicArtistDto] })
   artists!: MusicArtistDto[];

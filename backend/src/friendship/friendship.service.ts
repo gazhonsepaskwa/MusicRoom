@@ -21,7 +21,7 @@ export class FriendshipService {
 		if (await this.friendshipExists(senderId, receiverId)) {
 			throw new BadRequestException('Friendship already sent');
 		}
-		this.createFriendship({
+		await this.createFriendship({
 			requesterId: senderId,
 			addresseeId: receiverId,
 		})
@@ -38,7 +38,7 @@ export class FriendshipService {
 	} 
 
 	async createFriendship(data: Prisma.friendshipUncheckedCreateInput): Promise<friendship> {
-		return this.prisma.friendship.create({
+		return await this.prisma.friendship.create({
 			data,
 		});
 	}
@@ -100,7 +100,7 @@ export class FriendshipService {
 		throw new BadRequestException("No Friend Found at this address.")
 	}
 
-	return this.prisma.friendship.delete({
+	return await this.prisma.friendship.delete({
 		where: {
 		requesterId_addresseeId: {
 			requesterId: friendship.requesterId,

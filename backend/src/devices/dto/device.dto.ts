@@ -35,6 +35,9 @@ export class DeviceshipResponseDto {
 }
 
 export class AvailableDeviceResponseDto extends DeviceshipResponseDto {
+  @ApiProperty({ example: 'Living Room Speaker', required: false })
+  name?: string | null;
+
   @ApiProperty({ example: true })
   isOnlineDevice!: boolean;
 }

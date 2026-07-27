@@ -29,11 +29,15 @@ export class FriendshipController {
 		@CurrentUser() userId: number,
 		@Body() friendRequestDto : friendReqAnswerDto){
 		const friendship = await this.friendshipService.answerFriendRequest(friendRequestDto, userId);
+		const statusMessage =
+			friendship.status === invitationStatus.ACCEPTED
+				? 'accepted'
+				: friendship.status === invitationStatus.REJECTED
+				? 'rejected'
+				: 'accepted';
 		return {
-			message: "Friend request " + friendship.status == 
-			invitationStatus.ACCEPTED ? "accepted" : 
-			friendship.status == invitationStatus.REJECTED ? "rejected" : "accepted",
-		}
+			message: `Friend request ${statusMessage}`,
+		};
 	}
 
 	@ApiOkResponse({ type: [FriendshipDto] })
@@ -42,7 +46,7 @@ export class FriendshipController {
 		return await this.friendshipService.getFriendRequests(userId, [invitationStatus.ACCEPTED])
 	}
 
-	@ApiOkResponse({ type: FriendshipDto})
+	@ApiOkResponse({ type: FriendshipResponseDto })
 	@ApiBody({ type: friendRequestDto })
 	@Delete('delete')
 	async deleteFriendship(@CurrentUser() userId: number, @Body() data: friendRequestDto) {

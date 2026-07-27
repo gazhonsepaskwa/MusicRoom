@@ -15,6 +15,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import be.nalebrun.musicroom.R
+import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.PlaylistMusicJson
 import be.nalebrun.musicroom.ui.element.ActionItem
 import be.nalebrun.musicroom.ui.element.ActionSheet
@@ -42,16 +44,23 @@ import be.nalebrun.musicroom.viewmodel.PlaylistViewModel
 fun PlaylistUi(id: Int) {
     val viewModel: PlaylistViewModel = hiltViewModel()
 
-    val friends: Int? by viewModel.friends.collectAsStateWithLifecycle()
-    val title: String? by viewModel.title.collectAsStateWithLifecycle()
+    val friends: Int? by viewModel.friends.collectAsState()
+    val playlistId: Int by viewModel.id.collectAsState()
+    val title: String? by viewModel.title.collectAsState()
+    val isDefault: Boolean by viewModel.isDefault.collectAsState()
     val isPublic: Boolean? by viewModel.isPublic.collectAsStateWithLifecycle()
-    val musics: List<PlaylistMusicJson> by viewModel.musics.collectAsState()
+    val musics: List<MusicJson> by viewModel.musics.collectAsState()
     val number = musics.size
 
-    var playlistOn by remember { mutableStateOf(false) }
     var shuffleOn by remember { mutableStateOf(false) }
 
-    viewModel.getPlaylist(id)
+    LaunchedEffect(id) {
+        if (id == -1) {
+            viewModel.getFavorite()
+        } else {
+            viewModel.getPlaylist(id)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -72,15 +81,33 @@ fun PlaylistUi(id: Int) {
                     Text(title ?: "", fontWeight = FontWeight.Bold, lineHeight = 10.sp)
                     Text("$number songs", fontSize = 10.sp, lineHeight = 10.sp)
                 }
-                Text(
-                    text = if (isPublic ?: false) {
-                        "public"
-                    } else {
-                        "private"
-                    }, modifier = Modifier.clickable(true, onClick = {
-                        viewModel.updatePublicState(id)
-                    })
-                )
+                if (!isDefault) {
+                    Row(
+                        modifier = Modifier
+                            .clickable(true, onClick = {
+                                viewModel.updatePublicState(playlistId)
+                            }),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = if (isPublic ?: false) {
+                                "public"
+                            } else {
+                                "private"
+                            }
+                        )
+                        Image(
+                            painter = painterResource(
+                                if (isPublic ?: false) {
+                                    R.drawable.outline_visibility_24
+                                } else {
+                                    R.drawable.outline_visibility_off_24
+                                }
+                            ),
+                            contentDescription = "",
+                        )
+                    }
+                }
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -96,7 +123,9 @@ fun PlaylistUi(id: Int) {
                     Image(
                         painter = painterResource(R.drawable.outline_play_arrow_24),
                         contentDescription = "",
-                        modifier = Modifier.clickable(true, onClick = {})
+                        modifier = Modifier.clickable(true, onClick = {
+                            viewModel.musicRepository.replaceWaitingList(musics)
+                        })
                     )
                     Image(
                         painter = painterResource(if (shuffleOn) { R.drawable.outline_shuffle_on_24}
@@ -107,17 +136,19 @@ fun PlaylistUi(id: Int) {
                         modifier = Modifier.clickable(true, onClick = { shuffleOn = !shuffleOn })
                     )
                 }
-                Column(
-                    horizontalAlignment = Alignment.End,
-                    modifier = Modifier.clickable(true, onClick = {})
-                ) {
-                    Text(
-                        "Shared with $friends friends",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 10.sp,
-                        lineHeight = 10.sp
-                    )
-                    Text("Manage access →", fontSize = 10.sp, lineHeight = 10.sp)
+                if (!isDefault) {
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        modifier = Modifier.clickable(true, onClick = {})
+                    ) {
+                        Text(
+                            "Shared with $friends friends",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 10.sp,
+                            lineHeight = 10.sp
+                        )
+                        Text("Manage access →", fontSize = 10.sp, lineHeight = 10.sp)
+                    }
                 }
             }
         HorizontalDivider(thickness = 2.dp, color = Color.Black)
@@ -125,13 +156,13 @@ fun PlaylistUi(id: Int) {
             modifier = Modifier.weight(1f)
         ) {
             items(musics) { item ->
-                PlaylistCard(item.music.title, item.music.artists[0].title)
+                PlaylistCard(playlistId, item)
                 HorizontalDivider(thickness = 1.dp, color = Color.Black)
             }}
         }
 
         BottomScreenMenu(
-            activeScreen = ActiveScreen.FAVORITE,
+            activeScreen = if(isDefault) { ActiveScreen.FAVORITE } else { ActiveScreen.NONE },
         )
     }
 }

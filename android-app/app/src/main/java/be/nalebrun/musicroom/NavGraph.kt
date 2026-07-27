@@ -18,6 +18,10 @@ import be.nalebrun.musicroom.ui.screen.MusicPlayerUi
 import be.nalebrun.musicroom.ui.screen.PlaylistUi
 import be.nalebrun.musicroom.ui.screen.SearchUi
 import be.nalebrun.musicroom.ui.screen.SettingsUi
+import be.nalebrun.musicroom.ui.screen.ProfileUi
+import be.nalebrun.musicroom.ui.screen.UserProfileUi
+import be.nalebrun.musicroom.ui.screen.ServerSettingsUi
+import be.nalebrun.musicroom.ui.screen.ChangePasswordUi
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 
 /**
@@ -35,6 +39,7 @@ fun CreateNavGraph(
 ) {
     val navigationViewModel: NavigationViewModel = hiltViewModel()
     val navigationEvent by navigationViewModel.navigationEvent.observeAsState()
+    val backEvent by navigationViewModel.backEvent.observeAsState()
 
     LaunchedEffect(navigationEvent) {
         navigationEvent?.let { route ->
@@ -43,15 +48,25 @@ fun CreateNavGraph(
         }
     }
 
+    LaunchedEffect(backEvent) {
+        if (backEvent == true) {
+            navController.popBackStack()
+            navigationViewModel.clearBackEvent()
+        }
+    }
+
     NavHost(
         navController =     navController,
         startDestination =  startDestination,
     ) {
         composable(route = "auth")          { AuthUi() }
-        composable(route = "favorite")      { PlaylistUi(1) }
+        composable(route = "favorite")      { PlaylistUi(-1) }
         composable(route = "library")       { LibraryUi() }
         composable(route = "friends")       { FriendsUi() }
         composable(route = "settings")      { SettingsUi() }
+        composable(route = "profile")       { ProfileUi() }
+        composable(route = "server-settings") { ServerSettingsUi() }
+        composable(route = "change-password") { ChangePasswordUi() }
         composable(route = "music-player")  { MusicPlayerUi() }
         composable(route = "search")        { SearchUi() }
         composable(route = "artist/{id}") { backStackEntry ->
@@ -65,6 +80,10 @@ fun CreateNavGraph(
         composable(route = "album/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")
              AlbumUi(albumId = id!!.toInt())
+        }
+        composable(route = "user/{id}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: -1
+            UserProfileUi(userId = id)
         }
     }
 }

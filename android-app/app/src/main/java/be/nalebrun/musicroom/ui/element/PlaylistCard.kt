@@ -21,11 +21,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import be.nalebrun.musicroom.R
+import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
+import be.nalebrun.musicroom.viewmodel.PlaylistViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlaylistCard(title: String, artist: String) {
+fun PlaylistCard(playlistId: Int, music: MusicJson) {
+    val viewModel: PlaylistViewModel = hiltViewModel()
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
 
@@ -34,14 +38,19 @@ fun PlaylistCard(title: String, artist: String) {
             onDismissRequest = { showBottomSheet = false },
             actions = listOf(
                 ActionItem(
-                    label = "remove",
+                    label = "remove from playlist",
                     icon = R.drawable.outline_devices_other_24,
-                    onClick = {}
+                    onClick = { viewModel.removeSongFromPlaylist(music.id, playlistId) }
                 ),
                 ActionItem(
-                    label = "add to queue",
+                    label = "add to queue (next)",
                     icon = R.drawable.outline_devices_other_24,
-                    onClick = {}
+                    onClick = { viewModel.musicRepository.addSongToWaitingListNext(music) }
+                ),
+                ActionItem(
+                    label = "add to queue (end)",
+                    icon = R.drawable.outline_devices_other_24,
+                    onClick = { viewModel.musicRepository.addSongToWaitingListEnd(music) }
                 )
             ),
             sheetState = sheetState
@@ -58,14 +67,15 @@ fun PlaylistCard(title: String, artist: String) {
         verticalAlignment = Alignment.CenterVertically
     ){
         Column {
-            Text(title, fontWeight = FontWeight.Bold)
-            Text(artist)
+            Text(music.title, fontWeight = FontWeight.Bold)
+            val artists : String = music.artists.joinToString(", ") { it.title }
+            Text(artists)
         }
         Image(
             modifier = Modifier.clickable(true, onClick = {
                 showBottomSheet = true
             }),
-            painter = painterResource(R.drawable.menu),
+            painter = painterResource(R.drawable.outline_more_horiz_24),
             contentDescription = ""
         )
     }

@@ -22,11 +22,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import be.nalebrun.musicroom.R
+import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
+import be.nalebrun.musicroom.repositories.MusicRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AlbumListCard(title: String, artist: String) {
+fun AlbumListCard(musicViewModel: MusicRepository, music: MusicJson) {
     var showBottomSheet by remember { mutableStateOf(false) }
+    var addPlaylistSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
 
     if (showBottomSheet) {
@@ -34,14 +37,25 @@ fun AlbumListCard(title: String, artist: String) {
             onDismissRequest = { showBottomSheet = false },
             actions = listOf(
                 ActionItem(
-                    label = "remove",
+                    label = "add to queue (next)",
                     icon = R.drawable.outline_devices_other_24,
-                    onClick = {}
+                    onClick = {
+                        musicViewModel.addSongToWaitingListNext(music)
+                        showBottomSheet = false
+                    }
                 ),
                 ActionItem(
-                    label = "add to queue",
+                    label = "add to queue (end)",
                     icon = R.drawable.outline_devices_other_24,
-                    onClick = {}
+                    onClick = {
+                        musicViewModel.addSongToWaitingListEnd(music)
+                        showBottomSheet = false
+                    }
+                ),
+                ActionItem(
+                    label = "add to playlist",
+                    icon = R.drawable.outline_devices_other_24,
+                    onClick = { addPlaylistSheet = true }
                 )
             ),
             sheetState = sheetState
@@ -58,15 +72,24 @@ fun AlbumListCard(title: String, artist: String) {
         verticalAlignment = Alignment.CenterVertically
     ){
         Column {
-            Text(title, fontWeight = FontWeight.Bold)
-            Text(artist)
+            Text(music.title, fontWeight = FontWeight.Bold)
+            val artists: String = music.artists.joinToString(", ") { it.title }
+            Text(artists)
         }
         Image(
             modifier = Modifier.clickable(true, onClick = {
                 showBottomSheet = true
             }),
-            painter = painterResource(R.drawable.menu),
-            contentDescription = ""
+            painter = painterResource(R.drawable.outline_more_horiz_24),
+            contentDescription = "",
+        )
+    }
+
+    if (addPlaylistSheet) {
+        @OptIn(ExperimentalMaterial3Api::class)
+        AddPlaylistSheet(
+            musicId = music.id,
+            onDismissRequest = { addPlaylistSheet = false }
         )
     }
 }

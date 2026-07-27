@@ -5,7 +5,9 @@ import be.nalebrun.musicroom.IAPIRepository
 import be.nalebrun.musicroom.repositories.CredentialRepository
 import be.nalebrun.musicroom.repositories.ICredentialRepository
 import be.nalebrun.musicroom.repositories.IMusicRepository
+import be.nalebrun.musicroom.repositories.ISettingsRepository
 import be.nalebrun.musicroom.repositories.MusicRepository
+import be.nalebrun.musicroom.repositories.SettingsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -28,4 +30,7 @@ abstract class RepositoryModule {
     @Singleton
     abstract fun bindMusicRepository(impl: MusicRepository) : IMusicRepository
 
+    @Binds
+    @Singleton
+    abstract fun bindSettingsRepository(impl: SettingsRepository) : ISettingsRepository
 }

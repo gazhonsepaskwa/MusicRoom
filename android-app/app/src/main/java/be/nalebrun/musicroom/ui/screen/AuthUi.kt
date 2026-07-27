@@ -72,7 +72,7 @@ fun AuthUi() {
         // Titles
         Text("Music Room", fontSize = 20.sp)
         Text(
-            text = if (loginMode) "Login" else "Sign-in",
+            text = if (loginMode) "Login" else "Sign-up",
             modifier = Modifier.padding(bottom = 30.dp),
             fontSize = 30.sp
         )
@@ -106,9 +106,9 @@ fun AuthUi() {
             modifier = Modifier.padding(horizontal = 5.dp)
         ) {
             val buttonMod = Modifier.height(60.dp)
-            // toggle sign-in / login
+            // toggle sign-up / login
             BlackOrWhiteButton(
-                text = if (loginMode) "Sign-in" else "Login",
+                text = if (loginMode) "Sign-up" else "Login",
                 modifier = buttonMod.weight(2f),
                 active = false,
                 onClick = { loginMode = !loginMode }
@@ -116,7 +116,7 @@ fun AuthUi() {
 
             // Send api request
             BlackOrWhiteButton(
-                text = if (loginMode) "Login ->" else "Sign-in ->",
+                text = if (loginMode) "Login ->" else "Sign-up ->",
                 modifier = buttonMod.weight(3f),
                 active = true,
                 onClick = {

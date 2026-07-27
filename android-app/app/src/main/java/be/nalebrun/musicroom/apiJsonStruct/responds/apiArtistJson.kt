@@ -2,12 +2,6 @@ package be.nalebrun.musicroom.apiJsonStruct.responds
 
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class MusicArtistJson(
-    val id: Int,
-    val title: String,
-    val duration: Int,
-)
 
 @Serializable
 data class AlbumsArtistJson(
@@ -22,7 +16,7 @@ data class ArtistSongsJson(
     val id: Int,
     val title: String,
     val images: List<String>,
-    val musics: List<MusicArtistJson>,
+    val musics: List<MusicJson>,
     val type: String
 )
 

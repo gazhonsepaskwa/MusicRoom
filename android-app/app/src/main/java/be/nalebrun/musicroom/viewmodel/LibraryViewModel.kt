@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,11 +34,10 @@ class LibraryViewModel @Inject constructor(
     fun getPlaylists() { viewModelScope.launch {
         credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
             apiRepository.get(
-            url = "https://musicroom.nalebrun.be/playlists/available",
+            url = "/playlists/available",
             auth = "Bearer $jwt",
             onResponse = { _, response ->
                 val res = Json.decodeFromString<List<libraryJson>>(response.body?.string() ?: "")
-//                response.body?.string()?.let { Log.d("LIBRARY",it) }
                 _playlists.value = res
                 Log.d("LIBRARY", "HA S BE EN CALLED")
 
@@ -45,4 +46,22 @@ class LibraryViewModel @Inject constructor(
         )
     }
     }}
+
+    fun addMusicToPlaylist(musicId: Int, playlistId: Int) { viewModelScope.launch {
+        val body = """{"musicId": $musicId, "playlistId": $playlistId}""".toRequestBody("application/json".toMediaType())
+        credentialRepository.jwtFlow.firstOrNull().let { jwt ->
+            apiRepository.post(
+                url = "/playlists/add-music",
+                body = body,
+                auth = "Bearer $jwt",
+                onResponse = { _, response ->
+//                    if (response.code in 200..<300) {
+//
+//                    }
+                },
+                onFailure = { _, e -> e.printStackTrace()}
+            )
+        }
+    }}
+
 }

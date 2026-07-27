@@ -24,6 +24,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,11 +43,12 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.apiJsonStruct.responds.AlbumsArtistJson
-import be.nalebrun.musicroom.apiJsonStruct.responds.MusicArtistJson
+import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
 import be.nalebrun.musicroom.ui.element.ActiveScreen
 import be.nalebrun.musicroom.ui.element.AlbumCard
 import be.nalebrun.musicroom.ui.element.ArtistCard
 import be.nalebrun.musicroom.ui.element.BottomScreenMenu
+import be.nalebrun.musicroom.ui.element.PageTopBackButton
 import be.nalebrun.musicroom.viewmodel.ArtistViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import coil3.compose.AsyncImage
@@ -58,7 +60,6 @@ enum class ArtistType {
 
 @Composable
 fun ArtistUi(artistId: Int) {
-    Log.d("ARTIST", "$artistId")
     val viewModel: ArtistViewModel = hiltViewModel()
     val activity = LocalActivity.current
     val navigationViewModel: NavigationViewModel = if (activity != null) {
@@ -68,17 +69,17 @@ fun ArtistUi(artistId: Int) {
     }
 
     val artist: String? by viewModel.artist.collectAsStateWithLifecycle()
-    val musics: List<MusicArtistJson> by viewModel.musics.collectAsStateWithLifecycle()
+    val musics: List<MusicJson> by viewModel.musics.collectAsStateWithLifecycle()
     val albums: List<AlbumsArtistJson> by viewModel.albums.collectAsStateWithLifecycle()
     val image: String? by viewModel.artistImage.collectAsStateWithLifecycle()
 
     var type by remember { mutableStateOf(ArtistType.SONGS) }
     var shuffleOn by remember { mutableStateOf(false) }
 
-    if (type == ArtistType.ALBUM)
+    LaunchedEffect(artistId) {
         viewModel.getAlbumsFromArtist(artistId)
-    else
         viewModel.getSongsFromArtist(artistId)
+    }
 
     Column (
         modifier = Modifier
@@ -88,6 +89,7 @@ fun ArtistUi(artistId: Int) {
         Column(
             modifier = Modifier.weight(1f)
         ) {
+            PageTopBackButton(onClick = { navigationViewModel.navigateBack() })
             Box(
                 modifier = Modifier
                     .height(100.dp)
@@ -113,19 +115,32 @@ fun ArtistUi(artistId: Int) {
                 } else {
                     Text("???", fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 }
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ){
-                    Image(
-                        painter = painterResource(R.drawable.outline_play_arrow_24),
-                        contentDescription = ""
-                    )
-                    Image(
-                        painter = painterResource(if (shuffleOn) { R.drawable.outline_shuffle_on_24} else { R.drawable.outline_shuffle_24 }),
-                        contentDescription = "",
-                        modifier = Modifier.clickable(true, onClick = { shuffleOn = !shuffleOn })
-                    )
+                if (type == ArtistType.SONGS) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.outline_play_arrow_24),
+                            contentDescription = "",
+                            modifier = Modifier.clickable(true, onClick = {
+//                                viewModel.musicRepository.replaceWaitingList(musics)
+                            })
+                        )
+                        Image(
+                            painter = painterResource(
+                                if (shuffleOn) {
+                                    R.drawable.outline_shuffle_on_24
+                                } else {
+                                    R.drawable.outline_shuffle_24
+                                }
+                            ),
+                            contentDescription = "",
+                            modifier = Modifier.clickable(
+                                true,
+                                onClick = { shuffleOn = !shuffleOn })
+                        )
 
+                    }
                 }
             }
             Row(
@@ -182,7 +197,7 @@ fun ArtistUi(artistId: Int) {
             }
         }
         BottomScreenMenu(
-            activeScreen = ActiveScreen.FAVORITE,
+            activeScreen = ActiveScreen.NONE,
         )
 
     }

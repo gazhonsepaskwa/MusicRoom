@@ -47,6 +47,7 @@ import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
 import be.nalebrun.musicroom.ui.element.PageTopBackButton
 import be.nalebrun.musicroom.ui.element.QueueBottomSheet
 import be.nalebrun.musicroom.viewmodel.MusicViewModel
+import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import coil3.compose.AsyncImage
 import androidx.compose.runtime.collectAsState
 
@@ -61,23 +62,28 @@ enum class Repeat{
 fun MusicPlayerUi() {
 
     val activity = LocalActivity.current
-    val viewModel: MusicViewModel = if (activity != null) {
+    val musicViewModel: MusicViewModel = if (activity != null) {
+        hiltViewModel(activity as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
+    val navigationViewModel: NavigationViewModel = if (activity != null) {
         hiltViewModel(activity as ViewModelStoreOwner)
     } else {
         hiltViewModel()
     }
 
-    val currentSong: Int by viewModel.currentSong.collectAsStateWithLifecycle()
+    val currentSong: Int by musicViewModel.currentSong.collectAsStateWithLifecycle()
 
     var lyrics  by remember { mutableStateOf(""      ) }
 
-    val musicJson: MusicJson by viewModel.music.collectAsStateWithLifecycle()
+    val musicJson: MusicJson by musicViewModel.music.collectAsStateWithLifecycle()
 
     var showQueueSheet by remember { mutableStateOf(false) }
 
     // on song change, fetch the info of the next song
     LaunchedEffect(currentSong) {
-        viewModel.fetchMusicById(currentSong)
+        musicViewModel.fetchMusicById(currentSong)
     }
 
     Column(
@@ -86,7 +92,7 @@ fun MusicPlayerUi() {
             .fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        PageTopBackButton()
+        PageTopBackButton(onClick = { navigationViewModel.navigateBack() })
 
         CoverArt(musicJson.album?.images?.getOrNull(1) ?: "", lyrics) // take the second image because the screen quality is low
 
@@ -96,9 +102,9 @@ fun MusicPlayerUi() {
             Text(musicJson.artists.firstOrNull()?.title ?: "Unknown Artist")
         }
 
-        SongProgressBar(viewModel)
+        SongProgressBar(musicViewModel)
 
-        MusicControlButtons(viewModel)
+        MusicControlButtons(musicViewModel)
 
         BottomButtons(onQueueClick = { showQueueSheet = true })
     }
@@ -106,9 +112,8 @@ fun MusicPlayerUi() {
     if (showQueueSheet) {
         @OptIn(ExperimentalMaterial3Api::class)
         QueueBottomSheet(
-            viewModel,
-            onDismissRequest = { showQueueSheet = false }
-        )
+            musicViewModel,
+            onDismissRequest = { showQueueSheet = false })
     }
 }
 

@@ -1,19 +1,29 @@
 package be.nalebrun.musicroom
 
 import android.app.Application
+import android.os.Build
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.util.Log
+import be.nalebrun.musicroom.repositories.ISettingsRepository
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
+import java.util.UUID
 import java.util.logging.Level
 import java.util.logging.Logger
+import javax.inject.Inject
 
 @HiltAndroidApp
 class MusicRoomApp : Application() {
     companion object {
         const val TAG = "MusicRoomApp"
     }
+
+    @Inject
+    lateinit var settingsRepository: ISettingsRepository
 
     override fun onCreate() {
         super.onCreate()
@@ -43,5 +53,22 @@ class MusicRoomApp : Application() {
         }
 
         Log.d(TAG, "Application created")
+
+        val scope = MainScope()
+        scope.launch {
+            val currentUuid = settingsRepository.deviceUuidFlow.first()
+            if (currentUuid == null) {
+                val newUuid = UUID.randomUUID().toString()
+                settingsRepository.setDeviceUuid(newUuid)
+                Log.d(TAG, "Generated new device UUID: $newUuid")
+            }
+
+            val currentName = settingsRepository.deviceNameFlow.first()
+            if (currentName == null) {
+                val deviceName = "${Build.MANUFACTURER} ${Build.MODEL}"
+                settingsRepository.setDeviceName(deviceName)
+                Log.d(TAG, "Stored device name: $deviceName")
+            }
+        }
     }
 }

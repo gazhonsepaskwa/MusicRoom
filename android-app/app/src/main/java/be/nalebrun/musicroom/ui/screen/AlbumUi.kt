@@ -1,5 +1,6 @@
 package be.nalebrun.musicroom.ui.screen
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,16 +34,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
 import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.ui.element.ActiveScreen
 import be.nalebrun.musicroom.ui.element.AlbumListCard
 import be.nalebrun.musicroom.ui.element.BottomScreenMenu
+import be.nalebrun.musicroom.ui.element.PageTopBackButton
 import be.nalebrun.musicroom.viewmodel.AlbumViewModel
+import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import coil3.compose.AsyncImage
 
 @Composable
 fun AlbumUi(albumId: Int) {
     val viewModel: AlbumViewModel = hiltViewModel()
+    val activity = LocalActivity.current
+    val navigationViewModel: NavigationViewModel = if (activity != null) {
+        hiltViewModel(activity as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
 
     val musics by viewModel.musics.collectAsState()
     val image by viewModel.image.collectAsState()
@@ -49,7 +60,9 @@ fun AlbumUi(albumId: Int) {
 
     var shuffleOn by remember { mutableStateOf(false) }
 
-    viewModel.getAlbum(albumId)
+    LaunchedEffect(albumId) {
+        viewModel.getAlbum(albumId)
+    }
 
     Column (
         modifier = Modifier
@@ -60,6 +73,7 @@ fun AlbumUi(albumId: Int) {
         Column(
             modifier = Modifier.weight(1f)
         ) {
+            PageTopBackButton(onClick = { navigationViewModel.navigateBack() })
             Row (
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
@@ -83,10 +97,6 @@ fun AlbumUi(albumId: Int) {
                         contentDescription = null
                     )
                 }
-//                Image(
-//                    painter = painterResource(R.drawable.outline_shuffle_24), //change to image
-//                    contentDescription = "",
-//                )
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -102,7 +112,9 @@ fun AlbumUi(albumId: Int) {
                     Image(
                         painter = painterResource(R.drawable.outline_play_arrow_24),
                         contentDescription = "",
-                        modifier = Modifier.clickable(true, onClick = {})
+                        modifier = Modifier.clickable(true, onClick = {
+//                            viewModel.musicRepository.replaceWaitingList(musics)
+                        })
                     )
                     Image(
                         painter = painterResource(if (shuffleOn) { R.drawable.outline_shuffle_on_24}
@@ -119,13 +131,13 @@ fun AlbumUi(albumId: Int) {
                 modifier = Modifier.weight(1f)
             ) {
                 items(musics) { item ->
-                    AlbumListCard(item.title, "")
+                    AlbumListCard(viewModel.musicRepository, item)
                     HorizontalDivider(thickness = 1.dp, color = Color.Black)
                 }}
         }
 
         BottomScreenMenu(
-            activeScreen = ActiveScreen.FAVORITE,
+            activeScreen = ActiveScreen.NONE,
         )
     }
 }

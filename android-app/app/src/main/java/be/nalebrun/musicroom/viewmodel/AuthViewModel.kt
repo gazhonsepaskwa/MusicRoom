@@ -7,11 +7,13 @@ import androidx.lifecycle.viewModelScope
 import be.nalebrun.musicroom.IAPIRepository
 import androidx.navigation.NavController
 import be.nalebrun.musicroom.APIRepository
+import be.nalebrun.musicroom.apiJsonStruct.responds.FriendRequestStatus
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiLoginFailureJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiLoginSuccessJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiSigninFailureJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiSigninSuccessJson
 import be.nalebrun.musicroom.repositories.ICredentialRepository
+import be.nalebrun.musicroom.repositories.ISettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import be.nalebrun.musicroom.repositories.CredentialRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +31,8 @@ import kotlin.code
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     val apiRepository: IAPIRepository,
-    val credentialRepository: ICredentialRepository
+    val credentialRepository: ICredentialRepository,
+    val settingsRepository: ISettingsRepository
 ) : ViewModel() {
 
     init {
@@ -44,24 +47,33 @@ class AuthViewModel @Inject constructor(
     val loginOk: StateFlow<Boolean?> = _loginOk
 
     fun login(username: String, password: String) { viewModelScope.launch {
+        val deviceID = settingsRepository.deviceUuidFlow.firstOrNull() ?: ""
+        val deviceName = settingsRepository.deviceNameFlow.firstOrNull() ?: ""
+
         val body = FormBody.Builder()
             .add("username", username)
+            .add("deviceID", deviceID)
+            .add("deviceName", deviceName)
             .add("password", password)
             .build()
 
         apiRepository.post(
-            url = "https://musicroom.nalebrun.be/auth/login",
+            url = "auth/login",
             body = body,
             onResponse = { _, response ->
+                val bodyString = response.body?.string() ?: ""
                 if (response.code in 200..<300) {
-                    val jwt = Json.decodeFromString<apiLoginSuccessJson>(response.body?.string() ?: "").access_token
+                    val jwt = Json.decodeFromString<apiLoginSuccessJson>(bodyString).access_token
                     viewModelScope.launch {
                         //  store the jwt
                         credentialRepository.setJWT(jwt)
                         _loginOk.value = true
                     }
                 } else {
-                    _loginResult.value = Json.decodeFromString< apiLoginFailureJson>(response.body?.string() ?: "").message
+                    val failureMessage = Json.decodeFromString<apiLoginFailureJson>(bodyString).message
+                    _loginResult.value = failureMessage
+                    Log.d("test123", "$failureMessage : ${response.code}")
+
                     _loginOk.value = false
                 }
                 response.close()
@@ -79,20 +91,26 @@ class AuthViewModel @Inject constructor(
     val signinResult: StateFlow<String?> = _signinResult
 
     fun signin(username: String, password: String, email: String) { viewModelScope.launch {
+        val deviceID = settingsRepository.deviceUuidFlow.firstOrNull() ?: ""
+        val deviceName = settingsRepository.deviceNameFlow.firstOrNull() ?: ""
+
         val body = FormBody.Builder()
             .add("username", username)
             .add("password", password)
             .add("email", email)
+            .add("deviceID", deviceID)
+            .add("deviceName", deviceName)
             .build()
 
         apiRepository.post(
-            url = "https://musicroom.nalebrun.be/auth/new_account",
+            url = "auth/new_account",
             body = body,
             onResponse = { _, response ->
+                val bodyString = response.body?.string() ?: ""
                 if (response.code in 200..<300) {
-                    _signinResult.value = Json.decodeFromString<apiSigninSuccessJson>(response.body?.string() ?: "").message
+                    _signinResult.value = Json.decodeFromString<apiSigninSuccessJson>(bodyString).message
                 } else {
-                    _signinResult.value = Json.decodeFromString<apiSigninFailureJson>(response.body?.string() ?: "").message.first()
+                    _signinResult.value = Json.decodeFromString<apiSigninFailureJson>(bodyString).message.first()
                 }
                 response.close()
             },
@@ -107,7 +125,7 @@ class AuthViewModel @Inject constructor(
             credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
                 if (jwt.isNotEmpty()) {
                     apiRepository.get(
-                        url = "https://musicroom.nalebrun.be/auth/profile",
+                        url = "auth/profile",
                         auth = "Bearer $jwt",
                         onResponse = { _, response ->
                             if (response.code in 200..<300) {
@@ -126,4 +144,6 @@ class AuthViewModel @Inject constructor(
             }
         }
     }
+
+
 }

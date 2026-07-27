@@ -4,9 +4,10 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import be.nalebrun.musicroom.IAPIRepository
-import be.nalebrun.musicroom.apiJsonStruct.responds.MusicSongsAlbumJson
+import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.SingleAlbumJson
 import be.nalebrun.musicroom.repositories.ICredentialRepository
+import be.nalebrun.musicroom.repositories.MusicRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,13 +20,14 @@ import javax.inject.Inject
 @HiltViewModel
 class AlbumViewModel @Inject constructor(
     val apiRepository: IAPIRepository,
-    val credentialRepository: ICredentialRepository
+    val credentialRepository: ICredentialRepository,
+    val musicRepository: MusicRepository
 ) : ViewModel() {
-    private val _musics = MutableStateFlow<List<MusicSongsAlbumJson>>(emptyList())
+    private val _musics = MutableStateFlow<List<MusicJson>>(emptyList())
     private val _albumName = MutableStateFlow<String>("")
     private val _image = MutableStateFlow<String>("")
 
-    val musics : StateFlow<List<MusicSongsAlbumJson>> = _musics
+    val musics : StateFlow<List<MusicJson>> = _musics
     val albumName: StateFlow<String> = _albumName
     val image: StateFlow<String> = _image
 
@@ -33,7 +35,7 @@ class AlbumViewModel @Inject constructor(
         credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
             if (jwt.isNotEmpty()) {
                 apiRepository.get(
-                    "https://musicroom.nalebrun.be/album/$albumId",
+                    "/album/$albumId",
                     "Bearer $jwt",
                     {_, response ->
                         if (response.code in 200 ..<300) {
@@ -49,7 +51,7 @@ class AlbumViewModel @Inject constructor(
                                     e.printStackTrace()
                                 }
                             }
-                        Log.d("EXIT ALB", "???")}
+                        }
                     },
                     {_, e -> e.printStackTrace() }
                 )

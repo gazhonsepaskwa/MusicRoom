@@ -7,6 +7,7 @@ import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { playlist } from '../../generated/prisma/browser';
 import { PlaylistVersionResponseDto } from './dto/playlists.dto';
+import { title } from 'process';
 
 @Injectable()
 export class PlaylistsService {
@@ -38,6 +39,13 @@ export class PlaylistsService {
                   id: true,
                   title: true,
                   duration: true,
+				  album: {
+					select: {
+						title: true,
+						date: true,
+						images: true,
+					},
+				  },
                   artists: {
                     select: {
                       title: true,

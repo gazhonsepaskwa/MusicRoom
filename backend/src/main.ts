@@ -10,10 +10,9 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.getHttpAdapter().getInstance().set('trust proxy', 1);
   const config = new DocumentBuilder()
-    .setTitle('Cats example')
-    .setDescription('The cats API description')
-    .setVersion('1.0')
-    .addTag('cats')
+    .setTitle('Music Room')
+    .setDescription('Music Room API description: Nothing to do with cats... Unfortunatly')
+    .setVersion('0.5')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);

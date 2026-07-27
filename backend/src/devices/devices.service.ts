@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { deviceship } from '../../generated/prisma/client.js';
 import { WebSocketsService } from '../websockets/websockets.service';
 
 @Injectable()
@@ -90,6 +91,20 @@ export class DevicesService {
       },
     });
     return device;
+  }
+
+  async deviceship(deviceId: string, userId: number) : Promise<deviceship> {
+	const deviceship = await this.prisma.deviceship.findUnique({
+		where: {
+			deviceId_userId: {
+				deviceId,
+				userId
+			}
+		}
+	});
+	if (!deviceship)
+		throw new BadRequestException("No Deviceship Found between user and device");
+	return deviceship;
   }
 
   async deleteDevice(id: string, userId: number) {

@@ -1,6 +1,6 @@
 package be.nalebrun.musicroom.ui.screen
 
-import android.R.attr.contentDescription
+import android.util.Log
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ComposableOpenTarget
 import androidx.compose.runtime.collectAsState
@@ -48,11 +50,25 @@ import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 @Composable
 fun FriendsUi() {
     val viewModel: FriendsViewModel = hiltViewModel()
+    val activity = LocalActivity.current
+    val navigationViewModel: NavigationViewModel = if (activity != null) {
+        hiltViewModel(activity as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
     val friends by viewModel.friends.collectAsState()
+    val friendRequests by viewModel.friendRequests.collectAsState()
 
     var showBottomSheet by remember { mutableStateOf(false) }
+    var showPermissionsSheet by remember { mutableStateOf(false) }
     var selectedFriendId by remember { mutableStateOf<Int?>(null) }
+
+    var canSeek by remember { mutableStateOf(false) }
+    var canTogglePlayPause by remember { mutableStateOf(false) }
+    var canModifyMusic by remember { mutableStateOf(false) }
+
     val sheetState = rememberModalBottomSheetState()
+    val permissionsSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
     if (showBottomSheet) {
@@ -60,21 +76,23 @@ fun FriendsUi() {
             onDismissRequest = { showBottomSheet = false },
             actions = listOf(
                 ActionItem(
-                    label = "start control",
-                    icon = R.drawable.outline_devices_other_24,
+                    label = "manage account access",
+                    icon = R.drawable.outline_account_circle_24,
                     onClick = {
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
                             if (!sheetState.isVisible) {
                                 showBottomSheet = false
+                                showPermissionsSheet = true
                             }
                         }
                     }
                 ),
                 ActionItem(
-                    label = "manage account access",
+                    label = "See profile",
                     icon = R.drawable.outline_account_circle_24,
                     onClick = {
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            navigationViewModel.navigateTo("user/$selectedFriendId")
                             if (!sheetState.isVisible) {
                                 showBottomSheet = false
                             }
@@ -98,6 +116,57 @@ fun FriendsUi() {
         )
     }
 
+    if (showPermissionsSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showPermissionsSheet = false },
+            sheetState = permissionsSheetState
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .padding(bottom = 32.dp)
+            ) {
+                Text(
+                    text = "Manage Access",
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                PermissionToggle(
+                    label = "Can Seek",
+                    checked = canSeek,
+                    onCheckedChange = {
+                        canSeek = it
+                        selectedFriendId?.let { id ->
+                            viewModel.updatePermissions(id, it, canTogglePlayPause, canModifyMusic)
+                        }
+                    }
+                )
+                PermissionToggle(
+                    label = "Can Toggle Play/Pause",
+                    checked = canTogglePlayPause,
+                    onCheckedChange = {
+                        canTogglePlayPause = it
+                        selectedFriendId?.let { id ->
+                            viewModel.updatePermissions(id, canSeek, it, canModifyMusic)
+                        }
+                    }
+                )
+                PermissionToggle(
+                    label = "Can Modify Music",
+                    checked = canModifyMusic,
+                    onCheckedChange = {
+                        canModifyMusic = it
+                        selectedFriendId?.let { id ->
+                            viewModel.updatePermissions(id, canSeek, canTogglePlayPause, it)
+                        }
+                    }
+                )
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxHeight(),
@@ -108,6 +177,36 @@ fun FriendsUi() {
         ) {
             Title("Friends")
             LazyColumn(modifier = Modifier.weight(1f)) {
+                if (friendRequests.isNotEmpty()) {
+                    item {
+                        Text(
+                            "Request :",
+                            modifier = Modifier.padding(10.dp),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    items(friendRequests) { request ->
+                        FriendRequestCard(
+                            name = request.requesterName ?: "Unknown",
+                            onAccept = {
+                                Log.d("FriendsUi", "Accept clicked for ${request.requesterId}")
+                                request.requesterId?.let { viewModel.acceptFriendRequest(it) }
+                            },
+                            onDecline = {
+                                Log.d("FriendsUi", "Decline clicked for ${request.requesterId}")
+                                request.requesterId?.let { viewModel.declineFriendRequest(it) }
+                            }
+                        )
+                    }
+                }
+
+                item {
+                    Text(
+                        "friends :",
+                        modifier = Modifier.padding(10.dp),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
                 items(friends) { friend ->
                     FriendCard(
                         title = friend.otherUsername,
@@ -126,6 +225,44 @@ fun FriendsUi() {
 }
 
 @Composable
+fun FriendRequestCard(
+    name: String,
+    onAccept: () -> Unit,
+    onDecline: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp, vertical = 5.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Image(
+                painter = painterResource(R.drawable.baseline_account_circle_24),
+                contentDescription = null,
+                modifier = Modifier.padding(end = 10.dp)
+            )
+            Text(text = name, fontWeight = FontWeight.Bold)
+        }
+        Row {
+            Image(
+                painter = painterResource(R.drawable.outline_check_24),
+                contentDescription = "Accept",
+                modifier = Modifier
+                    .padding(end = 10.dp)
+                    .clickable { onAccept() }
+            )
+            Image(
+                painter = painterResource(R.drawable.outline_cancel_24),
+                contentDescription = "Decline",
+                modifier = Modifier.clickable { onDecline() }
+            )
+        }
+    }
+}
+
+@Composable
 fun FriendCard(
     title: String,
     onClick: () -> Unit = {}
@@ -136,7 +273,6 @@ fun FriendCard(
         ,
         modifier = Modifier
             .padding(top = 2.dp, bottom = 2.dp, start = 10.dp)
-            .background(Color.White)
             .height(50.dp)
             .fillMaxWidth()
             .clickable { onClick() }
@@ -150,5 +286,26 @@ fun FriendCard(
         )
 
         Text(title, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+fun PermissionToggle(
+    label: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = label)
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
     }
 }

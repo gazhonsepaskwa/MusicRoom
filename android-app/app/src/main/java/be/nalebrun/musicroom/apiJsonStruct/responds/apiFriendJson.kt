@@ -3,7 +3,10 @@ package be.nalebrun.musicroom.apiJsonStruct.responds
 import kotlinx.serialization.Serializable
 
 enum class FriendRequestStatus {
+    PENDING,
     ACCEPTED,
+    NOTVIEWED,
+    REJECTED
 }
 
 @Serializable

@@ -6,8 +6,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.runtime.Composable
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.compose.rememberNavController
+import be.nalebrun.musicroom.repositories.CredentialRepository
 import be.nalebrun.musicroom.ui.theme.MusicRoomTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

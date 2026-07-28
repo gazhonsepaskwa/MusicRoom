@@ -54,7 +54,7 @@ interface ISettingsRepository {
 class SettingsRepository @Inject constructor(
     @ApplicationContext context: Context
 ) : ISettingsRepository {
-    private val dataStore        = context.dataStore
+    private val dataStore = context.dataStore
     private val defaultServerUrl = "musicroom.nalebrun.be"
 
     override val serverUrlFlow: Flow<String>

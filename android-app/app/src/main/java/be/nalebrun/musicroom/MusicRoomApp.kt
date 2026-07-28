@@ -5,8 +5,8 @@ import android.os.Build
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.util.Log
-import be.nalebrun.musicroom.repositories.ISettingsRepository
 import be.nalebrun.musicroom.repositories.ISocketIORepository
+import be.nalebrun.musicroom.repositories.ISettingsRepository
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.first

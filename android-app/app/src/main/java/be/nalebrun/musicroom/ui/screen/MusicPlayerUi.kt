@@ -48,8 +48,8 @@ import be.nalebrun.musicroom.ui.element.PageTopBackButton
 import be.nalebrun.musicroom.ui.element.QueueBottomSheet
 import be.nalebrun.musicroom.ui.element.DeviceControlBottomSheet
 import be.nalebrun.musicroom.viewmodel.MusicViewModel
-import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import be.nalebrun.musicroom.viewmodel.DevicesViewModel
+import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import coil3.compose.AsyncImage
 import androidx.compose.runtime.collectAsState
 

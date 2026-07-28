@@ -9,6 +9,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
+/**
+ * Repository to access credential (jwt) from DataStore
+ * @author nalebrun
+ */
 interface ICredentialRepository {
     /**
      * Flow to retrieve asynchronously from Datastore the JWT
@@ -24,11 +28,6 @@ interface ICredentialRepository {
     suspend fun setJWT(newToken: String)
 }
 
-/**
- * Repository to access credential from DataStore
- * @param context ? IDK what it really is.
- * @author nalebrun
- */
 class CredentialRepository @Inject constructor(
     @ApplicationContext context: Context
 ) : ICredentialRepository {

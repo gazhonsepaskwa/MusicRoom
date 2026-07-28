@@ -12,6 +12,10 @@ import okhttp3.Response
 import okio.IOException
 import javax.inject.Inject
 
+/**
+ * Class to interact with API
+ * @author nalebrun
+ */
 interface IAPIRepository {
     /**
      * Get the base URL from settings
@@ -79,12 +83,6 @@ interface IAPIRepository {
     )
 }
 
-/**
- * Class to interact with API
- * @author nalebrun
- * @property client (private) hold the connection client
- * @see IAuthRepository
- */
 class APIRepository @Inject constructor(
     private val client: OkHttpClient,
     private val settingsRepository: ISettingsRepository

@@ -16,6 +16,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
+/**
+ * Service that manage and maintain alive the music playback via the ExoPlayer
+ * @author nalebrun
+ */
 @AndroidEntryPoint
 class PlaybackService : MediaSessionService() {
     private var mediaSession: MediaSession? = null
@@ -34,29 +38,26 @@ class PlaybackService : MediaSessionService() {
         val dataSourceFactory = DefaultHttpDataSource.Factory()
             .setDefaultRequestProperties(mapOf("Authorization" to "Bearer $jwt"))
 
+        // create the ExoPlayer
         val player = ExoPlayer.Builder(this)
             .setMediaSourceFactory(DefaultMediaSourceFactory(this).setDataSourceFactory(dataSourceFactory))
             .build()
 
+        // create the mediaSession
         mediaSession = MediaSession.Builder(this, object : ForwardingPlayer(player) {
-            override fun seekToNext() {
-                musicRepository.goToNextSong()
-            }
-
-            override fun seekToPrevious() {
-                musicRepository.goToPreviousSong()
-            }
+            override fun seekToNext()     = musicRepository.goToNextSong()
+            override fun seekToPrevious() = musicRepository.goToPreviousSong()
 
             override fun isCommandAvailable(command: Int): Boolean {
-                return  command == Player.COMMAND_SEEK_TO_NEXT ||
-                        command == Player.COMMAND_SEEK_TO_PREVIOUS ||
+                return  command == COMMAND_SEEK_TO_NEXT     ||
+                        command == COMMAND_SEEK_TO_PREVIOUS ||
                         super.isCommandAvailable(command)
             }
 
             override fun getAvailableCommands(): Player.Commands {
                 return super.getAvailableCommands().buildUpon()
-                    .add(Player.COMMAND_SEEK_TO_NEXT)
-                    .add(Player.COMMAND_SEEK_TO_PREVIOUS)
+                    .add(COMMAND_SEEK_TO_NEXT)
+                    .add(COMMAND_SEEK_TO_PREVIOUS)
                     .build()
             }
         }).build()
@@ -66,7 +67,7 @@ class PlaybackService : MediaSessionService() {
         super.onDestroy()
         mediaSession?.run {
             player.release()
-            release()
+            release() // release the mediaSession
             mediaSession = null
         }
     }

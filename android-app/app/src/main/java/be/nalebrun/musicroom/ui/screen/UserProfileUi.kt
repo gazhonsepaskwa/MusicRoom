@@ -24,7 +24,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.apiJsonStruct.responds.FriendRequestStatus
 import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
-import be.nalebrun.musicroom.apiJsonStruct.responds.PlaylistJson
+import be.nalebrun.musicroom.apiJsonStruct.responds.PlaylistProfileJson
 import be.nalebrun.musicroom.ui.element.ActiveScreen
 import be.nalebrun.musicroom.ui.element.BottomScreenMenu
 import be.nalebrun.musicroom.ui.element.PageTopBackButton
@@ -198,7 +198,7 @@ fun FavoriteMusicItem(music: MusicJson) {
 }
 
 @Composable
-fun PlaylistItem(playlist: PlaylistJson) {
+fun PlaylistItem(playlist: PlaylistProfileJson) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

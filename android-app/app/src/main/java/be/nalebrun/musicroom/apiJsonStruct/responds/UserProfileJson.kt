@@ -19,14 +19,14 @@ data class UserProfileJson(
     val firstPreferedMusicId: Int? = null,
     val secondPreferedMusicId: Int? = null,
     val thirdPreferedMusicId: Int? = null,
-    val ownedPlaylists: List<PlaylistJson>? = emptyList(),
-    val invitedPlaylists: List<PlaylistJson>? = emptyList()
+    val ownedPlaylists: List<PlaylistProfileJson>? = emptyList(),
+    val invitedPlaylists: List<PlaylistProfileJson>? = emptyList()
 )
 
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 @JsonIgnoreUnknownKeys
-data class PlaylistJson(
+data class PlaylistProfileJson(
     val id: Int,
     val title: String,
     val duration: Long = 0,

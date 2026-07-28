@@ -8,11 +8,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import be.nalebrun.musicroom.repositories.CredentialRepository
+import be.nalebrun.musicroom.ui.screen.AlbumUi
+import be.nalebrun.musicroom.ui.screen.ArtistUi
 import be.nalebrun.musicroom.ui.screen.AuthUi
-import be.nalebrun.musicroom.ui.screen.FavoriteUi
 import be.nalebrun.musicroom.ui.screen.FriendsUi
 import be.nalebrun.musicroom.ui.screen.LibraryUi
 import be.nalebrun.musicroom.ui.screen.MusicPlayerUi
+import be.nalebrun.musicroom.ui.screen.PlaylistUi
 import be.nalebrun.musicroom.ui.screen.SearchUi
 import be.nalebrun.musicroom.ui.screen.SettingsUi
 import be.nalebrun.musicroom.ui.screen.ProfileUi
@@ -57,7 +60,7 @@ fun CreateNavGraph(
         startDestination =  startDestination,
     ) {
         composable(route = "auth")          { AuthUi() }
-        composable(route = "favorite")      { FavoriteUi() }
+        composable(route = "favorite")      { PlaylistUi(-1) }
         composable(route = "library")       { LibraryUi() }
         composable(route = "friends")       { FriendsUi() }
         composable(route = "settings")      { SettingsUi() }
@@ -68,15 +71,15 @@ fun CreateNavGraph(
         composable(route = "search")        { SearchUi() }
         composable(route = "artist/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")
-            // ArtistUi(id = id)
+             ArtistUi(artistId = id!!.toInt())
         }
         composable(route = "playlist/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")
-            // PlaylistUi(id = id)
+            PlaylistUi(id = id!!.toInt())
         }
         composable(route = "album/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")
-            // AlbumUi(id = id)
+             AlbumUi(albumId = id!!.toInt())
         }
         composable(route = "user/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: -1

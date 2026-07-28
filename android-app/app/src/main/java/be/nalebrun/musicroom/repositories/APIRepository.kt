@@ -61,6 +61,14 @@ interface IAPIRepository {
         onResponse: (call: Call, response: Response) -> Unit,
         onFailure: (call: Call, e: IOException) -> Unit
     )
+
+    fun delete(
+        url: String,
+        body: RequestBody,
+        auth: String = "",
+        onResponse: (call: Call, response: Response) -> Unit,
+        onFailure: (call: Call, e: IOException) -> Unit
+    )
 }
 
 /**
@@ -143,6 +151,31 @@ class APIRepository @Inject constructor(
         val request = Request.Builder()
             .url(resolveUrl(url))
             .patch(body)
+            .addHeader("Authorization", auth)
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                onFailure(call, e)
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                onResponse(call,response)
+                response.close()
+            }
+        })
+    }
+
+    override fun delete(
+        url: String,
+        body: RequestBody,
+        auth: String,
+        onResponse: (call: Call, response: Response) -> Unit,
+        onFailure: (call: Call, e: IOException) -> Unit
+    ) {
+        val request = Request.Builder()
+            .url(resolveUrl(url))
+            .delete(body)
             .addHeader("Authorization", auth)
             .build()
 

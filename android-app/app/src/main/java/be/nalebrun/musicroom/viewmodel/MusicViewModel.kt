@@ -6,6 +6,10 @@ import be.nalebrun.musicroom.repositories.MusicRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
+/**
+ * The logic for the music playback and the waiting list
+ * @author nalebrun
+ */
 @HiltViewModel
 class MusicViewModel @Inject constructor(
     val musicRepository: MusicRepository,

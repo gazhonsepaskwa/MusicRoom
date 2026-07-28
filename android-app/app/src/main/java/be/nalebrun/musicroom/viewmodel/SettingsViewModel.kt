@@ -12,6 +12,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * The logic for the settings page
+ * @author nalebrun
+ */
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val settingsRepository: ISettingsRepository,
@@ -25,6 +29,11 @@ class SettingsViewModel @Inject constructor(
             initialValue = ""
         )
 
+    /**
+     * Update the server URL in the repository and clear the JWT
+     * @param url The new server URL
+     * @param onUrlChanged Callback to execute after the URL is updated
+     */
     fun updateServerUrl(url: String, onUrlChanged: () -> Unit) {
         viewModelScope.launch {
             val currentUrl = settingsRepository.serverUrlFlow.first()

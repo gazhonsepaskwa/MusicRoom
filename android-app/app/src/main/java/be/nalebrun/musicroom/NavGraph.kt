@@ -22,7 +22,27 @@ import be.nalebrun.musicroom.ui.screen.ProfileUi
 import be.nalebrun.musicroom.ui.screen.UserProfileUi
 import be.nalebrun.musicroom.ui.screen.ServerSettingsUi
 import be.nalebrun.musicroom.ui.screen.ChangePasswordUi
+import be.nalebrun.musicroom.ui.screen.ProfileUi
+import be.nalebrun.musicroom.ui.screen.UserProfileUi
+import be.nalebrun.musicroom.ui.screen.ServerSettingsUi
+import be.nalebrun.musicroom.ui.screen.ChangePasswordUi
+import be.nalebrun.musicroom.viewmodel.AuthViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
+import be.nalebrun.musicroom.viewmodel.SocketViewModel
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.collectAsState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import android.util.Log
+import androidx.navigation.navDeepLink
 
 /**
  * Function that Create the NavGraph.
@@ -32,14 +52,63 @@ import be.nalebrun.musicroom.viewmodel.NavigationViewModel
  * @param startDestination Name of the route to start the app
  * @author nalebrun
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateNavGraph(
     navController:        NavHostController,
     startDestination:     String
 ) {
     val navigationViewModel: NavigationViewModel = hiltViewModel()
+    val socketViewModel: SocketViewModel = hiltViewModel()
     val navigationEvent by navigationViewModel.navigationEvent.observeAsState()
     val backEvent by navigationViewModel.backEvent.observeAsState()
+    val incomingRequest by socketViewModel.incomingRequest.collectAsState()
+    val sheetState = rememberModalBottomSheetState()
+
+    LaunchedEffect(incomingRequest) {
+        Log.d("NavGraph", "incomingRequest state changed: $incomingRequest")
+    }
+
+    if (incomingRequest != null) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                Log.d("NavGraph", "Dismissing Sheet")
+                socketViewModel.dismissRequest()
+            },
+            sheetState = sheetState
+        ) {
+            Log.d("NavGraph", "Rendering BottomSheet Content")
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Connection Request",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Device '${incomingRequest?.deviceId}' (User ID: ${incomingRequest?.userId}) wants to connect to your device. Do you accept?",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    TextButton(onClick = { socketViewModel.dismissRequest() }) {
+                        Text("No")
+                    }
+                    Button(onClick = { socketViewModel.acceptRequest() }) {
+                        Text("Yes")
+                    }
+                }
+                Spacer(modifier = Modifier.height(32.dp))
+            }
+        }
+    }
 
     LaunchedEffect(navigationEvent) {
         navigationEvent?.let { route ->
@@ -59,16 +128,54 @@ fun CreateNavGraph(
         navController =     navController,
         startDestination =  startDestination,
     ) {
-        composable(route = "auth")          { AuthUi() }
-        composable(route = "favorite")      { PlaylistUi(-1) }
-        composable(route = "library")       { LibraryUi() }
-        composable(route = "friends")       { FriendsUi() }
-        composable(route = "settings")      { SettingsUi() }
-        composable(route = "profile")       { ProfileUi() }
+        ///////////////
+        // deep link //
+        ///////////////
+
+        // Validate email
+        composable(
+            route = "validate_email?token={token}",
+            deepLinks = listOf(navDeepLink { uriPattern = "musicroom://auth/callback?verificationToken={token}" })
+        ) { backStackEntry ->
+            val token = backStackEntry.arguments?.getString("token")
+            val authViewModel: AuthViewModel = hiltViewModel()
+
+            LaunchedEffect(token) {
+                token?.let {
+                    Log.d("NavGraph", "Storing token from deep link (validate_email): $it")
+                    authViewModel.credentialRepository.setJWT(it)
+                }
+            }
+            PlaylistUi(-1) // -1 is the favorite playlist fallback
+        }
+
+        // google auth callback (necessary ???)
+        composable(
+            route = "oauth_callback?token={token}",
+            deepLinks = listOf(navDeepLink { uriPattern = "musicroom://auth/callback?token={token}" })
+        ) { backStackEntry ->
+            val token = backStackEntry.arguments?.getString("token")
+            val authViewModel: AuthViewModel = hiltViewModel()
+
+            LaunchedEffect(token) {
+                token?.let {
+                    Log.d("NavGraph", "Storing token from Google OAuth: $it")
+                    authViewModel.credentialRepository.setJWT(it)
+                }
+            }
+            PlaylistUi(-1) // -1 is the favorite playlist fallback
+        }
+
+        composable(route = "auth")            { AuthUi() }
+        composable(route = "favorite")        { PlaylistUi(-1) }
+        composable(route = "library")         { LibraryUi() }
+        composable(route = "friends")         { FriendsUi() }
+        composable(route = "settings")        { SettingsUi() }
+        composable(route = "profile")         { ProfileUi() }
         composable(route = "server-settings") { ServerSettingsUi() }
         composable(route = "change-password") { ChangePasswordUi() }
-        composable(route = "music-player")  { MusicPlayerUi() }
-        composable(route = "search")        { SearchUi() }
+        composable(route = "music-player")    { MusicPlayerUi() }
+        composable(route = "search")          { SearchUi() }
         composable(route = "artist/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")
              ArtistUi(artistId = id!!.toInt())
@@ -80,6 +187,10 @@ fun CreateNavGraph(
         composable(route = "album/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")
              AlbumUi(albumId = id!!.toInt())
+        }
+        composable(route = "user/{id}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: -1
+            UserProfileUi(userId = id)
         }
         composable(route = "user/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: -1

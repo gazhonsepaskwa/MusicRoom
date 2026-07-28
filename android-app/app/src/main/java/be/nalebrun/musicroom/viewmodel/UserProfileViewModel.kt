@@ -19,21 +19,32 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 
+/**
+ * The logic for the user profile page
+ * @author nalebrun
+ */
 @HiltViewModel
 class UserProfileViewModel @Inject constructor(
     private val apiRepository: IAPIRepository,
     private val credentialRepository: ICredentialRepository
 ) : ViewModel() {
 
+    // The loaded user profile information
     private val _profile = MutableStateFlow<UserProfileJson?>(null)
     val profile: StateFlow<UserProfileJson?> = _profile
 
+    // List of the user's favorite tracks
     private val _favoriteMusics = MutableStateFlow<List<MusicJson>>(emptyList())
     val favoriteMusics: StateFlow<List<MusicJson>> = _favoriteMusics
 
+    // Current friend request status relative to the logged-in user
     private val _friendRequestState = MutableStateFlow<FriendRequestStatus?>(FriendRequestStatus.NOTVIEWED) // understand as not friends
     val friendRequestState : StateFlow<FriendRequestStatus?> = _friendRequestState
 
+    /**
+     * Send a friend request to another user
+     * @param userId The ID of the user to invite
+     */
     fun sendFriendRequest(userId: Int) {
         viewModelScope.launch {
             credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
@@ -57,6 +68,10 @@ class UserProfileViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Fetch a user's profile and their favorite music
+     * @param userId The ID of the user whose profile to fetch
+     */
     fun fetchProfile(userId: Int) {
         viewModelScope.launch {
             credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->

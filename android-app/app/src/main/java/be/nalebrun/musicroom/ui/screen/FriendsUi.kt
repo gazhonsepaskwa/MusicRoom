@@ -105,6 +105,7 @@ fun FriendsUi() {
                     color = Color.Red,
                     onClick = {
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            viewModel.removeFriend(selectedFriendId)
                             if (!sheetState.isVisible) {
                                 showBottomSheet = false
                             }

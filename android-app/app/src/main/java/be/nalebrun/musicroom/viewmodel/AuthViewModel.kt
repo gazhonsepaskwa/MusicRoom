@@ -194,5 +194,16 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Logout the user
+     * @author nalebrun
+     */
+    fun logout() {
+        viewModelScope.launch {
+            credentialRepository.setJWT("")
+            _loginOk.value = false
+        }
+    }
+
 
 }

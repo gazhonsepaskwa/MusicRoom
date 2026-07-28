@@ -130,12 +130,12 @@ fun CreateNavGraph(
     ) {
         ///////////////
         // deep link //
-        ///////////////
+        /////////////// aka: from the outside
 
         // Validate email
         composable(
             route = "validate_email?token={token}",
-            deepLinks = listOf(navDeepLink { uriPattern = "musicroom://auth/callback?verificationToken={token}" })
+            deepLinks = listOf(navDeepLink { uriPattern = "musicroom://auth/callback?token={token}" })
         ) { backStackEntry ->
             val token = backStackEntry.arguments?.getString("token")
             val authViewModel: AuthViewModel = hiltViewModel()
@@ -144,27 +144,16 @@ fun CreateNavGraph(
                 token?.let {
                     Log.d("NavGraph", "Storing token from deep link (validate_email): $it")
                     authViewModel.credentialRepository.setJWT(it)
+                    // connect to the socket ? I am not sure if it I should do it there (TODO : check)
+                    socketViewModel.connectSocket()
                 }
             }
             PlaylistUi(-1) // -1 is the favorite playlist fallback
         }
 
-        // google auth callback (necessary ???)
-        composable(
-            route = "oauth_callback?token={token}",
-            deepLinks = listOf(navDeepLink { uriPattern = "musicroom://auth/callback?token={token}" })
-        ) { backStackEntry ->
-            val token = backStackEntry.arguments?.getString("token")
-            val authViewModel: AuthViewModel = hiltViewModel()
-
-            LaunchedEffect(token) {
-                token?.let {
-                    Log.d("NavGraph", "Storing token from Google OAuth: $it")
-                    authViewModel.credentialRepository.setJWT(it)
-                }
-            }
-            PlaylistUi(-1) // -1 is the favorite playlist fallback
-        }
+        ////////////////
+        // in app nav //
+        ////////////////
 
         composable(route = "auth")            { AuthUi() }
         composable(route = "favorite")        { PlaylistUi(-1) }

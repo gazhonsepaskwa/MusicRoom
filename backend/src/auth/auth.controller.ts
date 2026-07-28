@@ -98,15 +98,16 @@ export class AuthController {
 
   @Get('oauth')
   @Public()
-  @UseGuards(AuthGuard('oauth'))
+  @UseGuards(AuthGuard('google'))
   async oauthLogin(@Req() req) {}
 
   @Get('oauth/callback')
-  @UseGuards(AuthGuard('oauth'))
+  @Public()
+  @UseGuards(AuthGuard('google'))
   async oauthCallback(@Req() req) {
     const user = req.user;
-    return this.authService.validateOAuthLogin(user);
-  }
+	return user;
+	}
 
   @ApiOkResponse({type: UserResponseDto})
   @Post('delete-account')

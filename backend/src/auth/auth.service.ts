@@ -192,7 +192,7 @@ export class AuthService {
     let user = await this.usersService.user({ email: profile.email });
     if (!user) {
       user = await this.usersService.createUser({
-        username: profile.username,
+        username: profile.name,
         email: profile.email,
         verifiedEmail: true,
       });

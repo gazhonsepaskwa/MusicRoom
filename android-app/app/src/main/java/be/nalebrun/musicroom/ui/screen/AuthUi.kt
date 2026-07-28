@@ -134,6 +134,16 @@ fun AuthUi() {
                 }
             )
         }
+        BlackOrWhiteButton(
+            text = "Google",
+            modifier = Modifier.height(60.dp),
+            active = true,
+            onClick = {
+                if (activity != null) {
+                    viewModel.googleAuth(activity)
+                }
+            }
+        )
         // Display response
         Text(currentResult ?: "", textAlign = TextAlign.Center)
     }

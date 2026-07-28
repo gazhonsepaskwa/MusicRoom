@@ -19,9 +19,9 @@ import be.nalebrun.musicroom.ui.screen.ProfileUi
 import be.nalebrun.musicroom.ui.screen.UserProfileUi
 import be.nalebrun.musicroom.ui.screen.ServerSettingsUi
 import be.nalebrun.musicroom.ui.screen.ChangePasswordUi
+import be.nalebrun.musicroom.viewmodel.AuthViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import be.nalebrun.musicroom.viewmodel.SocketViewModel
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.collectAsState
@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import android.util.Log
+import androidx.navigation.navDeepLink
 
 /**
  * Function that Create the NavGraph.
@@ -120,16 +121,54 @@ fun CreateNavGraph(
         navController =     navController,
         startDestination =  startDestination,
     ) {
-        composable(route = "auth")          { AuthUi() }
-        composable(route = "favorite")      { FavoriteUi() }
-        composable(route = "library")       { LibraryUi() }
-        composable(route = "friends")       { FriendsUi() }
-        composable(route = "settings")      { SettingsUi() }
-        composable(route = "profile")       { ProfileUi() }
+        ///////////////
+        // deep link //
+        ///////////////
+
+        // Validate email
+        composable(
+            route = "validate_email?token={token}",
+            deepLinks = listOf(navDeepLink { uriPattern = "musicroom://auth/callback?verificationToken={token}" })
+        ) { backStackEntry ->
+            val token = backStackEntry.arguments?.getString("token")
+            val authViewModel: AuthViewModel = hiltViewModel()
+
+            LaunchedEffect(token) {
+                token?.let {
+                    Log.d("NavGraph", "Storing token from deep link (validate_email): $it")
+                    authViewModel.credentialRepository.setJWT(it)
+                }
+            }
+            FavoriteUi()
+        }
+
+        // google auth callback (necessary ???)
+        composable(
+            route = "oauth_callback?token={token}",
+            deepLinks = listOf(navDeepLink { uriPattern = "musicroom://auth/callback?token={token}" })
+        ) { backStackEntry ->
+            val token = backStackEntry.arguments?.getString("token")
+            val authViewModel: AuthViewModel = hiltViewModel()
+
+            LaunchedEffect(token) {
+                token?.let {
+                    Log.d("NavGraph", "Storing token from Google OAuth: $it")
+                    authViewModel.credentialRepository.setJWT(it)
+                }
+            }
+            FavoriteUi()
+        }
+
+        composable(route = "auth")            { AuthUi() }
+        composable(route = "favorite")        { FavoriteUi() }
+        composable(route = "library")         { LibraryUi() }
+        composable(route = "friends")         { FriendsUi() }
+        composable(route = "settings")        { SettingsUi() }
+        composable(route = "profile")         { ProfileUi() }
         composable(route = "server-settings") { ServerSettingsUi() }
         composable(route = "change-password") { ChangePasswordUi() }
-        composable(route = "music-player")  { MusicPlayerUi() }
-        composable(route = "search")        { SearchUi() }
+        composable(route = "music-player")    { MusicPlayerUi() }
+        composable(route = "search")          { SearchUi() }
         composable(route = "artist/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")
             // ArtistUi(id = id)

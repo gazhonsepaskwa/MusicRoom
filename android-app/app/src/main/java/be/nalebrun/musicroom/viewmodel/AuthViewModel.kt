@@ -1,5 +1,8 @@
 package be.nalebrun.musicroom.viewmodel
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -129,6 +132,34 @@ class AuthViewModel @Inject constructor(
                 _signinResult.value = e.message
             }
         )
+    }}
+
+    /**
+     * Google authentication
+     */
+    fun googleAuth(context: Context) { viewModelScope.launch {
+        var baseUrl = apiRepository.getBaseUrl()
+        if (baseUrl.isEmpty()) {
+            Log.e("AuthViewModel", "Cannot start Google Auth: Base URL is empty")
+            return@launch
+        }
+        
+        if (!baseUrl.startsWith("http")) {
+            baseUrl = "https://$baseUrl"
+        }
+        
+        val url = if (baseUrl.endsWith("/")) "${baseUrl}auth/oauth" else "$baseUrl/auth/oauth"
+
+        // launch browser via an intent
+        Log.d("AuthViewModel", "Opening Google Auth URL: $url")
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            Log.e("AuthViewModel", "Failed to open browser for Google Auth", e)
+        }
     }}
 
     /**

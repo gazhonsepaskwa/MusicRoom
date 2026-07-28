@@ -9,33 +9,58 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
 interface ISocketIORepository {
-    val isConnected: StateFlow<Boolean>
+    /**
+     * connect to the socket
+     */
     fun connect()
+
+    /**
+     * disconnect from the socket
+     */
     fun disconnect()
+
+    /**
+     * send a message to the socket
+     */
     fun emit(event: String, vararg args: Any)
+
+    /**
+     * add a listener to the socket
+     */
     fun on(event: String, listener: (Array<Any>) -> Unit)
+
+    /**
+     * remove a listener from the socket
+     */
     fun off(event: String)
 }
 
+/**
+ * Repository to manage the socket.io connection
+ * @author :nalebrun
+ */
 @Singleton
 class SocketIORepository @Inject constructor(
     private val settingsRepository: ISettingsRepository,
     private val credentialRepository: ICredentialRepository,
 ) : ISocketIORepository {
 
+    // the socket.io instance
     private var socket: Socket? = null
+    // global scope
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
     private val listeners = mutableMapOf<String, (Array<Any>) -> Unit>()
 
+    // reflect the socket connection state
     private val _isConnected = MutableStateFlow(false)
-    override val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
+    val          isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
 
     init {
         // Automatically reconnect when JWT or Server URL changes
@@ -60,24 +85,20 @@ class SocketIORepository @Inject constructor(
     }
 
     override fun connect() {
-        Log.d("SocketIORepository", "connect() called. Current status: connected=${socket?.connected()}")
         if (socket?.connected() == true) return
 
         scope.launch {
-            // url and jwt
-            Log.d("SocketIORepository", "Attempting to fetch base URL and JWT...")
-            val baseUrl = settingsRepository.serverUrlFlow.firstOrNull() ?: run {
-                Log.e("SocketIORepository", "Could not connect: Base URL is null")
-                return@launch
-            }
-            val jwt = credentialRepository.jwtFlow.firstOrNull() ?: ""
-            val deviceUuid = settingsRepository.deviceUuidFlow.firstOrNull() ?: ""
+            // get the infos from the storage
+            val baseUrl     = settingsRepository.serverUrlFlow.firstOrNull() ?:  run { return@launch }
+            val jwt         = credentialRepository.jwtFlow.firstOrNull() ?:      run { return@launch }
+            val deviceUuid  = settingsRepository.deviceUuidFlow.firstOrNull() ?: run { return@launch }
 
-            // auth & build
+            // auth headers
             val headers = mapOf(
                 "authorization" to listOf(jwt),
-                "device" to listOf(deviceUuid)
+                "device"        to listOf(deviceUuid)
             )
+            // build
             val options = IO.Options.builder()
                 .setExtraHeaders(headers)
                 .build()
@@ -85,45 +106,54 @@ class SocketIORepository @Inject constructor(
             try {
                 val url = if (baseUrl.startsWith("http")) baseUrl else "https://$baseUrl"
                 Log.d("SocketIORepository", "Initializing Socket.IO for $url")
-                
+
+                // Create a new socket instance
                 socket = IO.socket(url, options)
 
                 // Re-apply all registered listeners
                 listeners.forEach { (event, listener) ->
-                    Log.d("SocketIORepository", "Applying stored listener for event: '$event'")
                     socket?.on(event) { args ->
                         Log.d("SocketIORepository", "<<< RECEIVED EVENT: '$event' | DATA: ${args?.joinToString()}")
                         listener(args ?: emptyArray())
                     }
                 }
-                
+
+                ///////////////
+                // Listeners //
+                ///////////////
+
+                // connect
                 socket?.on(Socket.EVENT_CONNECT) {
                     Log.d("SocketIORepository", "Successfully connected to $url")
                     _isConnected.value = true
                 }
 
+                // disconnect
                 socket?.on(Socket.EVENT_DISCONNECT) { args ->
                     val reason = args.getOrNull(0)
                     Log.d("SocketIORepository", "Disconnected from $url. Reason: $reason")
                     _isConnected.value = false
                 }
 
+                // connection error
                 socket?.on(Socket.EVENT_CONNECT_ERROR) { args ->
                     val error = args.getOrNull(0)
                     Log.e("SocketIORepository", "Connection Error: $error")
                 }
 
-                // temporary logger
-                socket?.on("hostRequest") { args -> Log.d("SocketIORepository", ">>> [hostRequest] INCOMING: ${args?.joinToString()}") }
-                socket?.on("hostResponse") { args -> Log.d("SocketIORepository", ">>> [hostResponse] INCOMING: ${args?.joinToString()}") }
-                socket?.on("connectToDevice") { args -> Log.d("SocketIORepository", ">>> [connectToDevice] INCOMING: ${args?.joinToString()}") }
+                // custom sockets
+                socket?.on("hostRequest")       { args -> hostRequestListener(args)     } // (Host only)      Request sent from the device that want to connect to the host
+                socket?.on("hostResponse")      { args -> hostResponseListener(args)    } // (Non-host only)  Response sent from the host to the device
+                socket?.on("connectToDevice")   { args -> connectToDeviceListener(args) } // TODO
 
+                // General errors
                 socket?.on("error") { args ->
                     Log.e("SocketIORepository", "General Error: ${args.getOrNull(0)}")
                 }
 
-                Log.d("SocketIORepository", "Calling socket.connect()")
+                // do the actual connection
                 socket?.connect()
+
             } catch (e: Exception) {
                 Log.e("SocketIORepository", "Socket initialization failed", e)
             }
@@ -136,6 +166,7 @@ class SocketIORepository @Inject constructor(
     }
 
     override fun emit(event: String, vararg args: Any) {
+        // only emit if the socket is connected
         if (socket?.connected() == true) {
             socket?.emit(event, *args)
         } else {
@@ -144,19 +175,29 @@ class SocketIORepository @Inject constructor(
     }
 
     override fun on(event: String, listener: (Array<Any>) -> Unit) {
-        Log.d("SocketIORepository", "Registering listener for event: '$event' (Socket state: ${if (socket == null) "NULL" else "READY"})")
         listeners[event] = listener
         
-        // If socket exists, attach it now
         socket?.on(event) { args ->
-            Log.d("SocketIORepository", "<<< RECEIVED EVENT: '$event' | DATA: ${args?.joinToString()}")
             listener(args ?: emptyArray())
         }
     }
 
     override fun off(event: String) {
-        Log.d("SocketIORepository", "Removing listener for event: '$event'")
         listeners.remove(event)
         socket?.off(event)
+    }
+
+    /////////////////////////////////
+    // custom listeners definition //
+    /////////////////////////////////
+
+    private fun hostRequestListener(args: Array<Any>?) {
+        Log.d("SocketIORepository", ">>> [hostRequest] INCOMING: ${args?.joinToString()}")
+    }
+    private fun hostResponseListener(args: Array<Any>?) {
+        Log.d("SocketIORepository", ">>> [hostResponse] INCOMING: ${args?.joinToString()}")
+    }
+    private fun connectToDeviceListener(args: Array<Any>?) {
+        Log.d("SocketIORepository", ">>> [connectToDevice] INCOMING: ${args?.joinToString()}")
     }
 }

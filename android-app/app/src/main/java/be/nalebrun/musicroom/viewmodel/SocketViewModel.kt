@@ -75,6 +75,8 @@ class SocketViewModel @Inject constructor(
         dismissRequest()
     }
 
+    fun connectSocket() = socketIORepository.connect()
+
     fun dismissRequest() {
         _incomingRequest.value = null
         // TODO send no to the sender

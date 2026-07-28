@@ -23,25 +23,34 @@ import kotlin.code
 
 /**
  * The logic for the Authentification page
+ * @author nalebrun
  */
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    val apiRepository: IAPIRepository,
+    val apiRepository:        IAPIRepository,
     val credentialRepository: ICredentialRepository,
-    val settingsRepository: ISettingsRepository
+    val settingsRepository:   ISettingsRepository
 ) : ViewModel() {
 
     init {
-        skipIfAlreadyAuthenticate()  // Runs ONCE when ViewModel is created
+        skipIfAlreadyAuthenticate()
     }
 
     // login
 
+    // Result message from the last login attempt
     private val _loginResult = MutableStateFlow<String?>(null)
+    // Whether the login was successful
     private val _loginOk = MutableStateFlow<Boolean?>(false)
     val loginResult: StateFlow<String?> = _loginResult
     val loginOk: StateFlow<Boolean?> = _loginOk
 
+    /**
+     * Login a user
+     * @param username The user's username
+     * @param password The user's password
+     * @author nalebrun
+     */
     fun login(username: String, password: String) { viewModelScope.launch {
         val deviceID = settingsRepository.deviceUuidFlow.firstOrNull() ?: ""
         val deviceName = settingsRepository.deviceNameFlow.firstOrNull() ?: ""
@@ -68,8 +77,6 @@ class AuthViewModel @Inject constructor(
                 } else {
                     val failureMessage = Json.decodeFromString<apiLoginFailureJson>(bodyString).message
                     _loginResult.value = failureMessage
-                    Log.d("test123", "$failureMessage : ${response.code}")
-
                     _loginOk.value = false
                 }
                 response.close()
@@ -81,11 +88,19 @@ class AuthViewModel @Inject constructor(
         )
     }}
 
-    // signin
 
+    // Result message from the last signup attempt
+    // TODO change everywhere signin by signup
     private val _signinResult = MutableStateFlow<String?>(null)
     val signinResult: StateFlow<String?> = _signinResult
 
+    /**
+     * Signup a new user account
+     * @param username The desired username
+     * @param password The desired password
+     * @param email    The desired email address
+     * @author nalebrun
+     */
     fun signin(username: String, password: String, email: String) { viewModelScope.launch {
         val deviceID = settingsRepository.deviceUuidFlow.firstOrNull() ?: ""
         val deviceName = settingsRepository.deviceNameFlow.firstOrNull() ?: ""
@@ -116,7 +131,10 @@ class AuthViewModel @Inject constructor(
         )
     }}
 
-    // check for skipping
+    /**
+     * Check if the user is already logged in and skip the login page in that case
+     * @author nalebrun
+     */
     fun skipIfAlreadyAuthenticate() { viewModelScope.launch {
             credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
                 if (jwt.isNotEmpty()) {
@@ -125,15 +143,15 @@ class AuthViewModel @Inject constructor(
                         auth = "Bearer $jwt",
                         onResponse = { _, response ->
                             if (response.code in 200..<300) {
-                                Log.i("api", "user logged in, skipping login page")
+                                Log.i("AuthViewModel", "user logged in, skipping login page")
                                 _loginOk.value = true
                             }
                             else {
-                                Log.i("api", "user not already logged in")
+                                Log.i("AuthViewModel", "user not already logged in")
                             }
                         },
                         onFailure = { _, e ->
-                            Log.i("api", "user not already logged in")
+                            Log.i("AuthViewModel", "user not already logged in")
                         }
                     )
                 }

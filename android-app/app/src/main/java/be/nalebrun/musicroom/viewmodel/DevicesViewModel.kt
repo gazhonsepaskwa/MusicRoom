@@ -14,6 +14,10 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
+/**
+ * The logic for the Devices page
+ * @author nalebrun
+ */
 @HiltViewModel
 class DevicesViewModel @Inject constructor(
     val credentialRepository: CredentialRepository,
@@ -21,9 +25,13 @@ class DevicesViewModel @Inject constructor(
     val socketIORepository: SocketIORepository
 ) : ViewModel() {
 
+    // List of available devices that can be controlled or used for playback
     private val _devices = MutableStateFlow<List<ForeignDevice>>(emptyList())
     val devices: StateFlow<List<ForeignDevice>> = _devices
 
+    /**
+     * Fetch the list of available devices from the server
+     */
     fun fetchAvailableDevices() {
         viewModelScope.launch {
             credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
@@ -53,15 +61,13 @@ class DevicesViewModel @Inject constructor(
         }
     }
 
-
-    // socket related // TODO move to socket view model
-    fun connectSocket() = socketIORepository.connect()
-
+    /**
+     * Ask to take control of another device playback.
+     * Message send via the websocket
+     */
     fun askDeviceControl(device: ForeignDevice) {
         viewModelScope.launch {
             socketIORepository.emit("connectToDevice", device.deviceId)
         }
     }
-
-
 }

@@ -14,16 +14,27 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
+/**
+ * The logic for the search page
+ * @author nalebrun
+ */
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     val apiRepository: IAPIRepository,
     val credentialRepository: ICredentialRepository
 ) : ViewModel() {
 
-    // search result
+    // List of search results matching the current query
     private val _results = MutableStateFlow<List<SearchResponseJson>>(emptyList())
     val results : StateFlow<List<SearchResponseJson>> = _results
 
+    /**
+     * Perform a search query against the API
+     * @param query The search string
+     * @param offset The starting point for pagination
+     * @param limit The maximum number of results to return
+     * @param filters Optional list of categories to filter by (e.g., "track", "album", "artist")
+     */
     fun search(query: String, offset: Int, limit: Int, filters: List<String> = emptyList()) {
         if (query.isEmpty()) {
             _results.value = emptyList()

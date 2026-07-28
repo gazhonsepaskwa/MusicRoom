@@ -8,6 +8,8 @@ import { AlbumModule } from '../album/album.module';
 import { ArtistModule } from '../artist/artist.module';
 import { MusicModule } from '../music/music.module';
 import { PrismaModule } from '../prisma/prisma.module';
+import { DevicesModule } from '../devices/devices.module';
+import { WebsocketsModule } from '../websockets/websockets.module';
 
 @Module({
   imports: [AuthModule, 
@@ -16,7 +18,9 @@ import { PrismaModule } from '../prisma/prisma.module';
 	AlbumModule, 
 	PlaylistsModule, 
 	UsersModule,
-	PrismaModule
+	PrismaModule,
+	WebsocketsModule,
+	DevicesModule
 ],
   controllers: [SearchController],
   providers: [

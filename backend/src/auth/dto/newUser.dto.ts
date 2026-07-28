@@ -1,4 +1,11 @@
-import { IsString, MinLength, MaxLength, IsAlphanumeric, IsEmail, Matches } from 'class-validator';
+import {
+  IsString,
+  MinLength,
+  MaxLength,
+  IsAlphanumeric,
+  IsEmail,
+  Matches,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 
@@ -33,4 +40,23 @@ export class NewUserDto {
 	@IsString()
 	@IsEmail()
 	email!: string;
+
+	@ApiProperty({
+	})
+	@IsString()
+	deviceID!: string;
+	
+	@ApiProperty({
+		example: 'john_doe\'s 3310',
+	})
+	@IsString()
+	deviceName!: string;
+}
+
+export class DeleteAccountDto {
+	@ApiProperty({
+		example: '********',
+	})
+	@IsString()
+	password!: string;
 }

@@ -11,9 +11,10 @@ import { FirebaseModule } from './firebase/firebase.module';
   imports: [
     forwardRef(() => PlaylistshipModule),
 	forwardRef(() => FriendshipModule),
+	forwardRef(() => UsersModule),
+	FirebaseModule,
 	WebsocketsModule,
-	UsersModule,
-	FirebaseModule],
+],
   controllers: [NotificationsController],
   providers: [NotificationsService],
   exports: [NotificationsService],

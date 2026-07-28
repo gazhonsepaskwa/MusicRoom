@@ -6,7 +6,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
 import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-  imports: [UsersModule, forwardRef(() => NotificationsModule), PrismaModule],
+  imports: [forwardRef(() =>UsersModule), forwardRef(() => NotificationsModule), PrismaModule],
   providers: [FriendshipService],
   controllers: [FriendshipController],
   exports: [FriendshipService],

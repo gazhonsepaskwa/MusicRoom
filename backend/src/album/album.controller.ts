@@ -11,8 +11,8 @@ export class AlbumController {
   @ApiParam({ name: 'id', type: Number })
   @ApiOkResponse({ type: AlbumResponseDto })
   @Get(':id')
-  getAlbum(@Param('id', ParseSafeIntPipe) id: number) {
-    return this.albumService.album({
+  async getAlbum(@Param('id', ParseSafeIntPipe) id: number) {
+    return await this.albumService.album({
       id,
     });
   }

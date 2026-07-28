@@ -1,13 +1,16 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { FriendshipService } from '../friendship/friendship.service';
-import { NotificationBodyDto, NotificationDto, NotificationType } from './dto/notifications.dto';
+import {
+  NotificationBodyDto,
+  NotificationDto,
+  NotificationType,
+} from './dto/notifications.dto';
 import { invitationStatus } from '../../generated/prisma/enums';
 import { WebSocketsService } from '../websockets/websockets.service';
 import { BaseGateway } from '../websockets/base.gateway';
 import { PlaylistshipService } from '../playlistship/playlistship.service';
 import { UsersService } from '../users/users.service';
 import { FirebaseService } from './firebase/firebase.service';
-
 
 @Injectable()
 export class NotificationsService {
@@ -18,6 +21,7 @@ export class NotificationsService {
 		private friendshipService: FriendshipService,
 		private websocketService: WebSocketsService,
 		private baseGateway: BaseGateway,
+		@Inject(forwardRef(() => UsersService))
 		private usersService: UsersService,
 		private pushNotification: FirebaseService
 	) {}
@@ -31,7 +35,8 @@ export class NotificationsService {
 			type: NotificationType.FRIEND_REQUEST,
 			createdAt: f.createdAt,
 			status: f.status,
-			requesterId: f.requesterId,
+			requesterId: f.otherId,
+			requesterName: f.otherUsername
 			})),
 
 			...playlistNotif.map((p) => ({
@@ -39,6 +44,7 @@ export class NotificationsService {
 			createdAt: p.createdAt,
 			status: p.status,
 			playlistId: p.playlistId,
+			playlistName: p.playlistName
 			})),
 		].sort(
 			(a, b) =>
@@ -46,18 +52,18 @@ export class NotificationsService {
 		);
 	}
 
-	async sendNotification(receiverId: number, senderId: number, body: NotificationBodyDto){
-		if (this.websocketService.isOnline(receiverId.toString()))
-			this.baseGateway.sendToUser(
-				receiverId.toString(),
-				body.websoketEvent, 
-				{
-					From: senderId,
-					To: receiverId
-				}
-		)
-		// A DECOMMENTER LORSQUE FIREBASE EST INSTALLE EN FRONT + USER A FIRBASE TOKEN
-		/*else if (body.FireBaseTitle && body.FirebaseMessage){
+  async sendNotification(
+    receiverId: number,
+    senderId: number,
+    body: NotificationBodyDto,
+  ) {
+    if (this.websocketService.isOnlineUser(receiverId))
+      this.baseGateway.sendToUser(receiverId, body.websoketEvent, {
+        From: senderId,
+        To: receiverId,
+      });
+    // A DECOMMENTER LORSQUE FIREBASE EST INSTALLE EN FRONT + USER A FIRBASE TOKEN
+    /*else if (body.FireBaseTitle && body.FirebaseMessage){
 			const user = await this.usersService.user({id: receiverId});
 			if (user){
 
@@ -68,11 +74,16 @@ export class NotificationsService {
 				)
 			}
 		}*/
-	}
+  }
 
-	async updateUsersNotification(userId: number) {
-		this.friendshipService.updateManpyFriendshipStatus({addresseeId: userId, status:invitationStatus.NOTVIEWED}, {status:invitationStatus.PENDING})
-		this.playlistshipService.updateManpyPlaylistshipStatus({addresseeId: userId, status:invitationStatus.NOTVIEWED}, {status:invitationStatus.PENDING})
-	}
+  async updateUsersNotification(userId: number) {
+    this.friendshipService.updateManpyFriendshipStatus(
+      { addresseeId: userId, status: invitationStatus.NOTVIEWED },
+      { status: invitationStatus.PENDING },
+    );
+    this.playlistshipService.updateManpyPlaylistshipStatus(
+      { addresseeId: userId, status: invitationStatus.NOTVIEWED },
+      { status: invitationStatus.PENDING },
+    );
+  }
 }
-

@@ -1,0 +1,208 @@
+import {
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { DevicesService } from './devices.service';
+import { WebSocketsService } from '../websockets/websockets.service';
+import { BaseGateway } from '../websockets/base.gateway';
+import { PlaybackStateDto } from './dto/playbackState.dto';
+
+@WebSocketGateway()
+export class DevicesGateway {
+  @WebSocketServer() server!: Server;
+
+  constructor(
+    private readonly devicesService: DevicesService,
+    private readonly baseGateway: BaseGateway,
+    private readonly websocketsService: WebSocketsService,
+  ) {}
+
+  handleConnection(client: Socket) {
+    client.on('disconnecting', () => {
+      for (const roomName of Array.from(client.rooms)) {
+        if (roomName.startsWith('room-')) {
+          this.leaveRoom(client, roomName);
+        }
+      }
+    });
+  }
+
+  @SubscribeMessage('connectToDevice')
+  async handleSendToDevice(client: Socket, deviceId: string) {
+    const userId = client.data.userId;
+
+    const canConnect = await this.devicesService.canConnectToDevice(
+      userId,
+      deviceId,
+    );
+
+    if (canConnect === undefined) {
+      client.emit('app_error', {
+        message:
+          'Cannot connect to target device (device not exist or invalid permission)',
+      });
+      return;
+    }
+    const isConnected = this.baseGateway.sendToDevice(deviceId, 'hostRequest', {
+      emitDeviceID: client.data.deviceId,
+      emitUserId: userId,
+    });
+
+    if (!isConnected) {
+      client.emit('app_error', { message: 'Target device not connected' });
+      return;
+    }
+  }
+
+  generateRoomName(deviceId: string): string {
+    return 'room-' + deviceId;
+  }
+
+  getDeviceIdFromRoomName(roomName: string): string {
+    return roomName.replace('room-', '');
+  }
+
+  deleteRoom(roomName: string) {
+    const room = this.server.sockets.adapter.rooms.get(roomName);
+    if (room && room.size > 0) {
+      this.server.to(roomName).emit('disconnectFromDevice', {
+        deviceId: this.getDeviceIdFromRoomName(roomName),
+      });
+      this.server.socketsLeave(roomName);
+    }
+  }
+
+  leaveRoom(client: Socket, roomName: string) {
+    const room = this.server.sockets.adapter.rooms.get(roomName);
+    if (room && room.has(client.id)) {
+      if (client.data.deviceId === this.getDeviceIdFromRoomName(roomName)) {
+        this.deleteRoom(roomName);
+      } else {
+        this.server.to(roomName).emit('userDisconnected', {
+          deviceId: this.getDeviceIdFromRoomName(roomName),
+          userId: client.data.userId,
+        });
+        client.leave(roomName);
+
+        if (room.size === 1) {
+          this.deleteRoom(roomName);
+        }
+      }
+    } else {
+      client.emit('app_error', { message: 'Not connected to the device' });
+    }
+  }
+
+  @SubscribeMessage('disconnectFromDevice')
+  async handleDisconnectFromDevice(client: Socket, deviceId: string) {
+    const roomName = this.generateRoomName(deviceId);
+
+    this.leaveRoom(client, roomName);
+  }
+
+  private async joinDeviceToRoom(
+    deviceId: string,
+    roomName: string,
+  ): Promise<boolean> {
+    const socketId = this.websocketsService.getSocketByDeviceId(deviceId);
+    if (!socketId) return false;
+
+    const targetSocket = this.server.sockets.sockets.get(socketId);
+    if (!targetSocket) return false;
+
+    await targetSocket.join(roomName);
+    return true;
+  }
+
+  @SubscribeMessage('hostResponse')
+  async handleHostResponse(
+    client: Socket,
+    payload: {
+      emitDeviceID: string;
+      emitUserId: number;
+      data: PlaybackStateDto;
+    },
+  ) {
+    const canConnect = await this.devicesService.canConnectToDevice(
+      payload.emitUserId,
+      client.data.deviceId,
+    );
+
+    if (canConnect === undefined) {
+      client.emit('app_error', {
+        message:
+          'Cannot connect to target device (device not exist or invalid permission)',
+      });
+      return;
+    }
+
+    const roomName = this.generateRoomName(client.data.deviceId);
+
+    const join = await this.joinDeviceToRoom(client.data.deviceId, roomName);
+    if (!join) {
+      client.emit('app_error', { message: 'Cannot connect to target device' });
+      return;
+    }
+
+    const joined = await this.joinDeviceToRoom(payload.emitDeviceID, roomName);
+
+    if (!joined) {
+      client.emit('app_error', {
+        message: 'Target device is no longer connected',
+      });
+      this.deleteRoom(roomName);
+      return;
+    }
+
+    this.baseGateway.sendToDevice(
+      payload.emitDeviceID,
+      'hostResponse',
+      payload.data,
+    );
+  }
+
+  @SubscribeMessage('modifyData')
+  async handleModifyData(client: Socket, payload: PlaybackStateDto) {
+    const userId = client.data.userId;
+
+    const canConnect = await this.devicesService.canConnectToDevice(
+      userId,
+      payload.deviceId,
+    );
+    if (canConnect === undefined) {
+      client.emit('app_error', {
+        message:
+          'Cannot connect to target device (device not exist or invalid permission)',
+      });
+      return;
+    }
+
+    const roomName = this.generateRoomName(payload.deviceId);
+    const room = this.server.sockets.adapter.rooms.get(roomName);
+    if (!room || !room.has(client.id)) {
+      client.emit('app_error', { message: 'Not connected to target device' });
+      return;
+    }
+
+    if (!canConnect.canModifyMusic && payload.musicListIds !== undefined) {
+      client.emit('app_error', { message: 'No permission to modify music' });
+      return;
+    }
+
+    if (!canConnect.canSeek && payload.currentTime !== undefined) {
+      client.emit('app_error', { message: 'No permission to seek' });
+      return;
+    }
+
+    if (!canConnect.canTogglePlayPause && payload.isPlaying !== undefined) {
+      client.emit('app_error', {
+        message: 'No permission to toggle play/pause',
+      });
+      return;
+    }
+
+    this.server.to(roomName).emit('playback_state', payload, {userId: userId});
+  }
+}

@@ -188,11 +188,7 @@ export class AuthService {
   }
 
   async validateOAuthLogin(profile: any): Promise<any> {
-	console.log("before");
-	console.log(profile);
 	profile = profile._json;
-	console.log("after");
-	console.log(profile);
     let user = await this.usersService.user({ email: profile.email });
     if (!user) {
       user = await this.usersService.createUser({

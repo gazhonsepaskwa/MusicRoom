@@ -6,7 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './constant';
 import { MailModule } from '../mail/mail.module';
 import { PassportModule } from '@nestjs/passport';
-import { OAuthStrategy } from './oauth.strategy';
+import { GoogleStrategy } from './oauth.strategy';
 import { AuthGuard } from './auth.guard';
 import { PlaylistsModule } from '../playlists/playlists.module';
 import { DevicesModule } from '../devices/devices.module';
@@ -29,7 +29,7 @@ import { WebsocketsModule } from '../websockets/websockets.module';
     forwardRef(() => WebsocketsModule),
   ],
   controllers: [AuthController],
-  providers: [AuthGuard, AuthService, OAuthStrategy],
+  providers: [AuthGuard, AuthService, GoogleStrategy],
   exports: [AuthService, AuthGuard],
 })
 export class AuthModule {}

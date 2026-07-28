@@ -63,30 +63,37 @@ export class AuthController {
     return req.user;
   }
 
-  @ApiQuery({ name: 'verificationToken', required: false })
-  @Get('verify')
-  @Public()
-  async verifyEmail(@Res() res: Response, @Query('verificationToken') token?: string) {
-    if (!token) {
-		throw new UnauthorizedException(
-			'Missing verification token.',
-		);
-	}
-	await this.authService.confirmEmail(token);
-	const jwt = await this.authService.loginFromVerificationToken(token);
-	return res.redirect(`${process.env.APP_SCHEME}://auth/callback?verificationToken=` + token);
-  }
+	@ApiQuery({ name: 'verificationToken', required: false })
+	@Get('verify')
+	@Public()
+	async verifyEmail(
+		@Res() res: Response,
+		@Query('verificationToken') token?: string,
+	) {
+		if (!token) {
+			throw new UnauthorizedException('Missing verification token.');
+		}
 
-  @Post('callback')
-  @Public()
-  async callback(@Query('verificationToken') token?: string) {
-	if (!token) {
-		throw new UnauthorizedException(
-			'Missing verification token.',
+		await this.authService.confirmEmail(token);
+
+		const jwt = await this.authService.loginFromVerificationToken(token);
+
+		return res.redirect(
+			`${process.env.APP_SCHEME}://auth/callback?token=${encodeURIComponent(jwt.access_token)}`
 		);
 	}
-	return await this.authService.loginFromVerificationToken(token);
-  }
+
+//   @Post('callback')
+//   @Public()
+//   async callback(@Query('verificationToken') token?: string) {
+// 	if (!token) {
+// 		throw new UnauthorizedException(
+// 			'Missing verification token.',
+// 		);
+// 	}
+// 	return await this.authService.loginFromVerificationToken(token);
+	
+//   }
 
   @ApiBody({ type: EmailDto })
   @ApiOkResponse({ type: AuthMessageResponseDto })
@@ -98,15 +105,16 @@ export class AuthController {
 
   @Get('oauth')
   @Public()
-  @UseGuards(AuthGuard('oauth'))
+  @UseGuards(AuthGuard('google'))
   async oauthLogin(@Req() req) {}
 
   @Get('oauth/callback')
-  @UseGuards(AuthGuard('oauth'))
-  async oauthCallback(@Req() req) {
+  @Public()
+  @UseGuards(AuthGuard('google'))
+  async oauthCallback(@Req() req, @Res() res) {
     const user = req.user;
-    return this.authService.validateOAuthLogin(user);
-  }
+	return res.redirect(`${process.env.APP_SCHEME}://auth/callback?token=` + user.access_token);
+	}
 
   @ApiOkResponse({type: UserResponseDto})
   @Post('delete-account')

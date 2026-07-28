@@ -59,7 +59,7 @@ export class AuthController {
   @ApiQuery({ name: 'verificationToken', required: false })
   @Get('verify')
   @Public()
-  async verifyEmail(/*@Res() res: Response,*/ @Query('verificationToken') token?: string) {
+  async verifyEmail(@Res() res: Response, @Query('verificationToken') token?: string) {
     if (!token) {
 		throw new UnauthorizedException(
 			'Missing verification token.',
@@ -67,8 +67,7 @@ export class AuthController {
 	}
 	await this.authService.confirmEmail(token);
 	const jwt = await this.authService.loginFromVerificationToken(token);
-	return jwt;
-	// return res.redirect(`${process.env.APP_SCHEME}://auth/callback?verificationToken=` + token);
+	return res.redirect(`${process.env.APP_SCHEME}://auth/callback?verificationToken=` + token);
   }
 
   @Post('callback')

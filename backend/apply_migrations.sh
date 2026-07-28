@@ -9,4 +9,6 @@ if [ -z "$migration_name" ]; then
   exit 0
 fi
 
+npx prisma migrate reset
+
 npx prisma migrate dev --name $migration_name

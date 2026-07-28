@@ -54,7 +54,7 @@ export class AuthService {
     const userByEmail = await this.usersService.user({ email: email.toLowerCase() });
     if (userByEmail && userByEmail.verifiedEmail)
       throw new UnprocessableEntityException(
-        `email already used: ${email}`,
+        [`email already used: ${email}`],
         'Invalid Account Creation',
       );
 	else if (userByEmail && !userByEmail.verifiedEmail) {
@@ -63,7 +63,7 @@ export class AuthService {
     const userByUsername = await this.usersService.user({ username });
     if (userByUsername)
       throw new UnprocessableEntityException(
-        `username already used: ${username}`,
+        [`username already used: ${username}`],
         'Invalid Account Creation',
       );
     const salt = await bcrypt.genSalt();
@@ -74,7 +74,7 @@ export class AuthService {
       email: email.toLowerCase(),
     });
     if (!user.email)
-      throw new BadRequestException('Missing email for verification');
+      throw new BadRequestException(['Missing email for verification']);
     this.sendVerificationEmail(user.email, user.id);
     return {
       message:

@@ -1,0 +1,199 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="be.nalebrun.musicroom"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+7-->INJECTED
+8        android:minSdkVersion="28"
+8-->INJECTED
+9        android:targetSdkVersion="37" />
+9-->INJECTED
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:4:5-67
+11-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:4:22-64
+12    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+12-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:5:5-79
+12-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:5:22-76
+13    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+13-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:6:5-77
+13-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:6:22-74
+14    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+14-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:7:5-92
+14-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:7:22-89
+15
+16    <permission
+16-->[androidx.core:core:1.19.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/6a50699fca14de18067576c4e6fb02ab/transformed/core-1.19.0/AndroidManifest.xml:22:5-24:47
+17        android:name="be.nalebrun.musicroom.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+17-->[androidx.core:core:1.19.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/6a50699fca14de18067576c4e6fb02ab/transformed/core-1.19.0/AndroidManifest.xml:23:9-81
+18        android:protectionLevel="signature" />
+18-->[androidx.core:core:1.19.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/6a50699fca14de18067576c4e6fb02ab/transformed/core-1.19.0/AndroidManifest.xml:24:9-44
+19
+20    <uses-permission android:name="be.nalebrun.musicroom.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+20-->[androidx.core:core:1.19.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/6a50699fca14de18067576c4e6fb02ab/transformed/core-1.19.0/AndroidManifest.xml:26:5-97
+20-->[androidx.core:core:1.19.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/6a50699fca14de18067576c4e6fb02ab/transformed/core-1.19.0/AndroidManifest.xml:26:22-94
+21
+22    <application
+22-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:9:5-40:19
+23        android:name="be.nalebrun.musicroom.MusicRoomApp"
+23-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:10:8-36
+24        android:allowBackup="true"
+24-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:11:8-34
+25        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+25-->[androidx.core:core:1.19.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/6a50699fca14de18067576c4e6fb02ab/transformed/core-1.19.0/AndroidManifest.xml:28:18-86
+26        android:dataExtractionRules="@xml/data_extraction_rules"
+26-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:12:9-65
+27        android:debuggable="true"
+28        android:extractNativeLibs="false"
+28-->INJECTED
+29        android:fullBackupContent="@xml/backup_rules"
+29-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:13:9-54
+30        android:icon="@drawable/note_1"
+30-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:14:9-40
+31        android:label="@string/app_name"
+31-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:15:9-41
+32        android:roundIcon="@drawable/note_1"
+32-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:16:9-45
+33        android:supportsRtl="true"
+33-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:17:9-35
+34        android:testOnly="true"
+35        android:theme="@style/Theme.MusicRoom" >
+35-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:18:9-47
+36        <activity
+36-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:20:9-28:20
+37            android:name="be.nalebrun.musicroom.MainActivity"
+37-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:21:13-41
+38            android:exported="true"
+38-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:22:13-36
+39            android:theme="@style/Theme.MusicRoom" >
+39-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:23:13-51
+40            <intent-filter>
+40-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:24:13-27:29
+41                <action android:name="android.intent.action.MAIN" />
+41-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:25:17-69
+41-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:25:25-66
+42
+43                <category android:name="android.intent.category.LAUNCHER" />
+43-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:26:17-77
+43-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:26:27-74
+44            </intent-filter>
+45        </activity>
+46
+47        <service
+47-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:29:9-37:19
+48            android:name="be.nalebrun.musicroom.services.PlaybackService"
+48-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:30:13-53
+49            android:exported="true"
+49-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:32:13-36
+50            android:foregroundServiceType="mediaPlayback" >
+50-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:31:13-58
+51            <intent-filter>
+51-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:33:13-36:29
+52                <action android:name="androidx.media3.session.MediaSessionService" />
+52-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:34:17-85
+52-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:34:25-83
+53                <action android:name="android.media.browse.MediaBrowserService" />
+53-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:35:17-82
+53-->/home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/AndroidManifest.xml:35:25-80
+54            </intent-filter>
+55        </service>
+56
+57        <activity
+57-->[androidx.compose.ui:ui-tooling-android:1.11.3] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/23a898d921b794c5243fcc096f00147a/transformed/ui-tooling/AndroidManifest.xml:23:9-25:39
+58            android:name="androidx.compose.ui.tooling.PreviewActivity"
+58-->[androidx.compose.ui:ui-tooling-android:1.11.3] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/23a898d921b794c5243fcc096f00147a/transformed/ui-tooling/AndroidManifest.xml:24:13-71
+59            android:exported="true" />
+59-->[androidx.compose.ui:ui-tooling-android:1.11.3] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/23a898d921b794c5243fcc096f00147a/transformed/ui-tooling/AndroidManifest.xml:25:13-36
+60
+61        <provider
+61-->[androidx.emoji2:emoji2:1.4.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/3b3e91c11e2501a6d762783a45e8e3ef/transformed/emoji2-1.4.0/AndroidManifest.xml:24:9-32:20
+62            android:name="androidx.startup.InitializationProvider"
+62-->[androidx.emoji2:emoji2:1.4.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/3b3e91c11e2501a6d762783a45e8e3ef/transformed/emoji2-1.4.0/AndroidManifest.xml:25:13-67
+63            android:authorities="be.nalebrun.musicroom.androidx-startup"
+63-->[androidx.emoji2:emoji2:1.4.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/3b3e91c11e2501a6d762783a45e8e3ef/transformed/emoji2-1.4.0/AndroidManifest.xml:26:13-68
+64            android:exported="false" >
+64-->[androidx.emoji2:emoji2:1.4.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/3b3e91c11e2501a6d762783a45e8e3ef/transformed/emoji2-1.4.0/AndroidManifest.xml:27:13-37
+65            <meta-data
+65-->[androidx.emoji2:emoji2:1.4.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/3b3e91c11e2501a6d762783a45e8e3ef/transformed/emoji2-1.4.0/AndroidManifest.xml:29:13-31:52
+66                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+66-->[androidx.emoji2:emoji2:1.4.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/3b3e91c11e2501a6d762783a45e8e3ef/transformed/emoji2-1.4.0/AndroidManifest.xml:30:17-75
+67                android:value="androidx.startup" />
+67-->[androidx.emoji2:emoji2:1.4.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/3b3e91c11e2501a6d762783a45e8e3ef/transformed/emoji2-1.4.0/AndroidManifest.xml:31:17-49
+68            <meta-data
+68-->[androidx.lifecycle:lifecycle-process:2.11.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/23da5f5a2ce3f1621efb54d1d7c5c39a/transformed/lifecycle-process-2.11.0/AndroidManifest.xml:29:13-31:52
+69                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+69-->[androidx.lifecycle:lifecycle-process:2.11.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/23da5f5a2ce3f1621efb54d1d7c5c39a/transformed/lifecycle-process-2.11.0/AndroidManifest.xml:30:17-78
+70                android:value="androidx.startup" />
+70-->[androidx.lifecycle:lifecycle-process:2.11.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/23da5f5a2ce3f1621efb54d1d7c5c39a/transformed/lifecycle-process-2.11.0/AndroidManifest.xml:31:17-49
+71            <meta-data
+71-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:29:13-31:52
+72                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+72-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:30:17-85
+73                android:value="androidx.startup" />
+73-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:31:17-49
+74        </provider>
+75
+76        <uses-library
+76-->[androidx.window:window:1.5.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/4b4e41c7040c90133c56e22bd0cb6aa7/transformed/window-1.5.0/AndroidManifest.xml:23:9-25:40
+77            android:name="androidx.window.extensions"
+77-->[androidx.window:window:1.5.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/4b4e41c7040c90133c56e22bd0cb6aa7/transformed/window-1.5.0/AndroidManifest.xml:24:13-54
+78            android:required="false" />
+78-->[androidx.window:window:1.5.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/4b4e41c7040c90133c56e22bd0cb6aa7/transformed/window-1.5.0/AndroidManifest.xml:25:13-37
+79        <uses-library
+79-->[androidx.window:window:1.5.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/4b4e41c7040c90133c56e22bd0cb6aa7/transformed/window-1.5.0/AndroidManifest.xml:26:9-28:40
+80            android:name="androidx.window.sidecar"
+80-->[androidx.window:window:1.5.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/4b4e41c7040c90133c56e22bd0cb6aa7/transformed/window-1.5.0/AndroidManifest.xml:27:13-51
+81            android:required="false" />
+81-->[androidx.window:window:1.5.0] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/4b4e41c7040c90133c56e22bd0cb6aa7/transformed/window-1.5.0/AndroidManifest.xml:28:13-37
+82
+83        <activity
+83-->[androidx.compose.ui:ui-test-manifest:1.11.3] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/b6ef2927f1816659914928d024af9c51/transformed/ui-test-manifest-1.11.3/AndroidManifest.xml:23:9-26:79
+84            android:name="androidx.activity.ComponentActivity"
+84-->[androidx.compose.ui:ui-test-manifest:1.11.3] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/b6ef2927f1816659914928d024af9c51/transformed/ui-test-manifest-1.11.3/AndroidManifest.xml:24:13-63
+85            android:exported="true"
+85-->[androidx.compose.ui:ui-test-manifest:1.11.3] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/b6ef2927f1816659914928d024af9c51/transformed/ui-test-manifest-1.11.3/AndroidManifest.xml:25:13-36
+86            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+86-->[androidx.compose.ui:ui-test-manifest:1.11.3] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/b6ef2927f1816659914928d024af9c51/transformed/ui-test-manifest-1.11.3/AndroidManifest.xml:26:13-76
+87
+88        <receiver
+88-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:34:9-52:20
+89            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+89-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:35:13-76
+90            android:directBootAware="false"
+90-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:36:13-44
+91            android:enabled="true"
+91-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:37:13-35
+92            android:exported="true"
+92-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:38:13-36
+93            android:permission="android.permission.DUMP" >
+93-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:39:13-57
+94            <intent-filter>
+94-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:40:13-42:29
+95                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+95-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:41:17-91
+95-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:41:25-88
+96            </intent-filter>
+97            <intent-filter>
+97-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:43:13-45:29
+98                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+98-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:44:17-85
+98-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:44:25-82
+99            </intent-filter>
+100            <intent-filter>
+100-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:46:13-48:29
+101                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+101-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:47:17-88
+101-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:47:25-85
+102            </intent-filter>
+103            <intent-filter>
+103-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:49:13-51:29
+104                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+104-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:50:17-95
+104-->[androidx.profileinstaller:profileinstaller:1.4.1] /home/xekhtyrl/.gradle/caches/9.6.0/transforms/dd2f2255efdbc0fa0bf334daf5df893e/transformed/profileinstaller-1.4.1/AndroidManifest.xml:50:25-92
+105            </intent-filter>
+106        </receiver>
+107    </application>
+108
+109</manifest>

@@ -1,0 +1,8 @@
+be.nalebrun.musicroom.app-pngs-0 /home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/build/generated/res/pngs/debug
+be.nalebrun.musicroom.app-updated_navigation_xml-1 /home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/build/generated/updated_navigation_xml/debug
+be.nalebrun.musicroom.app-packageDebugResources-2 /home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/build/intermediates/incremental/debug/packageDebugResources/merged.dir
+be.nalebrun.musicroom.app-packageDebugResources-3 /home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/build/intermediates/incremental/debug/packageDebugResources/stripped.dir
+be.nalebrun.musicroom.app-debug-4 /home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/build/intermediates/merged_res/debug/mergeDebugResources
+be.nalebrun.musicroom.app-debug-5 /home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/debug/res
+be.nalebrun.musicroom.app-main-6 /home/xekhtyrl/Documents/Code/19/MobileWeb/MusicRoom/android-app/app/src/main/res
+gradleHome-0 /home/xekhtyrl/.gradle

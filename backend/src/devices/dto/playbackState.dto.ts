@@ -1,4 +1,5 @@
 import { IsBoolean, IsInt, IsArray, IsString } from 'class-validator';
+import { MusicDto } from '../../music/dto/music.dto';
 
 export class PlaybackStateDto {
   @IsBoolean()
@@ -7,9 +8,28 @@ export class PlaybackStateDto {
   @IsInt()
   currentTime?: number;
 
+  @IsInt()
+  currentMusicId?: number;
+
   @IsArray()
   @IsInt({ each: true })
   musicListIds?: number[];
+
+  @IsString()
+  deviceId!: string;
+}
+
+export class PlaybackStateResponseDto {
+  @IsBoolean()
+  isPlaying?: boolean;
+
+  @IsInt()
+  currentTime?: number;
+
+  @IsInt()
+  currentMusicId?: number;
+
+  musicList: MusicDto[] = [];
 
   @IsString()
   deviceId!: string;

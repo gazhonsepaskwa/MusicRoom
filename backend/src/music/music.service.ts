@@ -6,6 +6,7 @@ import {
 import { Prisma } from '../../generated/prisma/client';
 import { music } from '../../generated/prisma/browser';
 import { PrismaService } from '../prisma/prisma.service';
+import { MusicDto } from './dto/music.dto';
 
 @Injectable()
 export class MusicService {
@@ -51,6 +52,42 @@ export class MusicService {
 
   getMusicPath({ id }: { id: number }): string {
     return `/dl/${id}.mp3`;
+  }
+
+  async convertMusicListIdsToMusicList(
+    musicListIds: number[],
+  ): Promise<MusicDto[]> {
+    const musicList = await this.prisma.music.findMany({
+      where: {
+        id: {
+          in: musicListIds,
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        duration: true,
+        album: {
+          select: {
+            title: true,
+            date: true,
+            images: true,
+          },
+        },
+        artists: {
+          select: {
+            title: true,
+          },
+        },
+      },
+    });
+    return musicList.map((music) => ({
+      ...music,
+      album: {
+        ...music.album,
+        date: music.album.date.toISOString(),
+      },
+    }));
   }
 
   async streamMusic(

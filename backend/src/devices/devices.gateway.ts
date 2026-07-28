@@ -7,7 +7,10 @@ import { Server, Socket } from 'socket.io';
 import { DevicesService } from './devices.service';
 import { WebSocketsService } from '../websockets/websockets.service';
 import { BaseGateway } from '../websockets/base.gateway';
-import { PlaybackStateDto } from './dto/playbackState.dto';
+import {
+  PlaybackStateDto,
+  PlaybackStateResponseDto,
+} from './dto/playbackState.dto';
 
 @WebSocketGateway()
 export class DevicesGateway {
@@ -123,6 +126,7 @@ export class DevicesGateway {
       emitDeviceID: string;
       emitUserId: number;
       data: PlaybackStateDto;
+      isAccepted: boolean;
     },
   ) {
     const canConnect = await this.devicesService.canConnectToDevice(
@@ -135,6 +139,15 @@ export class DevicesGateway {
         message:
           'Cannot connect to target device (device not exist or invalid permission)',
       });
+      return;
+    }
+
+    if (!payload.isAccepted) {
+      this.baseGateway.sendToDevice(
+        payload.emitDeviceID,
+        'hostResponse',
+        payload.isAccepted,
+      );
       return;
     }
 
@@ -156,16 +169,39 @@ export class DevicesGateway {
       return;
     }
 
+    const musicListObj = await this.devicesService.getMusicListFromIds(
+      payload.data.musicListIds || [],
+    );
+
+    const playbackStateResponse: PlaybackStateResponseDto = {
+      isPlaying: payload.data.isPlaying,
+      currentTime: payload.data.currentTime,
+      deviceId: payload.emitDeviceID,
+      currentMusicId: payload.data.currentMusicId,
+      musicList: musicListObj,
+    };
+
     this.baseGateway.sendToDevice(
       payload.emitDeviceID,
       'hostResponse',
-      payload.data,
+      playbackStateResponse,
     );
   }
 
   @SubscribeMessage('modifyData')
   async handleModifyData(client: Socket, payload: PlaybackStateDto) {
     const userId = client.data.userId;
+    const userDeviceId = client.data.deviceId;
+
+    if (
+      userDeviceId !== payload.deviceId &&
+      payload.currentMusicId !== undefined
+    ) {
+      client.emit('app_error', {
+        message: 'You are not the owner of this device',
+      });
+      return;
+    }
 
     const canConnect = await this.devicesService.canConnectToDevice(
       userId,
@@ -203,6 +239,20 @@ export class DevicesGateway {
       return;
     }
 
-    this.server.to(roomName).emit('playback_state', payload, {userId: userId});
+    const musicListObj = await this.devicesService.getMusicListFromIds(
+      payload.musicListIds || [],
+    );
+
+    const playbackStateResponse: PlaybackStateResponseDto = {
+      isPlaying: payload.isPlaying,
+      currentTime: payload.currentTime,
+      deviceId: payload.deviceId,
+      currentMusicId: payload.currentMusicId,
+      musicList: musicListObj,
+    };
+
+    this.server
+      .to(roomName)
+      .emit('playback_state', playbackStateResponse, { userId: userId });
   }
 }

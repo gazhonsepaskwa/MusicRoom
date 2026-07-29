@@ -85,13 +85,12 @@ model playlistship {
 model device {
   id       String           @id
   ownerId  Int
-  name     String?
+  name     String
   
-  @@unique([name, ownerId])
+  @@unique([name, ownerId, id])
   owner user @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   deviceships deviceship[]
-
 }
 
 

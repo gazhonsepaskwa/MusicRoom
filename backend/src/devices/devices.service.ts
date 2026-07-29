@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { deviceship } from '../../generated/prisma/client.js';
 import { WebSocketsService } from '../websockets/websockets.service';
+import { DeviceRequestDto } from './dto/device.dto';
 
 @Injectable()
 export class DevicesService {
@@ -107,15 +108,19 @@ export class DevicesService {
 	return deviceship;
   }
 
-  async deleteDevice(id: string, userId: number) {
-    const isDeviceOwner = await this.isAccessibleDevice(userId, id);
+  async deleteDevice(userId: number, data: DeviceRequestDto) {
+    const isDeviceOwner = await this.isAccessibleDevice(userId, data.deviceId);
     if (!isDeviceOwner)
       throw new BadRequestException(
         'Invalid device or you are not the owner of this device',
       );
     const device = await this.prisma.device.delete({
       where: {
-        id,
+        name_ownerId_id: {
+			name: data.deviceName,
+			ownerId: userId,
+			id: data.deviceId,
+		}
       },
     });
     return device;

@@ -54,8 +54,10 @@ fun Navigation(
                 R.drawable.baseline_favorite_24
                 else R.drawable.baseline_favorite_border_24,
             onClick = {
-                if (activeScreen != ActiveScreen.FAVORITE) {
-                    navigationViewModel.navigateTo("favorite")
+                navigationViewModel.navigateTo("favorite") {
+                    popUpTo("favorite") { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
                 }
             }
         )
@@ -66,7 +68,11 @@ fun Navigation(
                 R.drawable.outline_saved_search_24
             else R.drawable.outline_search_24,
             onClick = {
-                    navigationViewModel.navigateTo("search")
+                navigationViewModel.navigateTo("search") {
+                    popUpTo("favorite") { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
             }
         )
         // library
@@ -76,8 +82,10 @@ fun Navigation(
                 R.drawable.baseline_library_music_24
                 else R.drawable.outline_library_music_24,
             onClick = {
-                if (activeScreen != ActiveScreen.LIBRARY) {
-                    navigationViewModel.navigateTo("library")
+                navigationViewModel.navigateTo("library") {
+                    popUpTo("favorite") { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
                 }
             }
         )
@@ -88,8 +96,10 @@ fun Navigation(
                 R.drawable.baseline_account_circle_24
                 else R.drawable.outline_account_circle_24,
             onClick = {
-                if (activeScreen != ActiveScreen.FRIENDS) {
-                    navigationViewModel.navigateTo("friends")
+                navigationViewModel.navigateTo("friends") {
+                    popUpTo("favorite") { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
                 }
             }
         )
@@ -100,8 +110,11 @@ fun Navigation(
                 R.drawable.baseline_egg_alt_24
                 else R.drawable.outline_egg_alt_24,
             onClick = {
-                // No reclick protection because will have sub screens so clicking will get back to main settings screen
-                navigationViewModel.navigateTo("settings")
+                navigationViewModel.navigateTo("settings") {
+                    popUpTo("favorite") { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
             }
         )
     }

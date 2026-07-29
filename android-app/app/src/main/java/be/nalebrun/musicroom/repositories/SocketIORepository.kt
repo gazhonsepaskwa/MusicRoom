@@ -93,6 +93,11 @@ class SocketIORepository @Inject constructor(
             val jwt         = credentialRepository.jwtFlow.firstOrNull() ?:      run { return@launch }
             val deviceUuid  = settingsRepository.deviceUuidFlow.firstOrNull() ?: run { return@launch }
 
+            if (jwt.isEmpty()) {
+                Log.d("SocketIORepository", "JWT is empty, not connecting")
+                return@launch
+            }
+
             // auth headers
             val headers = mapOf(
                 "authorization" to listOf(jwt),

@@ -5,12 +5,8 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import be.nalebrun.musicroom.IAPIRepository
-import be.nalebrun.musicroom.apiJsonStruct.responds.FriendRequestStatus
-import androidx.navigation.NavController
-import be.nalebrun.musicroom.APIRepository
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiLoginFailureJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiLoginSuccessJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiSigninFailureJson
@@ -18,7 +14,6 @@ import be.nalebrun.musicroom.apiJsonStruct.responds.apiSigninSuccessJson
 import be.nalebrun.musicroom.repositories.ICredentialRepository
 import be.nalebrun.musicroom.repositories.ISettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import be.nalebrun.musicroom.repositories.CredentialRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
@@ -191,6 +186,17 @@ class AuthViewModel @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    /**
+     * Logout the user
+     * @author nalebrun
+     */
+    fun logout() {
+        viewModelScope.launch {
+            credentialRepository.setJWT("")
+            _loginOk.value = false
         }
     }
 

@@ -3,8 +3,17 @@ package be.nalebrun.musicroom.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavOptionsBuilder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+
+/**
+ * Data class to represent a navigation event with optional options
+ */
+data class NavEvent(
+    val route: String,
+    val builder: (NavOptionsBuilder.() -> Unit)? = null
+)
 
 /**
  * The logic for the navigation between pages
@@ -14,8 +23,8 @@ import javax.inject.Inject
 class NavigationViewModel @Inject constructor(
 ) : ViewModel() {
     // Event to trigger navigation to a new route
-    private val _navigationEvent = MutableLiveData<String?>()
-    val navigationEvent : LiveData<String?> = _navigationEvent
+    private val _navigationEvent = MutableLiveData<NavEvent?>()
+    val navigationEvent : LiveData<NavEvent?> = _navigationEvent
 
     // Event to trigger a back navigation
     private val _backEvent = MutableLiveData<Boolean>()
@@ -24,8 +33,8 @@ class NavigationViewModel @Inject constructor(
     /**
      * Request navigation to a specific route
      */
-    fun navigateTo(route: String) {
-        _navigationEvent.value = route
+    fun navigateTo(route: String, builder: (NavOptionsBuilder.() -> Unit)? = null) {
+        _navigationEvent.value = NavEvent(route, builder)
     }
 
     /**

@@ -8,7 +8,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import be.nalebrun.musicroom.repositories.CredentialRepository
 import be.nalebrun.musicroom.ui.screen.AlbumUi
 import be.nalebrun.musicroom.ui.screen.ArtistUi
 import be.nalebrun.musicroom.ui.screen.AuthUi
@@ -22,12 +21,9 @@ import be.nalebrun.musicroom.ui.screen.ProfileUi
 import be.nalebrun.musicroom.ui.screen.UserProfileUi
 import be.nalebrun.musicroom.ui.screen.ServerSettingsUi
 import be.nalebrun.musicroom.ui.screen.ChangePasswordUi
-import be.nalebrun.musicroom.ui.screen.ProfileUi
-import be.nalebrun.musicroom.ui.screen.UserProfileUi
-import be.nalebrun.musicroom.ui.screen.ServerSettingsUi
-import be.nalebrun.musicroom.ui.screen.ChangePasswordUi
 import be.nalebrun.musicroom.viewmodel.AuthViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
+import be.nalebrun.musicroom.viewmodel.NavEvent
 import be.nalebrun.musicroom.viewmodel.SocketViewModel
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -110,9 +106,23 @@ fun CreateNavGraph(
         }
     }
 
+    /**
+     * Listen to the navigation event and navigate to the destination
+     * if the route is "auth", clear the backstack and navigate to auth
+     * @see NavEvent
+     */
     LaunchedEffect(navigationEvent) {
-        navigationEvent?.let { route ->
-            navController.navigate(route)
+        navigationEvent?.let { event ->
+            if (event.route == "auth") {
+                // Nuclear option: clear everything and go to auth
+                navController.navigate("auth") {
+                    popUpTo(navController.graph.id) { inclusive = true }
+                }
+            } else if (event.builder != null) {
+                navController.navigate(event.route, event.builder)
+            } else {
+                navController.navigate(event.route)
+            }
             navigationViewModel.clearNavigationEvent()
         }
     }
@@ -130,12 +140,12 @@ fun CreateNavGraph(
     ) {
         ///////////////
         // deep link //
-        ///////////////
+        /////////////// aka: from the outside
 
         // Validate email
         composable(
             route = "validate_email?token={token}",
-            deepLinks = listOf(navDeepLink { uriPattern = "musicroom://auth/callback?verificationToken={token}" })
+            deepLinks = listOf(navDeepLink { uriPattern = "musicroom://auth/callback?token={token}" })
         ) { backStackEntry ->
             val token = backStackEntry.arguments?.getString("token")
             val authViewModel: AuthViewModel = hiltViewModel()
@@ -144,27 +154,18 @@ fun CreateNavGraph(
                 token?.let {
                     Log.d("NavGraph", "Storing token from deep link (validate_email): $it")
                     authViewModel.credentialRepository.setJWT(it)
+                    // connect to the socket ? I am not sure if it I should do it there (TODO : check)
+                    socketViewModel.connectSocket()
                 }
             }
-            PlaylistUi(-1) // -1 is the favorite playlist fallback
-        }
-
-        // google auth callback (necessary ???)
-        composable(
-            route = "oauth_callback?token={token}",
-            deepLinks = listOf(navDeepLink { uriPattern = "musicroom://auth/callback?token={token}" })
-        ) { backStackEntry ->
-            val token = backStackEntry.arguments?.getString("token")
-            val authViewModel: AuthViewModel = hiltViewModel()
-
-            LaunchedEffect(token) {
-                token?.let {
-                    Log.d("NavGraph", "Storing token from Google OAuth: $it")
-                    authViewModel.credentialRepository.setJWT(it)
-                }
+            navController.navigate("search") {
+                popUpTo(navController.graph.id) { inclusive = true }
             }
-            PlaylistUi(-1) // -1 is the favorite playlist fallback
         }
+
+        ////////////////
+        // in app nav //
+        ////////////////
 
         composable(route = "auth")            { AuthUi() }
         composable(route = "favorite")        { PlaylistUi(-1) }
@@ -187,10 +188,6 @@ fun CreateNavGraph(
         composable(route = "album/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")
              AlbumUi(albumId = id!!.toInt())
-        }
-        composable(route = "user/{id}") { backStackEntry ->
-            val id = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: -1
-            UserProfileUi(userId = id)
         }
         composable(route = "user/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: -1

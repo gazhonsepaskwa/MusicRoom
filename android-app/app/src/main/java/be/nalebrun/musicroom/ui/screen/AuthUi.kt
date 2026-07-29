@@ -60,7 +60,9 @@ fun AuthUi() {
         if (loginOk == true) {
             // when the login is ok, connect the socket and then navigate to the fav page
             socketViewModel.connectSocket()
-            navigationViewModel.navigateTo("favorite")
+            navigationViewModel.navigateTo("search") {
+                popUpTo("auth") { inclusive = true }
+            }
         }
     }
 

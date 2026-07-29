@@ -22,12 +22,9 @@ import be.nalebrun.musicroom.ui.screen.ProfileUi
 import be.nalebrun.musicroom.ui.screen.UserProfileUi
 import be.nalebrun.musicroom.ui.screen.ServerSettingsUi
 import be.nalebrun.musicroom.ui.screen.ChangePasswordUi
-import be.nalebrun.musicroom.ui.screen.ProfileUi
-import be.nalebrun.musicroom.ui.screen.UserProfileUi
-import be.nalebrun.musicroom.ui.screen.ServerSettingsUi
-import be.nalebrun.musicroom.ui.screen.ChangePasswordUi
 import be.nalebrun.musicroom.viewmodel.AuthViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
+import be.nalebrun.musicroom.viewmodel.NavEvent
 import be.nalebrun.musicroom.viewmodel.SocketViewModel
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -110,9 +107,23 @@ fun CreateNavGraph(
         }
     }
 
+    /**
+     * Listen to the navigation event and navigate to the destination
+     * if the route is "auth", clear the backstack and navigate to auth
+     * @see NavEvent
+     */
     LaunchedEffect(navigationEvent) {
-        navigationEvent?.let { route ->
-            navController.navigate(route)
+        navigationEvent?.let { event ->
+            if (event.route == "auth") {
+                // Nuclear option: clear everything and go to auth
+                navController.navigate("auth") {
+                    popUpTo(navController.graph.id) { inclusive = true }
+                }
+            } else if (event.builder != null) {
+                navController.navigate(event.route, event.builder)
+            } else {
+                navController.navigate(event.route)
+            }
             navigationViewModel.clearNavigationEvent()
         }
     }
@@ -176,10 +187,6 @@ fun CreateNavGraph(
         composable(route = "album/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")
              AlbumUi(albumId = id!!.toInt())
-        }
-        composable(route = "user/{id}") { backStackEntry ->
-            val id = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: -1
-            UserProfileUi(userId = id)
         }
         composable(route = "user/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: -1

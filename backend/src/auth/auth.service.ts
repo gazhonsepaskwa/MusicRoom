@@ -96,11 +96,11 @@ export class AuthService {
 
   async confirmPassword(user: user, password?: string) {
 	if (!user?.password && !password)
-	return;
+		return;
 	if (!user.password || !password)
-	throw new UnprocessableEntityException(
-		'Incorrect Password or User',
-		'Invalid Attempt ',
+		throw new UnprocessableEntityException(
+			'Incorrect Password or User',
+			'Invalid Attempt ',
 	);
 	const hash = await bcrypt.compare(password!, user?.password);
     if (hash == false) {

@@ -24,6 +24,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.apiJsonStruct.responds.FriendRequestStatus
 import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
+import be.nalebrun.musicroom.apiJsonStruct.responds.PlaylistJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.PlaylistProfileJson
 import be.nalebrun.musicroom.ui.element.ActiveScreen
 import be.nalebrun.musicroom.ui.element.BottomScreenMenu

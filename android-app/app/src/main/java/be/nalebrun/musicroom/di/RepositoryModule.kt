@@ -5,8 +5,10 @@ import be.nalebrun.musicroom.IAPIRepository
 import be.nalebrun.musicroom.repositories.CredentialRepository
 import be.nalebrun.musicroom.repositories.ICredentialRepository
 import be.nalebrun.musicroom.repositories.IMusicRepository
+import be.nalebrun.musicroom.repositories.ISocketIORepository
 import be.nalebrun.musicroom.repositories.ISettingsRepository
 import be.nalebrun.musicroom.repositories.MusicRepository
+import be.nalebrun.musicroom.repositories.SocketIORepository
 import be.nalebrun.musicroom.repositories.SettingsRepository
 import dagger.Binds
 import dagger.Module
@@ -14,6 +16,11 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/**
+ * Hilt module that provides bindings for repositories used in the application.
+ * All repositories are bound as singletons.
+ * @author nalebrun
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
@@ -33,4 +40,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindSettingsRepository(impl: SettingsRepository) : ISettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSocketIORepository(impl: SocketIORepository) : ISocketIORepository
 }

@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -25,6 +26,8 @@ import androidx.compose.ui.unit.sp
  * @param text the text variable
  * @param onValueChange the trigger on change to [text]
  * @param modifier style modifier
+ * @param visualTransformation visual transformation for the text field
+ * @param singleLine whether the text field is single line. Default to true
  * @author nalebrun
  */
 @Composable
@@ -32,7 +35,9 @@ fun CustomTextField(
     title: String,
     text: String,
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    singleLine: Boolean = true
 ) {
     Column(
         modifier = modifier
@@ -53,6 +58,8 @@ fun CustomTextField(
             TextField(
                 value = text,
                 onValueChange = onValueChange,
+                visualTransformation = visualTransformation,
+                singleLine = singleLine,
                 colors = TextFieldDefaults.colors(
                     unfocusedContainerColor = Color.Transparent,
                     focusedContainerColor = Color.Transparent

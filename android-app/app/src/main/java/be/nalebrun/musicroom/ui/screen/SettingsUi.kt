@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import be.nalebrun.musicroom.ui.element.ActiveScreen
 import be.nalebrun.musicroom.ui.element.BottomScreenMenu
 import be.nalebrun.musicroom.ui.element.Title
+import be.nalebrun.musicroom.viewmodel.AuthViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 
 @Composable
@@ -30,6 +31,7 @@ fun SettingsUi() {
     } else {
         hiltViewModel()
     }
+    val authViewModel: AuthViewModel = hiltViewModel()
 
     Column(
         modifier = Modifier
@@ -46,6 +48,10 @@ fun SettingsUi() {
             }
             SettingItem("change password") {
                 navigationViewModel.navigateTo("change-password")
+            }
+            SettingItem("logout") {
+                authViewModel.logout()
+                navigationViewModel.navigateTo("auth")
             }
         }
         BottomScreenMenu(

@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
@@ -48,10 +49,32 @@ fun ChangePasswordUi() {
                 PageTopBackButton(onClick = { navigationViewModel.navigateBack() })
             }
             Column(modifier = Modifier.padding(top = 20.dp)) {
-                CustomTextField(title = "Old Password", text = oldPassword, onValueChange = { oldPassword = it })
-                CustomTextField(title = "New Password", text = newPassword, onValueChange = { newPassword = it }, modifier = Modifier.padding(top = 10.dp))
-                CustomTextField(title = "Confirm New Password", text = confirmPassword, onValueChange = { confirmPassword = it }, modifier = Modifier.padding(top = 10.dp))
-                BlackOrWhiteButton(text = "Update Password", active = true, onClick = { /* TODO */ }, modifier = Modifier.padding(top = 20.dp, start = 10.dp, end = 10.dp))
+                CustomTextField(
+                    title = "Old Password",
+                    text = oldPassword,
+                    onValueChange = { oldPassword = it },
+                    visualTransformation = PasswordVisualTransformation()
+                )
+                CustomTextField(
+                    title = "New Password",
+                    text = newPassword,
+                    onValueChange = { newPassword = it },
+                    modifier = Modifier.padding(top = 10.dp),
+                    visualTransformation = PasswordVisualTransformation()
+                )
+                CustomTextField(
+                    title = "Confirm New Password",
+                    text = confirmPassword,
+                    onValueChange = { confirmPassword = it },
+                    modifier = Modifier.padding(top = 10.dp),
+                    visualTransformation = PasswordVisualTransformation()
+                )
+                BlackOrWhiteButton(
+                    text = "Update Password",
+                    active = true,
+                    onClick = { /* TODO */ },
+                    modifier = Modifier.padding(top = 20.dp, start = 10.dp, end = 10.dp)
+                )
             }
         }
         BottomScreenMenu(activeScreen = ActiveScreen.SETTINGS)

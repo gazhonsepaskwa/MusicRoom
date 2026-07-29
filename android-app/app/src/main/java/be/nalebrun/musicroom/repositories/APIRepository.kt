@@ -12,6 +12,10 @@ import okhttp3.Response
 import okio.IOException
 import javax.inject.Inject
 
+/**
+ * Class to interact with API
+ * @author nalebrun
+ */
 interface IAPIRepository {
     /**
      * Get the base URL from settings
@@ -62,21 +66,23 @@ interface IAPIRepository {
         onFailure: (call: Call, e: IOException) -> Unit
     )
 
+    /**
+     * Make a DELETE query to a given url
+     * @param url the url where the request goes
+     * @param auth the JWT Token
+     * @param body the posted body of the request
+     * @param onResponse callback function that execute when the api respond to the request
+     * @param onFailure callback function that execute whet there is an error communicating with api
+     */
     fun delete(
         url: String,
-        body: RequestBody,
+        body: RequestBody? = null,
         auth: String = "",
         onResponse: (call: Call, response: Response) -> Unit,
         onFailure: (call: Call, e: IOException) -> Unit
     )
 }
 
-/**
- * Class to interact with API
- * @author nalebrun
- * @property client (private) hold the connection client
- * @see IAuthRepository
- */
 class APIRepository @Inject constructor(
     private val client: OkHttpClient,
     private val settingsRepository: ISettingsRepository
@@ -168,7 +174,7 @@ class APIRepository @Inject constructor(
 
     override fun delete(
         url: String,
-        body: RequestBody,
+        body: RequestBody?,
         auth: String,
         onResponse: (call: Call, response: Response) -> Unit,
         onFailure: (call: Call, e: IOException) -> Unit

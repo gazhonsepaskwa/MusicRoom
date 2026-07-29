@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,6 +31,7 @@ import be.nalebrun.musicroom.viewmodel.AuthViewModel
 import be.nalebrun.musicroom.ui.element.BlackOrWhiteButton
 import be.nalebrun.musicroom.ui.element.CustomTextField
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
+import be.nalebrun.musicroom.viewmodel.SocketViewModel
 
 @Composable
 fun AuthUi() {
@@ -42,6 +44,11 @@ fun AuthUi() {
     } else {
         hiltViewModel()
     }
+    val socketViewModel: SocketViewModel = if (activity != null) {
+        hiltViewModel(activity as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
 
     // get the viewModel var in the AuthUi to update ui when value change
     val loginResult:  String?  by viewModel.loginResult.collectAsStateWithLifecycle()
@@ -50,8 +57,13 @@ fun AuthUi() {
 
     // navigation triggers
     LaunchedEffect(loginOk) {
+        // launch when login is done or when the token already exist
         if (loginOk == true) {
-            navigationViewModel.navigateTo("favorite")
+            // when the login is ok, connect the socket and then navigate to the fav page
+            socketViewModel.connectSocket()
+            navigationViewModel.navigateTo("search") {
+                popUpTo("auth") { inclusive = true }
+            }
         }
     }
 
@@ -96,7 +108,8 @@ fun AuthUi() {
             "password",
             tfPassword,
             { tfPassword = it },
-            Modifier.padding(bottom = 30.dp)
+            Modifier.padding(bottom = 30.dp),
+            visualTransformation = PasswordVisualTransformation()
         )
 
         // Buttons
@@ -129,6 +142,16 @@ fun AuthUi() {
                 }
             )
         }
+        BlackOrWhiteButton(
+            text = "Google",
+            modifier = Modifier.height(60.dp),
+            active = true,
+            onClick = {
+                if (activity != null) {
+                    viewModel.googleAuth(activity)
+                }
+            }
+        )
         // Display response
         Text(currentResult ?: "", textAlign = TextAlign.Center)
     }

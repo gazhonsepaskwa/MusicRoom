@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import be.nalebrun.musicroom.APIRepository
 import be.nalebrun.musicroom.apiJsonStruct.responds.FriendRequestActionJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.NotificationJson
-import be.nalebrun.musicroom.apiJsonStruct.responds.SearchResponseJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiFriendJson
 import be.nalebrun.musicroom.repositories.CredentialRepository
 import be.nalebrun.musicroom.repositories.ISettingsRepository
@@ -32,6 +31,10 @@ data class UpdatePermissionsJson(
     val canModifyMusic: Boolean
 )
 
+/**
+ * The logic for the Friends page
+ * @author nalebrun
+ */
 @HiltViewModel
 class FriendsViewModel @Inject constructor(
     val apiRepository: APIRepository,
@@ -39,9 +42,11 @@ class FriendsViewModel @Inject constructor(
     val settingsRepository: ISettingsRepository
 ) : ViewModel() {
 
+    // List of accepted friends
     private val _friends = MutableStateFlow<List< apiFriendJson>>(emptyList())
     val friends : StateFlow<List<apiFriendJson>> = _friends
 
+    // List of pending friend requests (notifications)
     private val _friendRequests = MutableStateFlow<List<NotificationJson>>(emptyList())
     val friendRequests: StateFlow<List<NotificationJson>> = _friendRequests
 
@@ -50,10 +55,16 @@ class FriendsViewModel @Inject constructor(
         getFriendRequests()
     }
 
+    /**
+     * Answers a friend request "ACCEPTED"
+     */
     fun acceptFriendRequest(senderId: Int) {
         answerFriendRequest(senderId, "ACCEPTED")
     }
 
+    /**
+     * Answers a friend request "REJECTED"
+     */
     fun declineFriendRequest(senderId: Int) {
         answerFriendRequest(senderId, "REJECTED")
     }
@@ -91,6 +102,9 @@ class FriendsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Fetch the list of pending friend requests from notifications
+     */
     fun getFriendRequests() {
         Log.d("FriendsViewModel", "Fetching friend requests")
         viewModelScope.launch {
@@ -122,6 +136,9 @@ class FriendsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Fetch the list of accepted friends
+     */
     fun getFriendList() { viewModelScope.launch {
         credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
             if (jwt.isNotEmpty()) {
@@ -149,6 +166,9 @@ class FriendsViewModel @Inject constructor(
         }
     }}
 
+    /**
+     * Update permissions for a specific friend on the current device
+     */
     fun updatePermissions(friendId: Int, canSeek: Boolean, canTogglePlayPause: Boolean, canModifyMusic: Boolean) {
         viewModelScope.launch {
             val deviceId = settingsRepository.deviceUuidFlow.first() ?: return@launch
@@ -179,4 +199,31 @@ class FriendsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Remove a friend from the friend list
+     */
+    fun removeFriend(friendId: Int?) {
+        viewModelScope.launch {
+            credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
+                if (jwt.isNotEmpty()) {
+                    val bodyString = Json.encodeToString(mapOf("receiverId" to friendId))
+                    val body = bodyString.toRequestBody("application/json".toMediaType())
+                    apiRepository.delete(
+                        "friendship/delete",
+                        body,
+                        "Bearer $jwt",
+                        { _, response ->
+                            Log.d("FriendsViewModel", "Remove friend response: ${response.code}")
+                            if (response.code in 200..<300) {
+                                getFriendList()
+                            }
+                        },
+                        { _, e ->
+                            Log.e("FriendsViewModel", "Remove friend failed", e)
+                        }
+                    )
+                }
+            }
+        }
+    }
 }

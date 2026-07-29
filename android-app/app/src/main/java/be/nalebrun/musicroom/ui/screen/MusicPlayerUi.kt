@@ -46,7 +46,9 @@ import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
 import be.nalebrun.musicroom.ui.element.PageTopBackButton
 import be.nalebrun.musicroom.ui.element.QueueBottomSheet
+import be.nalebrun.musicroom.ui.element.DeviceControlBottomSheet
 import be.nalebrun.musicroom.viewmodel.MusicViewModel
+import be.nalebrun.musicroom.viewmodel.DevicesViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import coil3.compose.AsyncImage
 import androidx.compose.runtime.collectAsState
@@ -72,6 +74,7 @@ fun MusicPlayerUi() {
     } else {
         hiltViewModel()
     }
+    val DevicesViewModel: DevicesViewModel = hiltViewModel()
 
     val currentSong: Int by musicViewModel.currentSong.collectAsStateWithLifecycle()
 
@@ -80,6 +83,7 @@ fun MusicPlayerUi() {
     val musicJson: MusicJson by musicViewModel.music.collectAsStateWithLifecycle()
 
     var showQueueSheet by remember { mutableStateOf(false) }
+    var showDeviceSheet by remember { mutableStateOf(false) }
 
     // on song change, fetch the info of the next song
     LaunchedEffect(currentSong) {
@@ -106,7 +110,10 @@ fun MusicPlayerUi() {
 
         MusicControlButtons(musicViewModel)
 
-        BottomButtons(onQueueClick = { showQueueSheet = true })
+        BottomButtons(
+            onQueueClick = { showQueueSheet = true },
+            onControlDeviceClick = { showDeviceSheet = true }
+        )
     }
 
     if (showQueueSheet) {
@@ -114,6 +121,13 @@ fun MusicPlayerUi() {
         QueueBottomSheet(
             musicViewModel,
             onDismissRequest = { showQueueSheet = false })
+    }
+
+    if (showDeviceSheet) {
+        DeviceControlBottomSheet(
+            viewModel = DevicesViewModel,
+            onDismissRequest = { showDeviceSheet = false }
+        )
     }
 }
 
@@ -293,7 +307,7 @@ fun MusicControlButtons(viewModel: MusicViewModel) {
 }
 
 @Composable
-fun BottomButtons(onQueueClick: () -> Unit) {
+fun BottomButtons(onQueueClick: () -> Unit, onControlDeviceClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -305,6 +319,7 @@ fun BottomButtons(onQueueClick: () -> Unit) {
             modifier = Modifier
                 .clip(CircleShape)
                 .border(border = BorderStroke(2.dp, Color.Black), shape = CircleShape)
+                .clickable { onControlDeviceClick() }
                 .padding(10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp)

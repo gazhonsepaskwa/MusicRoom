@@ -8,7 +8,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import be.nalebrun.musicroom.repositories.CredentialRepository
 import be.nalebrun.musicroom.ui.screen.AlbumUi
 import be.nalebrun.musicroom.ui.screen.ArtistUi
 import be.nalebrun.musicroom.ui.screen.AuthUi
@@ -159,7 +158,9 @@ fun CreateNavGraph(
                     socketViewModel.connectSocket()
                 }
             }
-            PlaylistUi(-1) // -1 is the favorite playlist fallback
+            navController.navigate("search") {
+                popUpTo(navController.graph.id) { inclusive = true }
+            }
         }
 
         ////////////////

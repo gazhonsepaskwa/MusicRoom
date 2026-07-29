@@ -13,40 +13,38 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary      = Color.White,
+    secondary    = Color.Gray,
+    tertiary     = Color.Gray,
+    background   = Color.Black,
+    onBackground = Color.White,
+    surface      = Color.Black,
+    onSurface    = Color.White,
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40,
-    background = Color.Red,
-
-    /* Other default colors to override
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary      = Color.Black,
+    secondary    = Color.Gray,
+    tertiary     = Color.Gray,
+    background   = Color.White,
+    onBackground = Color.Black,
+    surface      = Color.White,
+    onSurface    = Color.Black,
 )
 
 @Composable
 fun MusicRoomTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
+    darkTheme : Boolean = isSystemInDarkTheme(),
+    content   : @Composable () -> Unit
 ) {
     val colorScheme = when {
         darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        else      -> LightColorScheme
     }
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
-        content = content
+        typography  = Typography,
+        content     = content
     )
 }

@@ -12,9 +12,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -180,7 +183,7 @@ fun SearchResultCard(
         ,
         modifier = Modifier
             .padding(top = 2.dp, bottom = 2.dp, start = 10.dp)
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .height(50.dp)
             .fillMaxWidth()
             .clickable(onClick = {
@@ -197,9 +200,10 @@ fun SearchResultCard(
         ,
         verticalAlignment = Alignment.CenterVertically
     ){
-        Image(
+        Icon(
             modifier = Modifier
-                .padding(2.dp),
+                .padding(2.dp)
+                .size(36.dp),
             painter = painterResource(id = when(resultType) {
                 ResultType.ARTIST -> R.drawable.artist
                 ResultType.MUSIC -> R.drawable.note_1
@@ -207,7 +211,8 @@ fun SearchResultCard(
                 ResultType.ALBUM -> R.drawable.album
                 ResultType.USER -> R.drawable.baseline_account_circle_24
             }),
-            contentDescription = ""
+            contentDescription = "",
+            tint = MaterialTheme.colorScheme.onBackground
         )
         Column (
         ) {
@@ -273,12 +278,12 @@ fun FilterButton(
             .clip(shape = RoundedCornerShape(99.dp))
             .border(
                 width = 2.dp,
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onBackground,
                 shape = RoundedCornerShape(99.dp)
             )
             .background(color = when (active) {
-                true -> Color.Black
-                false -> Color.White
+                true  -> MaterialTheme.colorScheme.onBackground
+                false -> MaterialTheme.colorScheme.background
             })
             .height(30.dp)
             .clickable(onClick = onClick),
@@ -288,8 +293,8 @@ fun FilterButton(
             text = text,
             textAlign = TextAlign.Center,
             color = when (active) {
-                true -> Color.White
-                false -> Color.Black
+                false -> MaterialTheme.colorScheme.onBackground
+                true  -> MaterialTheme.colorScheme.background
             },
             modifier = Modifier
                 .fillMaxWidth()

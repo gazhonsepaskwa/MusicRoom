@@ -1,13 +1,15 @@
 package be.nalebrun.musicroom.ui.element
 
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -129,11 +131,17 @@ fun BottomScreenMenuButton(buttonText: String, buttonIcon: Int, onClick: () -> U
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
-            modifier = Modifier.padding(bottom = 3.dp),
+        Icon(
+            modifier = Modifier
+                .padding(bottom = 3.dp)
+                .size(24.dp),
             painter = painterResource(id = buttonIcon),
-            contentDescription = ""
+            contentDescription = "",
+            tint = MaterialTheme.colorScheme.onSurface
         )
-        Text(buttonText)
+        Text(
+            text = buttonText,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
 }

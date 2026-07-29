@@ -4,6 +4,7 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.unit.dp
@@ -27,7 +28,7 @@ fun BottomScreenMenu(
     val waitingList = musicViewModel.waitingList.collectAsState()
 
     Column() {
-        HorizontalDivider(thickness = 1.dp, color = Color.Black)
+        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.onBackground)
         if (activity != null && waitingList.value.isNotEmpty()) {
             MiniPlayer(musicViewModel, activity)
         }

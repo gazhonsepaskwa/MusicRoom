@@ -79,13 +79,13 @@ fun UserProfileUi(userId: Int) {
                             modifier = Modifier
                                 .size(100.dp)
                                 .clip(RoundedCornerShape(999.dp))
-                                .border(3.dp, Color.Black, RoundedCornerShape(999.dp)),
+                                .border(3.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(999.dp)),
                             contentScale = ContentScale.Crop
                         )
                         Column(modifier = Modifier.padding(start = 16.dp)) {
-                            Text("username:", fontSize = 12.sp, color = Color.Gray)
+                            Text("username:", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(user.username, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                            Text("email:", fontSize = 12.sp, color = Color.Gray, modifier = Modifier.padding(top = 4.dp))
+                            Text("email:", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp))
                             Text(user.email ?: "N/A", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                         }
                     }
@@ -99,7 +99,7 @@ fun UserProfileUi(userId: Int) {
                     ) {
                         Surface(
                             modifier = Modifier
-                                .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
+                                .border(1.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(8.dp))
                                 .padding(horizontal = 12.dp, vertical = 8.dp),
                             shape = RoundedCornerShape(8.dp)
                         ) {
@@ -113,8 +113,8 @@ fun UserProfileUi(userId: Int) {
                             },
                             modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.buttonColors(containerColor = when (friendRequestState) {
-                                null -> Color.Black
-                                else -> Color.Gray
+                                null -> MaterialTheme.colorScheme.onBackground
+                                else -> MaterialTheme.colorScheme.outline
                             }),
                             shape = RoundedCornerShape(8.dp)
                         ) {
@@ -122,7 +122,7 @@ fun UserProfileUi(userId: Int) {
                                 FriendRequestStatus.PENDING -> "pending"
                                 FriendRequestStatus.NOTVIEWED -> "pending"
                                 FriendRequestStatus.ACCEPTED -> "already friends !"
-                                else -> "send friend request" }, color = Color.White)
+                                else -> "send friend request" }, color = MaterialTheme.colorScheme.background)
                         }
                     }
                 }
@@ -165,7 +165,7 @@ fun UserProfileUi(userId: Int) {
                 }
             }
         } ?: Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = Color.Black)
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.onBackground)
         }
 
         BottomScreenMenu(activeScreen = ActiveScreen.SEARCH)
@@ -186,7 +186,7 @@ fun FavoriteMusicItem(music: MusicJson) {
             modifier = Modifier
                 .size(60.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .border(1.dp, Color.Gray, RoundedCornerShape(8.dp)),
+                .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(8.dp)),
             contentScale = ContentScale.Crop
         )
         Text(
@@ -212,17 +212,27 @@ fun PlaylistItem(playlist: PlaylistProfileJson) {
             modifier = Modifier
                 .size(60.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .border(1.dp, Color.Gray, RoundedCornerShape(8.dp)),
+                .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(8.dp)),
             contentScale = ContentScale.Crop
         )
         Column(modifier = Modifier.padding(start = 16.dp)) {
             Text(text = playlist.title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(painter = painterResource(id = R.drawable.outline_event_list_24), contentDescription = null, modifier = Modifier.size(16.dp))
+                Icon(
+                    painter = painterResource(id = R.drawable.outline_event_list_24),
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
                 Text(text = formatDuration(playlist.duration), fontSize = 14.sp, modifier = Modifier.padding(start = 4.dp))
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(painter = painterResource(id = R.drawable.note_1), contentDescription = null, modifier = Modifier.size(16.dp))
+                Icon(
+                    painter = painterResource(id = R.drawable.note_1),
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
                 Text(text = "${playlist.musicCount}", fontSize = 14.sp, modifier = Modifier.padding(start = 4.dp))
             }
         }
@@ -234,24 +244,24 @@ fun PlaylistTabSwitcher(selectedTab: String, onTabSelected: (String) -> Unit) {
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(Color.White)
-            .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.background)
+            .border(1.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(8.dp))
     ) {
         Box(
             modifier = Modifier
-                .background(if (selectedTab == "owned") Color.Black else Color.White)
+                .background(if (selectedTab == "owned") MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.background)
                 .clickable { onTabSelected("owned") }
                 .padding(horizontal = 16.dp, vertical = 4.dp)
         ) {
-            Text("owned", color = if (selectedTab == "owned") Color.White else Color.Black)
+            Text("owned", color = if (selectedTab == "owned") MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground)
         }
         Box(
             modifier = Modifier
-                .background(if (selectedTab == "invited") Color.Black else Color.White)
+                .background(if (selectedTab == "invited") MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.background)
                 .clickable { onTabSelected("invited") }
                 .padding(horizontal = 16.dp, vertical = 4.dp)
         ) {
-            Text("invited", color = if (selectedTab == "invited") Color.White else Color.Black)
+            Text("invited", color = if (selectedTab == "invited") MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.onBackground)
         }
     }
 }

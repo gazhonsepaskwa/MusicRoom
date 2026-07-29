@@ -1,6 +1,5 @@
 package be.nalebrun.musicroom.ui.screen
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,6 +11,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -96,7 +97,7 @@ fun PlaylistUi(id: Int) {
                                 "private"
                             }
                         )
-                        Image(
+                        Icon(
                             painter = painterResource(
                                 if (isPublic ?: false) {
                                     R.drawable.outline_visibility_24
@@ -105,6 +106,7 @@ fun PlaylistUi(id: Int) {
                                 }
                             ),
                             contentDescription = "",
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
@@ -120,20 +122,22 @@ fun PlaylistUi(id: Int) {
                     horizontalArrangement = Arrangement
                         .spacedBy(8.dp),
                 ) {
-                    Image(
+                    Icon(
                         painter = painterResource(R.drawable.outline_play_arrow_24),
                         contentDescription = "",
                         modifier = Modifier.clickable(true, onClick = {
                             viewModel.musicRepository.replaceWaitingList(musics)
-                        })
+                        }),
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
-                    Image(
+                    Icon(
                         painter = painterResource(if (shuffleOn) { R.drawable.outline_shuffle_on_24}
                         else {
                             R.drawable.outline_shuffle_24
                         }),
                         contentDescription = "",
-                        modifier = Modifier.clickable(true, onClick = { shuffleOn = !shuffleOn })
+                        modifier = Modifier.clickable(true, onClick = { shuffleOn = !shuffleOn }),
+                        tint = if (shuffleOn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                     )
                 }
                 if (!isDefault) {
@@ -151,13 +155,13 @@ fun PlaylistUi(id: Int) {
                     }
                 }
             }
-        HorizontalDivider(thickness = 2.dp, color = Color.Black)
+        HorizontalDivider(thickness = 2.dp, color = MaterialTheme.colorScheme.onBackground)
         LazyColumn(
             modifier = Modifier.weight(1f)
         ) {
             items(musics) { item ->
                 PlaylistCard(playlistId, item)
-                HorizontalDivider(thickness = 1.dp, color = Color.Black)
+                HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.onBackground)
             }}
         }
 

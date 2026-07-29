@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -73,6 +74,6 @@ fun SettingItem(text: String, onClick: () -> Unit) {
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp)
         )
-        HorizontalDivider(thickness = 1.dp, color = Color.Gray)
+        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

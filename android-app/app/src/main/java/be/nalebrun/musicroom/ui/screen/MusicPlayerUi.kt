@@ -2,7 +2,6 @@ package be.nalebrun.musicroom.ui.screen
 
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,6 +18,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -31,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -138,14 +138,13 @@ fun CoverArt(url: String, lyrics: String) {
             .fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-            // Back Box (Text/Lyrics)
             Box(
             modifier = Modifier
                 .offset(x = 50.dp)
                 .size(200.dp)
-                .border(2.dp, Color.Black, RoundedCornerShape(32.dp))
+                .border(2.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(32.dp))
                 .clip(RoundedCornerShape(32.dp))
-                .background(Color.White),
+                .background(MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.CenterEnd
         ) {
             Text(
@@ -160,7 +159,7 @@ fun CoverArt(url: String, lyrics: String) {
             modifier = Modifier
                 .offset(x = (-30).dp)
                 .size(240.dp)
-                .border(2.dp, Color.Black, RoundedCornerShape(32.dp))
+                .border(2.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(32.dp))
                 .clip(RoundedCornerShape(32.dp))
         ) {
             AsyncImage(
@@ -188,16 +187,16 @@ fun SongProgressBar(viewModel: MusicViewModel) {
                 viewModel.seekTo(newPosition)
             },
             colors = SliderDefaults.colors(
-                thumbColor = Color.Black,
-                activeTrackColor = Color.Black,
-                inactiveTrackColor = Color.Gray
+                thumbColor = MaterialTheme.colorScheme.onBackground,
+                activeTrackColor = MaterialTheme.colorScheme.onBackground,
+                inactiveTrackColor = MaterialTheme.colorScheme.outlineVariant
             ),
             thumb = {
                 Box(
                     modifier = Modifier
                         .size(20.dp)
-                        .background(Color.Black, CircleShape)
-                        .border(BorderStroke(1.dp, Color.White), CircleShape)
+                        .background(MaterialTheme.colorScheme.onBackground, CircleShape)
+                        .border(BorderStroke(1.dp, MaterialTheme.colorScheme.background), CircleShape)
                 )
             },
             track = {
@@ -205,14 +204,14 @@ fun SongProgressBar(viewModel: MusicViewModel) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp)
-                        .border(BorderStroke(1.dp, Color.Black), CircleShape)
+                        .border(BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground), CircleShape)
                 )
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(sliderPosition)
                         .height(8.dp)
-                        .background(Color.Black, CircleShape)
-                        .border(BorderStroke(1.dp, Color.Black), CircleShape)
+                        .background(MaterialTheme.colorScheme.onBackground, CircleShape)
+                        .border(BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground), CircleShape)
                 )
             }
         )
@@ -243,7 +242,7 @@ fun MusicControlButtons(viewModel: MusicViewModel) {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         val controlIconsSize: Dp = 40.dp
-        Image(
+        Icon(
             painter = painterResource(id = when {
                 shuffle -> R.drawable.outline_shuffle_on_24
                 else -> R.drawable.outline_shuffle_24
@@ -253,21 +252,23 @@ fun MusicControlButtons(viewModel: MusicViewModel) {
                 .size(controlIconsSize)
                 .clickable(onClick = {
                     shuffle = !shuffle
-                })
+                }),
+            tint = if (shuffle) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Image(
+            Icon(
                 painter = painterResource(id = R.drawable.outline_skip_previous_24),
                 contentDescription = "",
                 Modifier
                     .size(controlIconsSize)
                     .clickable(onClick = {
                         viewModel.goToPreviousSong()
-                    })
+                    }),
+                tint = MaterialTheme.colorScheme.onSurface
             )
-            Image(
+            Icon(
                 painter = painterResource(id = when {
                     play.collectAsState().value -> R.drawable.outline_pause_24
                     else -> R.drawable.outline_play_arrow_24
@@ -277,19 +278,21 @@ fun MusicControlButtons(viewModel: MusicViewModel) {
                     .size(controlIconsSize)
                     .clickable(onClick = {
                         if (play.value) viewModel.pause() else viewModel.play()
-                    })
+                    }),
+                tint = MaterialTheme.colorScheme.onSurface
             )
-            Image(
+            Icon(
                 painter = painterResource(id = R.drawable.outline_skip_next_24),
                 contentDescription = "",
                 Modifier
                     .size(controlIconsSize)
                     .clickable(onClick = {
                         viewModel.goToNextSong()
-                    })
+                    }),
+                tint = MaterialTheme.colorScheme.onSurface
             )
         }
-        Image(
+        Icon(
             painter = painterResource(id = when (repeat) {
                 Repeat.NO  -> R.drawable.outline_repeat_24
                 Repeat.ONE -> R.drawable.outline_repeat_one_24
@@ -301,7 +304,8 @@ fun MusicControlButtons(viewModel: MusicViewModel) {
                 .clickable(onClick = {
                     // go to next state
                     repeat = Repeat.entries.toTypedArray()[(repeat.ordinal + 1) % Repeat.entries.size]
-                })
+                }),
+            tint = if (repeat != Repeat.NO) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -318,27 +322,29 @@ fun BottomButtons(onQueueClick: () -> Unit, onControlDeviceClick: () -> Unit) {
         Row(
             modifier = Modifier
                 .clip(CircleShape)
-                .border(border = BorderStroke(2.dp, Color.Black), shape = CircleShape)
+                .border(border = BorderStroke(2.dp, MaterialTheme.colorScheme.onBackground), shape = CircleShape)
                 .clickable { onControlDeviceClick() }
                 .padding(10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Image(
+            Icon(
                 painter = painterResource(id = R.drawable.outline_devices_other_24),
                 contentDescription = "",
-                Modifier.size(25.dp)
+                Modifier.size(25.dp),
+                tint = MaterialTheme.colorScheme.onBackground
             )
             Text("Control device")
         }
 
         // musique queue
-        Image(
+        Icon(
             painter = painterResource(id = R.drawable.outline_event_list_24),
             contentDescription = "",
             Modifier
                 .size(25.dp)
-                .clickable(onClick = onQueueClick)
+                .clickable(onClick = onQueueClick),
+            tint = MaterialTheme.colorScheme.onBackground
         )
     }
 }

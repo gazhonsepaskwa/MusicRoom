@@ -99,10 +99,9 @@ export class AuthController {
   @Get('oauth/callback')
   @Public()
   @UseGuards(AuthGuard('google'))
-  async oauthCallback(@Req() req/*, @Res() res*/) {
+  async oauthCallback(@Req() req, @Res() res) {
     const user = req.user;
-	return user;
-	//return res.redirect(`${process.env.APP_SCHEME}://auth/callback?token=` + user.access_token);
+	return res.redirect(`${process.env.APP_SCHEME}://auth/callback?token=` + user.access_token);
 	}
 
   @ApiOkResponse({type: UserResponseDto})

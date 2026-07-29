@@ -99,13 +99,13 @@ export class AuthService {
 		return;
 	if (!user.password || !password)
 		throw new UnprocessableEntityException(
-			'Incorrect Password or User',
+			['Incorrect Password or User'],
 			'Invalid Attempt ',
 	);
 	const hash = await bcrypt.compare(password!, user?.password);
     if (hash == false) {
       throw new UnprocessableEntityException(
-        'Incorrect Password or User',
+        ['Incorrect Password or User'],
         'Invalid Attempt ',
       );
     }

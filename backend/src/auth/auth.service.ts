@@ -198,6 +198,17 @@ export class AuthService {
         email: profile.email,
         verifiedEmail: true,
       });
+	  await this.playlistsService.create({
+				isPublic: false, 
+				title: "Favorite", 
+				isDefault: true, 
+				status: "FAVORITE",
+				user: {
+				connect: {
+					id: +user.id,
+				},
+			}, 
+	  });
     }
     if (!profile || !user) {
       throw new UnauthorizedException();

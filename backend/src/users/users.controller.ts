@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiBody, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
-import { ChangePasswordDto, UserProfileResponseDto, UserResponseDto, UserUpdateDto } from './dto/user.dto';
+import { ChangePasswordDto, PasswordCheckDto, UserProfileResponseDto, UserResponseDto, UserUpdateDto } from './dto/user.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ParseSafeIntPipe } from '../common/pipe/parse_safe_int.pipe';
 
@@ -61,6 +61,15 @@ export class UsersController {
 	@Body() data: UserUpdateDto)
   {
 	await this.usersService.updateUser({ where:{id: userId}, data})
+  }
+
+  @ApiOkResponse({ type: PasswordCheckDto})
+  @Get('is-google-checked')
+  async isPasswordSet(@CurrentUser() userId: number) {
+	const user = await this.usersService.user({id: userId})
+	return {
+		isPasswordSet: user!.password != null
+	}
   }
 
   @ApiBody({type: ChangePasswordDto})

@@ -83,18 +83,6 @@ export class AuthController {
 		);
 	}
 
-//   @Post('callback')
-//   @Public()
-//   async callback(@Query('verificationToken') token?: string) {
-// 	if (!token) {
-// 		throw new UnauthorizedException(
-// 			'Missing verification token.',
-// 		);
-// 	}
-// 	return await this.authService.loginFromVerificationToken(token);
-	
-//   }
-
   @ApiBody({ type: EmailDto })
   @ApiOkResponse({ type: AuthMessageResponseDto })
   @Post('resend-email')
@@ -111,9 +99,10 @@ export class AuthController {
   @Get('oauth/callback')
   @Public()
   @UseGuards(AuthGuard('google'))
-  async oauthCallback(@Req() req, @Res() res) {
+  async oauthCallback(@Req() req/*, @Res() res*/) {
     const user = req.user;
-	return res.redirect(`${process.env.APP_SCHEME}://auth/callback?token=` + user.access_token);
+	return user;
+	//return res.redirect(`${process.env.APP_SCHEME}://auth/callback?token=` + user.access_token);
 	}
 
   @ApiOkResponse({type: UserResponseDto})

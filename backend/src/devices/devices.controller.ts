@@ -14,6 +14,7 @@ import { UpdateNameDto } from './dto/updateName.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import {
   AvailableDeviceResponseDto,
+  DeviceRequestDto,
   DeviceResponseDto,
   DeviceshipResponseDto,
 } from './dto/device.dto';
@@ -64,11 +65,11 @@ export class DevicesController {
     return await this.devicesService.getAvailableDevices(userId);
   }
 
-  @ApiParam({ name: 'id', type: String })
+  @ApiBody({ type: DeviceRequestDto})
   @ApiOkResponse({ type: DeviceResponseDto })
-  @Delete(':id')
-  async deleteDevice(@CurrentUser() userId: number, @Param('id') id: string) {
-    return await this.devicesService.deleteDevice(id, userId);
+  @Delete('remove-device')
+  async deleteDevice(@CurrentUser() userId: number,  @Body() data: DeviceRequestDto) {
+    return await this.devicesService.deleteDevice(userId, data);
   }
 
   @ApiOkResponse({ type: [DeviceResponseDto] })

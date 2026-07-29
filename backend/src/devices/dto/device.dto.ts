@@ -41,3 +41,12 @@ export class AvailableDeviceResponseDto extends DeviceshipResponseDto {
   @ApiProperty({ example: true })
   isOnlineDevice!: boolean;
 }
+
+export class DeviceRequestDto {
+	@ApiProperty({})
+	deviceId!: string
+
+	@ApiProperty({})
+	deviceName!: string
+
+}

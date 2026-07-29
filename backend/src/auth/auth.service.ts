@@ -94,13 +94,15 @@ export class AuthService {
     };
   }
 
-  async confirmPassword(user: user, password: string) {
-	if (!user.password)
-      throw new UnprocessableEntityException(
-        'Incorrect Password or User',
-        'Invalid Attempt ',
-      );
-	const hash = await bcrypt.compare(password, user?.password);
+  async confirmPassword(user: user, password?: string) {
+	if (!user?.password && !password)
+	return;
+	if (!user.password || !password)
+	throw new UnprocessableEntityException(
+		'Incorrect Password or User',
+		'Invalid Attempt ',
+	);
+	const hash = await bcrypt.compare(password!, user?.password);
     if (hash == false) {
       throw new UnprocessableEntityException(
         'Incorrect Password or User',
@@ -192,7 +194,7 @@ export class AuthService {
     let user = await this.usersService.user({ email: profile.email });
     if (!user) {
       user = await this.usersService.createUser({
-        username: profile.username,
+        username: profile.name,
         email: profile.email,
         verifiedEmail: true,
       });

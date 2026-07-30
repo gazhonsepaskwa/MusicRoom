@@ -52,6 +52,8 @@ import be.nalebrun.musicroom.viewmodel.DevicesViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import coil3.compose.AsyncImage
 import androidx.compose.runtime.collectAsState
+import be.nalebrun.musicroom.repositories.SocketIORepository
+import be.nalebrun.musicroom.viewmodel.SocketViewModel
 
 enum class Repeat{
     NO,
@@ -70,6 +72,11 @@ fun MusicPlayerUi() {
         hiltViewModel()
     }
     val navigationViewModel: NavigationViewModel = if (activity != null) {
+        hiltViewModel(activity as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
+    val socketViewModel: SocketViewModel = if (activity != null) {
         hiltViewModel(activity as ViewModelStoreOwner)
     } else {
         hiltViewModel()
@@ -112,7 +119,14 @@ fun MusicPlayerUi() {
 
         BottomButtons(
             onQueueClick = { showQueueSheet = true },
-            onControlDeviceClick = { showDeviceSheet = true }
+            onControlDeviceClick = {
+                if (socketViewModel.isInRoom.value) {
+                    socketViewModel.quitMusicRoom()
+                    navigationViewModel.navigateTo("search")
+                } else {
+                    showDeviceSheet = true
+                }
+            }
         )
     }
 
@@ -312,6 +326,15 @@ fun MusicControlButtons(viewModel: MusicViewModel) {
 
 @Composable
 fun BottomButtons(onQueueClick: () -> Unit, onControlDeviceClick: () -> Unit) {
+    val activity = LocalActivity.current
+    val socketViewModel: SocketViewModel = if (activity != null) {
+        hiltViewModel(activity as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
+
+    val isInRoom = socketViewModel.isInRoom.collectAsStateWithLifecycle()
+
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -334,7 +357,7 @@ fun BottomButtons(onQueueClick: () -> Unit, onControlDeviceClick: () -> Unit) {
                 Modifier.size(25.dp),
                 tint = MaterialTheme.colorScheme.onBackground
             )
-            Text("Control device")
+            Text(if (isInRoom.value) "Disconnect" else "Control device")
         }
 
         // musique queue

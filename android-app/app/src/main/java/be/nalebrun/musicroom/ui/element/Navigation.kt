@@ -59,7 +59,6 @@ fun Navigation(
                 navigationViewModel.navigateTo("favorite") {
                     popUpTo("favorite") { saveState = true }
                     launchSingleTop = true
-                    restoreState = true
                 }
             }
         )
@@ -73,7 +72,6 @@ fun Navigation(
                 navigationViewModel.navigateTo("search") {
                     popUpTo("favorite") { saveState = true }
                     launchSingleTop = true
-                    restoreState = true
                 }
             }
         )
@@ -87,7 +85,6 @@ fun Navigation(
                 navigationViewModel.navigateTo("library") {
                     popUpTo("favorite") { saveState = true }
                     launchSingleTop = true
-                    restoreState = true
                 }
             }
         )
@@ -101,7 +98,6 @@ fun Navigation(
                 navigationViewModel.navigateTo("friends") {
                     popUpTo("favorite") { saveState = true }
                     launchSingleTop = true
-                    restoreState = true
                 }
             }
         )
@@ -115,7 +111,6 @@ fun Navigation(
                 navigationViewModel.navigateTo("settings") {
                     popUpTo("favorite") { saveState = true }
                     launchSingleTop = true
-                    restoreState = true
                 }
             }
         )

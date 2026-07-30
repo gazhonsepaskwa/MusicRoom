@@ -75,7 +75,7 @@ fun CreateNavGraph(
         ModalBottomSheet(
             onDismissRequest = {
                 Log.d("NavGraph", "Dismissing Sheet")
-                socketViewModel.dismissRequest()
+                socketViewModel.answerRequest(false)
             },
             sheetState = sheetState
         ) {
@@ -100,10 +100,10 @@ fun CreateNavGraph(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    TextButton(onClick = { socketViewModel.dismissRequest() }) {
+                    TextButton(onClick = { socketViewModel.answerRequest(false) }) {
                         Text("No")
                     }
-                    Button(onClick = { socketViewModel.acceptRequest() }) {
+                    Button(onClick = { socketViewModel.answerRequest(true) }) {
                         Text("Yes")
                     }
                 }

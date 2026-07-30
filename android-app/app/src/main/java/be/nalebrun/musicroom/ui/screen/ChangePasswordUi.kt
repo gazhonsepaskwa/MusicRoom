@@ -78,6 +78,9 @@ fun ChangePasswordUi() {
                         if (newPassword == confirmPassword) {
                             settingsViewModel.changePassword(oldPassword, newPassword)
                         }
+                        else {
+                            navigationViewModel.showMessage("Passwords don't match")
+                        }
                     },
                     modifier = Modifier.padding(top = 20.dp, start = 10.dp, end = 10.dp)
                 )

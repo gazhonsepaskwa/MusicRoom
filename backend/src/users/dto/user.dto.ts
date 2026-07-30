@@ -138,3 +138,8 @@ export class ChangePasswordDto {
 		})
 	newPassword!: string
 }
+
+export class PasswordCheckDto {
+	@ApiProperty({})
+	isPasswordSet!: boolean
+}

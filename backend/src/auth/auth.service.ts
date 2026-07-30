@@ -99,13 +99,13 @@ export class AuthService {
 		return;
 	if (!user.password || !password)
 		throw new UnprocessableEntityException(
-			'Incorrect Password or User',
+			['Incorrect Password or User'],
 			'Invalid Attempt ',
 	);
 	const hash = await bcrypt.compare(password!, user?.password);
     if (hash == false) {
       throw new UnprocessableEntityException(
-        'Incorrect Password or User',
+        ['Incorrect Password or User'],
         'Invalid Attempt ',
       );
     }
@@ -198,6 +198,17 @@ export class AuthService {
         email: profile.email,
         verifiedEmail: true,
       });
+	  await this.playlistsService.create({
+				isPublic: false, 
+				title: "Favorite", 
+				isDefault: true, 
+				status: "FAVORITE",
+				user: {
+				connect: {
+					id: +user.id,
+				},
+			}, 
+	  });
     }
     if (!profile || !user) {
       throw new UnauthorizedException();

@@ -83,18 +83,6 @@ export class AuthController {
 		);
 	}
 
-//   @Post('callback')
-//   @Public()
-//   async callback(@Query('verificationToken') token?: string) {
-// 	if (!token) {
-// 		throw new UnauthorizedException(
-// 			'Missing verification token.',
-// 		);
-// 	}
-// 	return await this.authService.loginFromVerificationToken(token);
-	
-//   }
-
   @ApiBody({ type: EmailDto })
   @ApiOkResponse({ type: AuthMessageResponseDto })
   @Post('resend-email')

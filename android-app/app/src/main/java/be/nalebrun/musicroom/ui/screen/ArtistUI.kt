@@ -107,7 +107,7 @@ fun ArtistUi(artistId: Int) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 40.dp, vertical = 10.dp),
+                    .padding(horizontal = 20.dp, vertical = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 if (artist != "") {
@@ -123,7 +123,7 @@ fun ArtistUi(artistId: Int) {
                             painter = painterResource(R.drawable.outline_play_arrow_24),
                             contentDescription = "",
                             modifier = Modifier.clickable(true, onClick = {
-//                                viewModel.musicRepository.replaceWaitingList(musics)
+                                viewModel.musicRepository.replaceWaitingList(musics)
                             })
                         )
                         Image(
@@ -190,7 +190,7 @@ fun ArtistUi(artistId: Int) {
                     modifier = Modifier.weight(1f)
                 ) {
                     items(musics) { it ->
-                        ArtistCard(it.title, "note")
+                        ArtistCard(it)
                         HorizontalDivider(thickness = 1.dp, color = Color.Black)
                     }
                 }

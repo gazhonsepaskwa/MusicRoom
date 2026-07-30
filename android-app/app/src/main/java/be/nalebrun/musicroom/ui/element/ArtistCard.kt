@@ -21,27 +21,38 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import be.nalebrun.musicroom.R
+import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
+import be.nalebrun.musicroom.viewmodel.ArtistViewModel
+import be.nalebrun.musicroom.viewmodel.PlaylistViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ArtistCard(title: String, artist: String) {
+fun ArtistCard(music: MusicJson) {
     var showbottomSheet by remember { mutableStateOf(false) }
     var sheetState = rememberModalBottomSheetState()
+    var addPlaylistSheet by remember { mutableStateOf(false) }
+    val viewModel: PlaylistViewModel = hiltViewModel()
 
     if (showbottomSheet) {
         ActionSheet(
             onDismissRequest = { showbottomSheet = false },
             actions = listOf(
                 ActionItem(
-                    label = "add to playlist",
+                    label = "add to queue (next)",
                     icon = R.drawable.playlist_tmp,
-                    onClick = {}
+                    onClick = { viewModel.musicRepository.addSongToWaitingListNext(music) }
                 ),
                 ActionItem(
-                    label = "add to queue",
+                    label = "add to queue (end)",
                     icon = R.drawable.playlist_tmp,
-                    onClick = {}
+                    onClick = { viewModel.musicRepository.addSongToWaitingListEnd(music) }
+                ),
+                ActionItem(
+                    label = "add to playlist",
+                    icon = R.drawable.playlist_tmp,
+                    onClick = { addPlaylistSheet = true }
                 )
             ),
             sheetState = sheetState
@@ -58,13 +69,21 @@ fun ArtistCard(title: String, artist: String) {
         verticalAlignment = Alignment.CenterVertically
     ){
         Column {
-            Text(title, fontWeight = FontWeight.Bold)
-            Text(artist)
+            Text(music.title, fontWeight = FontWeight.Bold)
+//            Text(artist)
         }
         Image(
-            painter = painterResource(R.drawable.menu),
+            painter = painterResource(R.drawable.outline_more_horiz_24),
             contentDescription = "",
             modifier = Modifier.clickable(true, onClick = { showbottomSheet = true })
+        )
+    }
+
+    if (addPlaylistSheet) {
+        @OptIn(ExperimentalMaterial3Api::class)
+        AddPlaylistSheet(
+            musicId = music.id,
+            onDismissRequest = { addPlaylistSheet = false }
         )
     }
 }

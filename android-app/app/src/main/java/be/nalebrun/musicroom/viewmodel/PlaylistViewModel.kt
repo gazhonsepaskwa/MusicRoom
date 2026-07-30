@@ -12,6 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -123,7 +124,24 @@ class PlaylistViewModel @Inject constructor(
                         _isPublic.value = !_isPublic.value
                     }
                 },
-                onFailure = { _, e -> e.message?.let { Log.i("STATUS 2", it) } }
+                onFailure = { _, e -> e.printStackTrace() }
+            )
+        }
+    }}
+
+    fun renamePlaylist(id: Int, title: String) { viewModelScope.launch {
+        val body = """{"title": "$title"}""".toRequestBody("application/json".toMediaType())
+        credentialRepository.jwtFlow.firstOrNull().let { jwt ->
+            apiRepository.patch(
+                url = "/playlists/update/$id",
+                body = body,
+                auth = "Bearer $jwt",
+                onResponse = { _, response ->
+                    if (response.code in 200..<300) {
+                        _title.value = title
+                    }
+                },
+                onFailure = { _, e -> e.printStackTrace()}
             )
         }
     }}

@@ -37,14 +37,32 @@ class LibraryViewModel @Inject constructor(
             url = "/playlists/available",
             auth = "Bearer $jwt",
             onResponse = { _, response ->
-                val res = Json.decodeFromString<List<libraryJson>>(response.body?.string() ?: "")
-                _playlists.value = res
-                Log.d("LIBRARY", "HA S BE EN CALLED")
-
+                if (response.code in 200..<300) {
+                    try {
+                        val res =
+                            Json.decodeFromString<List<libraryJson>>(response.body?.string() ?: "")
+                        _playlists.value = res
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
             },
-            onFailure = { _, _ -> }
+            onFailure = { _, e -> e.printStackTrace()}
         )
     }
+    }}
+
+    fun createPlaylist(title: String, status: Boolean) { viewModelScope.launch {
+        val body = """{"title": "$title", "isPublic": $status, "status":""}""".toRequestBody("application/json".toMediaType())
+        credentialRepository.jwtFlow.firstOrNull().let { jwt ->
+            apiRepository.post(
+                url = "/playlists/create",
+                body = body,
+                auth = "Bearer $jwt",
+                onResponse = { _, _ -> },
+                onFailure = { _, e -> e.printStackTrace() }
+            )
+        }
     }}
 
     fun addMusicToPlaylist(musicId: Int, playlistId: Int) { viewModelScope.launch {
@@ -64,4 +82,18 @@ class LibraryViewModel @Inject constructor(
         }
     }}
 
+    fun deletePlaylist(id: Int) { viewModelScope.launch {
+        credentialRepository.jwtFlow.firstOrNull().let { jwt ->
+            apiRepository.delete(
+                url = "/playlists/delete/$id",
+                auth = "Bearer $jwt",
+                onResponse = { _, response ->
+                    if (response.code in 200..<300) {
+                        _playlists.value = _playlists.value.filter { it.id != id }
+                    }
+                },
+                onFailure = { _, e -> e.printStackTrace()}
+            )
+        }
+    }}
 }

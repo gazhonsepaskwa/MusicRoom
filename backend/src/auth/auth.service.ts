@@ -65,7 +65,7 @@ export class AuthService {
     const userByEmail = await this.usersService.user({ email: email.toLowerCase() });
     if (userByEmail && userByEmail.verifiedEmail)
       throw new UnprocessableEntityException(
-        `email already used: ${email.toLowerCase()}`,
+        [`email already used: ${email.toLowerCase()}`],
         'Invalid Account Creation',
       );
 	else if (userByEmail && !userByEmail.verifiedEmail) {
@@ -74,7 +74,7 @@ export class AuthService {
     const userByUsername = await this.usersService.user({ username });
     if (userByUsername)
       throw new UnprocessableEntityException(
-        `username already used: ${username}`,
+        [`username already used: ${username}`],
         'Invalid Account Creation',
       );
     const salt = await bcrypt.genSalt();
@@ -85,7 +85,7 @@ export class AuthService {
       email: email.toLowerCase(),
     });
     if (!user.email)
-      throw new BadRequestException('Missing email for verification');
+      throw new BadRequestException(['Missing email for verification']);
     this.sendVerificationEmail(user.email, user.id);
     await this.devicesService.addDevice(user.id, deviceID, deviceName);
     return {
@@ -94,16 +94,18 @@ export class AuthService {
     };
   }
 
-  async confirmPassword(user: user, password: string) {
-	if (!user.password)
-      throw new UnprocessableEntityException(
-        'Incorrect Password or User',
-        'Invalid Attempt ',
-      );
-	const hash = await bcrypt.compare(password, user?.password);
+  async confirmPassword(user: user, password?: string) {
+	if (!user?.password && !password)
+		return;
+	if (!user.password || !password)
+		throw new UnprocessableEntityException(
+			['Incorrect Password or User'],
+			'Invalid Attempt ',
+	);
+	const hash = await bcrypt.compare(password!, user?.password);
     if (hash == false) {
       throw new UnprocessableEntityException(
-        'Incorrect Password or User',
+        ['Incorrect Password or User'],
         'Invalid Attempt ',
       );
     }
@@ -188,13 +190,25 @@ export class AuthService {
   }
 
   async validateOAuthLogin(profile: any): Promise<any> {
+	profile = profile._json;
     let user = await this.usersService.user({ email: profile.email });
     if (!user) {
       user = await this.usersService.createUser({
-        username: profile.username,
+        username: profile.name,
         email: profile.email,
         verifiedEmail: true,
       });
+	  await this.playlistsService.create({
+				isPublic: false, 
+				title: "Favorite", 
+				isDefault: true, 
+				status: "FAVORITE",
+				user: {
+				connect: {
+					id: +user.id,
+				},
+			}, 
+	  });
     }
     if (!profile || !user) {
       throw new UnauthorizedException();

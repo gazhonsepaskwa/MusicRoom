@@ -126,14 +126,7 @@ export class UserUpdateDto extends PartialType(UserProfileDto) {}
 export class ChangePasswordDto {
 
 	@ApiProperty({})
-	@IsString()
-	@MinLength(8)
-	@MaxLength(30)
-	@Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&,.°§+])/,
-		{
-			message: "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character. (And a sacrifice to the coding gods)"
-		})
-	oldPassword!: string
+	oldPassword?: string
 
 	@ApiProperty({})
 	@IsString()
@@ -144,4 +137,9 @@ export class ChangePasswordDto {
 			message: "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character. (And a sacrifice to the coding gods)"
 		})
 	newPassword!: string
+}
+
+export class PasswordCheckDto {
+	@ApiProperty({})
+	isPasswordSet!: boolean
 }

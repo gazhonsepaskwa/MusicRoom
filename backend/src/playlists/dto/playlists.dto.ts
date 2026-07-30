@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { MusicArtistDto } from '../../music/dto/music.dto';
+import {
+  IsString,
+  IsNotEmpty,
+  IsBoolean,
+  IsOptional
+} from 'class-validator';
 
 export class MusicPlaylistDto {
   @ApiProperty({ example: 1 })
@@ -25,23 +31,37 @@ export class PlaylistListItemDto {
 
 export class CreatePlaylistDto {
   @ApiProperty({ example: 'My Playlist' })
+  @IsString()
+  @IsNotEmpty()
   title!: string;
 
+  @IsString()
+  @IsNotEmpty()
   @ApiProperty({ example: 'Random Description' })
   status!: string;
 
+  @IsBoolean()
+  @IsNotEmpty()
   @ApiProperty({ example: true })
   isPublic!: boolean;
-}
+} 
 
 export class UpdatePlaylistDto {
   @ApiProperty({ example: 'My Playlist 2.0', required: false })
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
   title?: string;
 
   @ApiProperty({ example: 'Updated Random Description', required: false })
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
   status?: string;
 
   @ApiProperty({ example: true, required: false })
+  @IsOptional()
+  @IsBoolean()
   isPublic?: boolean;
 }
 

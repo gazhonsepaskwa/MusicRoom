@@ -5,6 +5,7 @@ import {
   IsAlphanumeric,
   IsEmail,
   Matches,
+  IsNotEmpty,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -16,6 +17,7 @@ export class NewUserDto {
 		maxLength: 20,
 	})
 	@IsString()
+	@IsNotEmpty()
 	@MinLength(3)
 	@MaxLength(20)
 	username!: string;
@@ -26,6 +28,7 @@ export class NewUserDto {
 		maxLength: 30,
 	})
 	@IsString()
+	@IsNotEmpty()
 	@MinLength(8)
 	@MaxLength(30)
 	@Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&,.°§+])/,
@@ -38,18 +41,21 @@ export class NewUserDto {
 		example: 'john_doe@gmail.com',
 	})
 	@IsString()
+	@IsNotEmpty()
 	@IsEmail()
 	email!: string;
 
 	@ApiProperty({
 	})
 	@IsString()
+	@IsNotEmpty()
 	deviceID!: string;
 	
 	@ApiProperty({
 		example: 'john_doe\'s 3310',
 	})
 	@IsString()
+	@IsNotEmpty()
 	deviceName!: string;
 }
 
@@ -58,5 +64,6 @@ export class DeleteAccountDto {
 		example: '********',
 	})
 	@IsString()
+	@IsNotEmpty()
 	password!: string;
 }

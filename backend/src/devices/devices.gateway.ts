@@ -10,6 +10,7 @@ import { BaseGateway } from '../websockets/base.gateway';
 import {
   PlaybackStateDto,
   PlaybackStateResponseDto,
+  PlaybackStateResponseRejectDto,
 } from './dto/playbackState.dto';
 
 @WebSocketGateway()
@@ -125,16 +126,23 @@ export class DevicesGateway {
     payload: {
       emitDeviceID: string;
       emitUserId: number;
-      data: PlaybackStateDto;
+      data: PlaybackStateDto | undefined;
       isAccepted: boolean;
     },
   ) {
-    const canConnect = await this.devicesService.canConnectToDevice(
-      payload.emitUserId,
-      client.data.deviceId,
-    );
-
-    if (canConnect === undefined) {
+    try {
+      const canConnect = await this.devicesService.canConnectToDevice(
+        payload.emitUserId,
+        client.data.deviceId,
+      );
+      if (canConnect === undefined) {
+        client.emit('app_error', {
+          message:
+            'Cannot connect to target device (device not exist or invalid permission)',
+        });
+        return;
+      }
+    } catch (error) {
       client.emit('app_error', {
         message:
           'Cannot connect to target device (device not exist or invalid permission)',
@@ -142,11 +150,16 @@ export class DevicesGateway {
       return;
     }
 
-    if (!payload.isAccepted) {
+    if (!payload.isAccepted || !payload.data) {
+      const playbackStateResponseReject: PlaybackStateResponseRejectDto = {
+        deviceId: client.data.deviceId,
+        isAccepted: false,
+      };
+
       this.baseGateway.sendToDevice(
         payload.emitDeviceID,
         'hostResponse',
-        payload.isAccepted,
+        playbackStateResponseReject,
       );
       return;
     }
@@ -177,6 +190,7 @@ export class DevicesGateway {
       isPlaying: payload.data.isPlaying,
       currentTime: payload.data.currentTime,
       deviceId: payload.emitDeviceID,
+      isAccepted: true,
       currentMusicId: payload.data.currentMusicId,
       musicList: musicListObj,
     };

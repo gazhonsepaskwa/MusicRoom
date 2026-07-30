@@ -33,4 +33,15 @@ export class PlaybackStateResponseDto {
 
   @IsString()
   deviceId!: string;
+
+  @IsBoolean()
+  isAccepted?: boolean;
+}
+
+export class PlaybackStateResponseRejectDto {
+  @IsString()
+  deviceId!: string;
+
+  @IsBoolean()
+  isAccepted?: boolean;
 }

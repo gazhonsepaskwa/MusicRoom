@@ -73,10 +73,15 @@ class UserProfileViewModel @Inject constructor(
      * @param userId The ID of the user whose profile to fetch
      */
     fun fetchProfile(userId: Int) {
+        var url = ""
+        if (userId == -1)
+            url = "users/profile"
+        else
+            url = "users/profile/$userId"
         viewModelScope.launch {
             credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
                 apiRepository.get(
-                    "users/profile/$userId",
+                    url,
                     "Bearer $jwt",
                     { _, response ->
                         if (response.code in 200..<300) {

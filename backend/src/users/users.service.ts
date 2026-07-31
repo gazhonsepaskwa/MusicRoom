@@ -150,7 +150,12 @@ export class UsersService {
 		secondPreferedMusicId: this.showProfileItem(user.showPreferedMusics, visibilty) ? user.secondPreferredMusicId : null,
 		thirdPreferedMusicId: this.showProfileItem(user.showPreferedMusics, visibilty) ? user.thirdPreferredMusicId : null,
 		ownedPlaylists: this.showProfileItem(user.showCreatedPlaylist, visibilty) ? ownedPlaylists : null,
-		invitedPlaylists: this.showProfileItem(user.showInvitedPlaylist, visibilty) ? invitedPlaylists : null
+		invitedPlaylists: this.showProfileItem(user.showInvitedPlaylist, visibilty) ? invitedPlaylists : null,
+		showAddress: visibilty == visibilityStatus.PRIVATE ? user.showAddress : null,
+		showCreatedPlaylist: visibilty == visibilityStatus.PRIVATE ? user.showCreatedPlaylist : null,
+		showFriends: visibilty == visibilityStatus.PRIVATE ? user.showFriends : null,
+		showInvitedPlaylist: visibilty == visibilityStatus.PRIVATE ? user.showInvitedPlaylist : null,
+		showPreferedMusics: visibilty == visibilityStatus.PRIVATE ? user.showPreferedMusics : null,
 	};
 	return result;
   }

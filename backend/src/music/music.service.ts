@@ -81,13 +81,24 @@ export class MusicService {
         },
       },
     });
-    return musicList.map((music) => ({
-      ...music,
-      album: {
-        ...music.album,
-        date: music.album.date.toISOString(),
-      },
-    }));
+
+    const musicMap = new Map(musicList.map((music) => [music.id, music]));
+
+    return musicListIds
+      .map((id) => musicMap.get(id))
+      .filter(
+        (music): music is NonNullable<typeof music> => music !== undefined,
+      )
+      .map(
+        (music): MusicDto => ({
+          ...music,
+          album: {
+            images: music.album.images,
+            title: music.album.title,
+            date: music.album.date.toISOString(),
+          },
+        }),
+      );
   }
 
   async streamMusic(

@@ -56,6 +56,41 @@ export class UserProfileResponseDto {
 
   @ApiProperty({ type: [PlaylistListItemDto] })
   invitedPlaylists!: PlaylistListItemDto[] | null
+
+  	@ApiPropertyOptional({
+		enum: visibilityStatus,
+		example: visibilityStatus.PRIVATE,
+		description: 'The new visibility status.',
+	})
+	showAddress!: visibilityStatus | null
+
+	@ApiPropertyOptional({
+		enum: visibilityStatus,
+		example: visibilityStatus.PRIVATE,
+		description: 'The new visibility status.',
+	})
+	showCreatedPlaylist!: visibilityStatus | null
+
+	@ApiPropertyOptional({
+		enum: visibilityStatus,
+		example: visibilityStatus.PRIVATE,
+		description: 'The new visibility status.',
+	})
+	showFriends!: visibilityStatus | null
+
+	@ApiPropertyOptional({
+		enum: visibilityStatus,
+		example: visibilityStatus.PRIVATE,
+		description: 'The new visibility status.',
+	})
+	showInvitedPlaylist!: visibilityStatus | null
+
+	@ApiPropertyOptional({
+		enum: visibilityStatus,
+		example: visibilityStatus.PRIVATE,
+		description: 'The new visibility status.',
+	})
+	showPreferedMusics!: visibilityStatus | null
 }
 
 export class UserProfileDto {

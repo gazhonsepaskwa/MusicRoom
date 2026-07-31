@@ -13,11 +13,15 @@ import be.nalebrun.musicroom.apiJsonStruct.responds.apiSigninFailureJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiSigninSuccessJson
 import be.nalebrun.musicroom.repositories.ICredentialRepository
 import be.nalebrun.musicroom.repositories.ISettingsRepository
+import be.nalebrun.musicroom.repositories.MusicRepository
+import be.nalebrun.musicroom.repositories.UiMessageManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okhttp3.FormBody
 import javax.inject.Inject
@@ -31,7 +35,8 @@ import kotlin.code
 class AuthViewModel @Inject constructor(
     val apiRepository:        IAPIRepository,
     val credentialRepository: ICredentialRepository,
-    val settingsRepository:   ISettingsRepository
+    val settingsRepository:   ISettingsRepository,
+    val uiMessageManager:     UiMessageManager
 ) : ViewModel() {
 
     init {
@@ -46,6 +51,9 @@ class AuthViewModel @Inject constructor(
     private val _loginOk = MutableStateFlow<Boolean?>(false)
     val loginResult: StateFlow<String?> = _loginResult
     val loginOk: StateFlow<Boolean?> = _loginOk
+
+    private val _logoutComplete = MutableStateFlow(false)
+    val          logoutComplete = _logoutComplete.asStateFlow()
 
     /**
      * Login a user
@@ -77,8 +85,7 @@ class AuthViewModel @Inject constructor(
                         _loginOk.value = true
                     }
                 } else {
-                    val failureMessage = Json.decodeFromString<apiLoginFailureJson>(bodyString).message
-                    _loginResult.value = failureMessage
+                    _loginResult.value = Json.decodeFromString<apiLoginFailureJson>(bodyString).message.first()
                     _loginOk.value = false
                 }
                 response.close()
@@ -190,15 +197,40 @@ class AuthViewModel @Inject constructor(
     }
 
     /**
-     * Logout the user
+     * Logout the user. First delete the device from the server, delete the jwt, and redirect to the login page
      * @author nalebrun
      */
-    fun logout() {
-        viewModelScope.launch {
-            credentialRepository.setJWT("")
-            _loginOk.value = false
+    fun logout() { viewModelScope.launch {
+        val deviceId   = settingsRepository.deviceUuidFlow.firstOrNull() ?: ""
+        val deviceName = settingsRepository.deviceNameFlow.firstOrNull() ?: ""
+        Log.d("AuthViewModel", "Logging out device $deviceId ($deviceName)")
+        credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
+            if (jwt.isNotEmpty()) {
+                apiRepository.delete(
+                    url = "/devices/remove-device",
+                    body = FormBody.Builder().add("deviceId", deviceId).add("deviceName", deviceName).build(),
+                    auth = "Bearer $jwt",
+                    onResponse = { _, response ->
+                        Log.d("AuthViewModel", "Logout response: ${response.code}")
+                        if (response.code in 200..<300) {
+                            viewModelScope.launch {
+                                credentialRepository.setJWT("")
+                                _loginOk.value = false
+                                _logoutComplete.value = true
+                            }
+                        }
+                        else {
+                            uiMessageManager.showMessage("Failed to log you out from server")
+                        }
+                    },
+                    onFailure = { _, e ->
+                        uiMessageManager.showMessage("Network error")
+                    }
+                )
+            }
         }
+    }}
+    fun resetLogoutComplete() {
+        _logoutComplete.value = false
     }
-
-
 }

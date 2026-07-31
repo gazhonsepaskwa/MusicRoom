@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -47,10 +48,10 @@ fun CustomTextField(
             modifier = Modifier
                 .padding(horizontal = 10.dp)
                 .clip(shape = RoundedCornerShape(99.dp))
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.background)
                 .border(
                     width = 2.dp,
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.onBackground,
                     shape = RoundedCornerShape(99.dp)
                 )
                 .fillMaxWidth()

@@ -1,5 +1,6 @@
 package be.nalebrun.musicroom.viewmodel
 
+import be.nalebrun.musicroom.repositories.UiMessageManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,6 +22,7 @@ data class NavEvent(
  */
 @HiltViewModel
 class NavigationViewModel @Inject constructor(
+    private val uiMessageManager: UiMessageManager
 ) : ViewModel() {
     // Event to trigger navigation to a new route
     private val _navigationEvent = MutableLiveData<NavEvent?>()
@@ -29,6 +31,9 @@ class NavigationViewModel @Inject constructor(
     // Event to trigger a back navigation
     private val _backEvent = MutableLiveData<Boolean>()
     val backEvent: LiveData<Boolean> = _backEvent
+
+    // Event to trigger a message (Snackbar)
+    val messageEvent: LiveData<String?> = uiMessageManager.messageEvent
 
     /**
      * Request navigation to a specific route
@@ -56,5 +61,19 @@ class NavigationViewModel @Inject constructor(
      */
     fun clearBackEvent() {
         _backEvent.value = false
+    }
+
+    /**
+     * Request to display a message to the user
+     */
+    fun showMessage(message: String) {
+        uiMessageManager.showMessage(message)
+    }
+
+    /**
+     * Clear the message event after it's been handled
+     */
+    fun clearMessageEvent() {
+        uiMessageManager.clearMessageEvent()
     }
 }

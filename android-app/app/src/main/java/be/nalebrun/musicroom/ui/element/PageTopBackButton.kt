@@ -1,9 +1,11 @@
 package be.nalebrun.musicroom.ui.element
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,10 +22,13 @@ fun PageTopBackButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
             .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            modifier = Modifier.padding(bottom = 3.dp),
+        Icon(
+            modifier = Modifier
+                .padding(bottom = 3.dp)
+                .size(24.dp),
             painter = painterResource(id = R.drawable.outline_arrow_back_ios_24),
-            contentDescription = ""
+            contentDescription = "",
+            tint = MaterialTheme.colorScheme.onBackground
         )
         Text("Back")
     }

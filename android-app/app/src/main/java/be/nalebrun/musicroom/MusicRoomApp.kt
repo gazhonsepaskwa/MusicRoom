@@ -26,7 +26,6 @@ class MusicRoomApp : Application() {
     @Inject
     lateinit var settingsRepository: ISettingsRepository
 
-    @Inject
     override fun onCreate() {
         super.onCreate()
 

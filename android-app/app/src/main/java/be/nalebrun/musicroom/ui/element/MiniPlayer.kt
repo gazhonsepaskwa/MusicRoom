@@ -1,9 +1,6 @@
 package be.nalebrun.musicroom.ui.element
 
 import android.app.Activity
-import androidx.activity.compose.LocalActivity
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,6 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -63,35 +62,38 @@ fun MiniPlayer(musicViewModel: MusicViewModel, activity: Activity) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Image(
+            Icon(
                 painter = painterResource(id = R.drawable.outline_skip_previous_24),
                 contentDescription = "",
-                Modifier
+                modifier = Modifier
                     .size(30.dp)
                     .clickable(onClick = {
                         musicViewModel.goToPreviousSong()
-                    })
+                    }),
+                tint = MaterialTheme.colorScheme.onSurface
             )
-            Image(
+            Icon(
                 painter = painterResource(id =
                     if (playing) R.drawable.outline_pause_24
                     else         R.drawable.outline_play_arrow_24
                 ),
                 contentDescription = "",
-                Modifier
+                modifier = Modifier
                     .size(30.dp)
                     .clickable(onClick = {
                         if (playing) musicViewModel.pause() else musicViewModel.play()
-                    })
+                    }),
+                tint = MaterialTheme.colorScheme.onSurface
             )
-            Image(
+            Icon(
                 painter = painterResource(id = R.drawable.outline_skip_next_24),
                 contentDescription = "",
-                Modifier
+                modifier = Modifier
                     .size(30.dp)
                     .clickable(onClick = {
                         musicViewModel.goToNextSong()
-                    })
+                    }),
+                tint = MaterialTheme.colorScheme.onSurface
             )
         }
     }

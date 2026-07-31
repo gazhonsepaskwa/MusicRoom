@@ -35,6 +35,7 @@ import be.nalebrun.musicroom.apiJsonStruct.responds.libraryJson
 import be.nalebrun.musicroom.ui.element.ActiveScreen
 import be.nalebrun.musicroom.ui.element.BottomScreenMenu
 import be.nalebrun.musicroom.ui.element.LibraryCard
+import be.nalebrun.musicroom.ui.element.Title
 import be.nalebrun.musicroom.viewmodel.LibraryViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 
@@ -58,11 +59,7 @@ fun LibraryUi() {
         Column(
             modifier = Modifier.weight(1f)
         ) {
-            Text("Library", fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, fontSize = 25.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 10.dp))
-            HorizontalDivider(thickness = 2.dp, color = Color.Black)
+            Title("Library")
             LazyColumn(
                 modifier = Modifier.weight(1f)
             ) {
@@ -75,5 +72,5 @@ fun LibraryUi() {
         BottomScreenMenu(
             activeScreen = ActiveScreen.LIBRARY,
         )
-        }
+    }
 }

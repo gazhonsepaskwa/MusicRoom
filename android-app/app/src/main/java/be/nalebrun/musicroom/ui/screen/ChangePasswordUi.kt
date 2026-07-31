@@ -25,6 +25,7 @@ import be.nalebrun.musicroom.ui.element.CustomTextField
 import be.nalebrun.musicroom.ui.element.PageTopBackButton
 import be.nalebrun.musicroom.ui.element.Title
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
+import be.nalebrun.musicroom.viewmodel.SettingsViewModel
 
 @Composable
 fun ChangePasswordUi() {
@@ -34,6 +35,7 @@ fun ChangePasswordUi() {
     } else {
         hiltViewModel()
     }
+    val settingsViewModel: SettingsViewModel = hiltViewModel()
 
     var oldPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
@@ -50,7 +52,7 @@ fun ChangePasswordUi() {
             }
             Column(modifier = Modifier.padding(top = 20.dp)) {
                 CustomTextField(
-                    title = "Old Password",
+                    title = "Old Password\nLeave empty if you don't have a password (google auth)",
                     text = oldPassword,
                     onValueChange = { oldPassword = it },
                     visualTransformation = PasswordVisualTransformation()
@@ -72,7 +74,14 @@ fun ChangePasswordUi() {
                 BlackOrWhiteButton(
                     text = "Update Password",
                     active = true,
-                    onClick = { /* TODO */ },
+                    onClick = {
+                        if (newPassword == confirmPassword) {
+                            settingsViewModel.changePassword(oldPassword, newPassword)
+                        }
+                        else {
+                            navigationViewModel.showMessage("Passwords don't match")
+                        }
+                    },
                     modifier = Modifier.padding(top = 20.dp, start = 10.dp, end = 10.dp)
                 )
             }

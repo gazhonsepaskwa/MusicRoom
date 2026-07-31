@@ -1,7 +1,6 @@
 package be.nalebrun.musicroom.ui.screen
 
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +16,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -87,7 +88,7 @@ fun AlbumUi(albumId: Int) {
                 Box(
                     modifier = Modifier
                         .size(60.dp)
-                        .border(1.dp, Color.Black, RoundedCornerShape(16.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(16.dp))
                         .clip(RoundedCornerShape(16.dp))
                 ) {
                     AsyncImage(
@@ -109,30 +110,32 @@ fun AlbumUi(albumId: Int) {
                     horizontalArrangement = Arrangement
                         .spacedBy(8.dp),
                 ) {
-                    Image(
+                    Icon(
                         painter = painterResource(R.drawable.outline_play_arrow_24),
                         contentDescription = "",
                         modifier = Modifier.clickable(true, onClick = {
 //                            viewModel.musicRepository.replaceWaitingList(musics)
-                        })
+                        }),
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
-                    Image(
+                    Icon(
                         painter = painterResource(if (shuffleOn) { R.drawable.outline_shuffle_on_24}
                         else {
                             R.drawable.outline_shuffle_24
                         }),
                         contentDescription = "",
-                        modifier = Modifier.clickable(true, onClick = { shuffleOn = !shuffleOn })
+                        modifier = Modifier.clickable(true, onClick = { shuffleOn = !shuffleOn }),
+                        tint = if (shuffleOn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                     )
                 }
             }
-            HorizontalDivider(thickness = 2.dp, color = Color.Black)
+            HorizontalDivider(thickness = 2.dp, color = MaterialTheme.colorScheme.onBackground)
             LazyColumn (
                 modifier = Modifier.weight(1f)
             ) {
                 items(musics) { item ->
                     AlbumListCard(viewModel.musicRepository, item)
-                    HorizontalDivider(thickness = 1.dp, color = Color.Black)
+                    HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.onBackground)
                 }}
         }
 

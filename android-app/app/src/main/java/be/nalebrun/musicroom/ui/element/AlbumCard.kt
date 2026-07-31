@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,7 +33,7 @@ fun AlbumCard(image: List<String>, title: String, id: Int, navigationViewModel: 
         Box(
             modifier = Modifier
                 .size(120.dp)
-                .border(2.dp, Color.Black, RoundedCornerShape(32.dp))
+                .border(2.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(32.dp))
                 .clip(RoundedCornerShape(32.dp))
         ) {
             AsyncImage(

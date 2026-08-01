@@ -1,5 +1,6 @@
 package be.nalebrun.musicroom.ui.screen
 
+import android.util.Log
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -44,7 +45,7 @@ import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import be.nalebrun.musicroom.viewmodel.PlaylistViewModel
 
 @Composable
-fun PlaylistUi(id: Int) {
+fun PlaylistUi(id: Int, owned: Boolean = true) {
     val viewModel: PlaylistViewModel = hiltViewModel()
     val activity = LocalActivity.current
     val navigationView: NavigationViewModel = if (activity != null) {
@@ -89,7 +90,7 @@ fun PlaylistUi(id: Int) {
                     Text(title ?: "", fontWeight = FontWeight.Bold, lineHeight = 10.sp)
                     Text("$number songs", fontSize = 10.sp, lineHeight = 10.sp)
                 }
-                if (!isDefault) {
+                if (!isDefault && owned) {
                     Row(
                         modifier = Modifier
                             .clickable(true, onClick = {
@@ -144,7 +145,7 @@ fun PlaylistUi(id: Int) {
                         modifier = Modifier.clickable(true, onClick = { shuffleOn = !shuffleOn })
                     )
                 }
-                if (!isDefault) {
+                if (!isDefault && owned) {
                     Column(
                         horizontalAlignment = Alignment.End,
                         modifier = Modifier.clickable(true, onClick = {})

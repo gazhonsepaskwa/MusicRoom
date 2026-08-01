@@ -31,23 +31,20 @@ import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.apiJsonStruct.responds.libraryJson
 import be.nalebrun.musicroom.viewmodel.LibraryViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
+import be.nalebrun.musicroom.viewmodel.PlaylistAccessViewModel
 import be.nalebrun.musicroom.viewmodel.PlaylistViewModel
+import be.nalebrun.musicroom.viewmodel.UserProfileViewModel
 import org.w3c.dom.Text
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LibraryCard(music: libraryJson, navigationViewModel: NavigationViewModel) {
+fun PlaylistSharedCard(music: libraryJson, navigationViewModel: NavigationViewModel) {
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
 
-    var showChangeName by remember { mutableStateOf(false) }
-    var changeNameSheetState = rememberModalBottomSheetState()
-
-    var newName by remember {mutableStateOf("")}
-    var newTitle by remember { mutableStateOf(music.title)}
-
-    val playlistViewModel: PlaylistViewModel = hiltViewModel()
-    val libraryViewModel: LibraryViewModel = hiltViewModel()
+    val viewModel: LibraryViewModel = hiltViewModel()
+    val profileModel: UserProfileViewModel = hiltViewModel()
+    val accessViewModel: PlaylistAccessViewModel = hiltViewModel()
     val hours = music.duration / (1000 * 60 * 60)
     val minutes = (music.duration / (1000 * 60)) % 60
     var time = "${hours}h$minutes"
@@ -59,16 +56,13 @@ fun LibraryCard(music: libraryJson, navigationViewModel: NavigationViewModel) {
             onDismissRequest = { showBottomSheet = false },
             actions = listOf(
                 ActionItem(
-                    label = "rename playlist",
-                    icon = R.drawable.outline_devices_other_24,
-                    onClick = { showChangeName = true }
-                ),
-                ActionItem(
-                    label = "delete playlist",
+                    label = "leave playlist",
                     icon = R.drawable.outline_devices_other_24,
                     onClick = {
-                        libraryViewModel.deletePlaylist(music.id)
+                        //GET REAL OWN ID
+//                        accessViewModel.leavePlaylistAccess(music.id, userId)
                         showBottomSheet = false
+                        viewModel.getPlaylists()
                     }
                 )
             ),
@@ -76,50 +70,25 @@ fun LibraryCard(music: libraryJson, navigationViewModel: NavigationViewModel) {
         )
     }
 
-    if (showChangeName) {
-        ModalBottomSheet(
-            onDismissRequest = { showChangeName = false },
-            sheetState = changeNameSheetState
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .padding(bottom = 32.dp)
-            ) {
-                CustomTextField(
-                    title = "Change playlist name:",
-                    text = newName,
-                    onValueChange = { newName = it },
-                    modifier = Modifier.padding(bottom = 10.dp))
-                BlackOrWhiteButton(
-                    text = "Confirm",
-                    active = false,
-                    onClick = {
-                        if (newName.isNotBlank()) {
-                            playlistViewModel.renamePlaylist(music.id, newName)
-                            newTitle = newName
-                            newName = ""
-                            showChangeName = false
-                            showBottomSheet = false
-                        }
-                    }
-                )
-            }
-        }
-    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 5.dp)
             .clickable(true, onClick = {
-                navigationViewModel.navigateTo("playlist/${music.id}")
+                navigationViewModel.navigateTo("playlist/shared/${music.id}")
             }),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column{
-            Text(newTitle, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Row {
+                Image(
+                    modifier = Modifier.padding(end = 2.dp),
+                    painter = painterResource(R.drawable.outline_group_24),
+                    contentDescription = null,
+                )
+                Text(music.title, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            }
             Text("${music.songs} songs ● $time")
         }
         Image(

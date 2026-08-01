@@ -23,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -38,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.ui.element.ActiveScreen
 import be.nalebrun.musicroom.ui.element.BottomScreenMenu
@@ -46,19 +48,26 @@ import be.nalebrun.musicroom.ui.element.Title
 import be.nalebrun.musicroom.viewmodel.FriendsViewModel
 import be.nalebrun.musicroom.viewmodel.MusicViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
+import be.nalebrun.musicroom.viewmodel.PlaylistAccessViewModel
+import be.nalebrun.musicroom.viewmodel.PlaylistViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageAccessUi(playlistId: Int) {
-    val viewModel: FriendsViewModel = hiltViewModel()
+    val viewModel: PlaylistAccessViewModel = hiltViewModel()
     val activity = LocalActivity.current
     val navigationViewModel: NavigationViewModel = if (activity != null) {
         hiltViewModel(activity as ViewModelStoreOwner)
     } else {
         hiltViewModel()
     }
-    val friends by viewModel.friends.collectAsState()
-    val friendRequests by viewModel.friendRequests.collectAsState()
+    val friendsWithAccess by viewModel.friendsWithAccess.collectAsState()
+    val friendsWithoutAccess by viewModel.friends.collectAsState()
+
+    LaunchedEffect(playlistId) {
+        viewModel.getAccessFriends(playlistId)
+    }
 
     Column(
         modifier = Modifier
@@ -70,7 +79,7 @@ fun ManageAccessUi(playlistId: Int) {
         ) {
             PageTopBackButton(onClick = { navigationViewModel.navigateBack() })
             LazyColumn(modifier = Modifier.weight(1f)) {
-                if (friendRequests.isNotEmpty()) {
+                if (friendsWithAccess.isNotEmpty()) {
                     item {
                         Text(
                             "Friends with access :",
@@ -78,8 +87,8 @@ fun ManageAccessUi(playlistId: Int) {
                             fontWeight = FontWeight.Bold
                         )
                     }
-                    items(friendRequests) { request ->
-                        ManageAccessCard("Hello")
+                    items(friendsWithAccess) { request ->
+                        ManageAccessCard(request.addresseeName, request.playlistId, request.addresseeId)
                     }
                 }
 
@@ -90,8 +99,8 @@ fun ManageAccessUi(playlistId: Int) {
                         fontWeight = FontWeight.Bold
                     )
                 }
-                items(friends) { friend ->
-                    AddAccessCard("???")
+                items(friendsWithoutAccess) { friend ->
+                    AddAccessCard(viewModel, friend.otherUsername, friend.otherId, playlistId)
                 }
             }
         }
@@ -103,8 +112,11 @@ fun ManageAccessUi(playlistId: Int) {
 
 @Composable
 fun ManageAccessCard(
-    name: String
+    name: String,
+    playlistId: Int,
+    friendId: Int
 ) {
+    val viewModel: PlaylistAccessViewModel = hiltViewModel()
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -120,20 +132,27 @@ fun ManageAccessCard(
                 contentDescription = null,
                 modifier = Modifier.padding(end = 10.dp)
             )
-            Text(text = "Friend name", fontWeight = FontWeight.Bold)
+            Text(text = name, fontWeight = FontWeight.Bold)
         }
         Image(
             painter = painterResource(R.drawable.outline_cancel_24),
             contentDescription = "Remove",
-            modifier = Modifier.clickable(true, onClick = {})
+            modifier = Modifier.clickable(true, onClick = {
+                viewModel.leavePlaylistAccess(playlistId, friendId)
+            })
         )
     }
 }
 
 @Composable
 fun AddAccessCard(
-    title: String
+    accessViewModel: PlaylistAccessViewModel,
+    name: String,
+    friendId: Int,
+    playlistId: Int
 ) {
+    var invitSent by remember { mutableStateOf(false) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -149,12 +168,19 @@ fun AddAccessCard(
                 contentDescription = null,
                 modifier = Modifier.padding(end = 10.dp)
             )
-            Text(text = "Friend name", fontWeight = FontWeight.Bold)
+            Text(text = name, fontWeight = FontWeight.Bold)
         }
         Image(
-            painter = painterResource(R.drawable.outline_add_circle_24),
+            painter = painterResource(if (invitSent) {
+                R.drawable.outline_expand_circle_down_24
+            } else {
+                R.drawable.outline_add_circle_24
+            }),
             contentDescription = "Add",
-            modifier = Modifier.clickable(true, onClick = {})
+            modifier = Modifier.clickable(true, onClick = {
+                accessViewModel.giveFriendAccessToPlaylist(friendId, playlistId)
+                invitSent = true
+            })
         )
     }
 }

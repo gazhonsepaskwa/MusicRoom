@@ -9,6 +9,8 @@ import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 @JsonIgnoreUnknownKeys
 data class PlaylistAccessJson(
     val addresseeId: Int,
+    val addresseeName: String,
     val playlistId: Int,
+    val playlistName: String,
     val status: String,
 )

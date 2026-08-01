@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import be.nalebrun.musicroom.APIRepository
 import be.nalebrun.musicroom.IAPIRepository
+import be.nalebrun.musicroom.apiJsonStruct.responds.AllPlaylistsJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.libraryJson
 import be.nalebrun.musicroom.repositories.ICredentialRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,8 +26,10 @@ class LibraryViewModel @Inject constructor(
     val credentialRepository: ICredentialRepository
 ) : ViewModel() {
     private val _playlists = MutableStateFlow<List<libraryJson>>(emptyList())
+    private val _sharedPlaylists = MutableStateFlow<List<libraryJson>>(emptyList())
 
     val playlists: StateFlow<List<libraryJson>> = _playlists
+    val sharedPlaylists: StateFlow<List<libraryJson>> = _sharedPlaylists
 
     init {
         getPlaylists()
@@ -34,14 +37,15 @@ class LibraryViewModel @Inject constructor(
     fun getPlaylists() { viewModelScope.launch {
         credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
             apiRepository.get(
-            url = "/playlists/available",
+            url = "/users/profile",
             auth = "Bearer $jwt",
             onResponse = { _, response ->
                 if (response.code in 200..<300) {
                     try {
                         val res =
-                            Json.decodeFromString<List<libraryJson>>(response.body?.string() ?: "")
-                        _playlists.value = res
+                            Json.decodeFromString<AllPlaylistsJson>(response.body?.string() ?: "")
+                        _playlists.value = res.ownedPlaylists
+                        _sharedPlaylists.value = res.invitedPlaylists
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }

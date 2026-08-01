@@ -38,19 +38,24 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import be.nalebrun.musicroom.R
+import be.nalebrun.musicroom.apiJsonStruct.responds.PlaylistNotificationJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.libraryJson
 import be.nalebrun.musicroom.ui.element.ActiveScreen
 import be.nalebrun.musicroom.ui.element.BlackOrWhiteButton
 import be.nalebrun.musicroom.ui.element.BottomScreenMenu
 import be.nalebrun.musicroom.ui.element.CustomTextField
 import be.nalebrun.musicroom.ui.element.LibraryCard
+import be.nalebrun.musicroom.ui.element.PlaylistInvitationCard
+import be.nalebrun.musicroom.ui.element.PlaylistSharedCard
 import be.nalebrun.musicroom.viewmodel.LibraryViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
+import be.nalebrun.musicroom.viewmodel.PlaylistAccessViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryUi() {
     val viewModel: LibraryViewModel = hiltViewModel()
+    val accessViewModel: PlaylistAccessViewModel = hiltViewModel()
     val activity = LocalActivity.current
     val navigationView: NavigationViewModel = if (activity != null) {
         hiltViewModel(activity as ViewModelStoreOwner)
@@ -62,9 +67,15 @@ fun LibraryUi() {
     val createPlaylistSheetState = rememberModalBottomSheetState()
 
     val playlists: List<libraryJson> by viewModel.playlists.collectAsState()
+    val sharedPlaylists: List<libraryJson> by viewModel.sharedPlaylists.collectAsState()
+    val invitations: List<PlaylistNotificationJson> by accessViewModel.playlistRequest.collectAsState()
 
     var newPlaylist by remember { mutableStateOf("") }
     var newPlaylistPublicStatus by remember { mutableStateOf(false) }
+
+    LaunchedEffect(0) {
+        accessViewModel.getPlaylistInvitations()
+    }
 
     if (showCreatePlaylistSheet) {
         ModalBottomSheet(
@@ -141,7 +152,31 @@ fun LibraryUi() {
                 modifier = Modifier.weight(1f)
             ) {
                 items(playlists) { it ->
-                    LibraryCard(it.id,it.title, it.songs, it.duration, navigationView)
+                    LibraryCard(it, navigationView)
+                }
+                if (sharedPlaylists.isNotEmpty()) {
+//                    item {
+//                        Text(
+//                            "Shared playlists:",
+//                            modifier = Modifier.padding(10.dp),
+//                            fontWeight = FontWeight.Bold
+//                        )
+//                    }
+                    items(sharedPlaylists) { item ->
+                        PlaylistSharedCard(item, navigationView)
+                    }
+                }
+                if (invitations.isNotEmpty()) {
+                    item {
+                        Text(
+                            "Invitations to playlists:",
+                            modifier = Modifier.padding(10.dp),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    items(invitations) { item ->
+                        PlaylistInvitationCard(item)
+                    }
                 }
             }
         }

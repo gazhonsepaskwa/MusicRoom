@@ -35,6 +35,16 @@ class PlaylistAccessViewModel @Inject constructor(
     val friendsWithAccess : StateFlow<List<PlaylistAccessJson>> = _friendsWithAccess
     val playlistRequest : StateFlow<List<PlaylistNotificationJson>> = _playlistRequests
 
+    fun getAccessFriends(playlistId: Int) {
+        getFriends()
+        getFriendsWithAccess(playlistId)
+        Log.d("FRIENDS", _friends.value.toString())
+        Log.d("SHAREFRIENDS", _friendsWithAccess.value.toString())
+
+        val friendsWithAccessId = _friendsWithAccess.value.map { it.addresseeId }
+        _friends.value = _friends.value.filter { it.otherId !in friendsWithAccessId }
+    }
+
     fun getFriends() { viewModelScope.launch {
         credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
             if (jwt.isNotEmpty()) {
@@ -108,7 +118,11 @@ class PlaylistAccessViewModel @Inject constructor(
                 url = "/playlistship/answer-playlist-invitation",
                 body = body,
                 auth = "Bearer $jwt",
-                onResponse = { _, response -> },
+                onResponse = { _, response ->
+                    if (response.code in 200..<300) {
+
+                    }
+                },
                 onFailure = { _, e -> e.printStackTrace() }
             )
         }
@@ -121,13 +135,17 @@ class PlaylistAccessViewModel @Inject constructor(
                 url = "/playlistship/answer-playlist-invitation",
                 body = body,
                 auth = "Bearer $jwt",
-                onResponse = { _, response -> },
+                onResponse = { _, response ->
+                    if (response.code in 200..<300) {
+
+                    }
+                },
                 onFailure = { _, e -> e.printStackTrace() }
             )
         }
     }}
 
-    fun getFriendRequests() {
+    fun getPlaylistInvitations() {
         viewModelScope.launch {
             credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
                 if (jwt.isNotEmpty()) {
@@ -141,14 +159,14 @@ class PlaylistAccessViewModel @Inject constructor(
                                     try {
                                         val notifications = Json.decodeFromString<List<PlaylistNotificationJson>>(body)
                                         _playlistRequests.value = notifications.filter { it.type == "PLAYLIST_INVITATION" }
-                                        Log.d("FriendsViewModel", "Filtered requests: ${_playlistRequests.value.size}")
+                                        Log.d("PlaylistAccessViewModel", "Filtered requests: ${_playlistRequests.value}")
                                     } catch (e: Exception) {
-                                        Log.e("FriendsViewModel", "Parsing error", e)
+                                        Log.e("PlaylistAccessViewModel", "Parsing error", e)
                                     }
                                 }
                             }
                         },
-                        { _, e -> Log.e("FriendsViewModel", "Failure getting notifications", e) }
+                        { _, e -> Log.e("PlaylistAccessViewModel", "Failure getting notifications", e) }
                     )
                 }
             }

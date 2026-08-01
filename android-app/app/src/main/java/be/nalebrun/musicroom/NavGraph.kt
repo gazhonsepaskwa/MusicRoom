@@ -186,6 +186,10 @@ fun CreateNavGraph(
             val id = backStackEntry.arguments?.getString("id")
             PlaylistUi(id = id!!.toInt())
         }
+        composable(route = "playlist/shared/{id}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id")
+            PlaylistUi(id = id!!.toInt(), false)
+        }
         composable(route = "playlist/{id}/access") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")
             ManageAccessUi(playlistId = id!!.toInt())

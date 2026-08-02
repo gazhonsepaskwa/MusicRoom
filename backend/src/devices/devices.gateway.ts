@@ -78,7 +78,7 @@ export class DevicesGateway {
     }
   }
 
-  leaveRoom(client: Socket, roomName: string) {
+  leaveRoom(client: Socket, roomName: string): boolean {
     const room = this.server.sockets.adapter.rooms.get(roomName);
     if (room && room.has(client.id)) {
       if (client.data.deviceId === this.getDeviceIdFromRoomName(roomName)) {
@@ -94,8 +94,10 @@ export class DevicesGateway {
           this.deleteRoom(roomName);
         }
       }
+      return true;
     } else {
       client.emit('app_error', { message: 'Not connected to the device' });
+      return false;
     }
   }
 
@@ -103,7 +105,9 @@ export class DevicesGateway {
   async handleDisconnectFromDevice(client: Socket, deviceId: string) {
     const roomName = this.generateRoomName(deviceId);
 
-    this.leaveRoom(client, roomName);
+    if (this.leaveRoom(client, roomName)) {
+      client.emit('disconnectedFromDevice', { deviceId: deviceId });
+    }
   }
 
   private async joinDeviceToRoom(

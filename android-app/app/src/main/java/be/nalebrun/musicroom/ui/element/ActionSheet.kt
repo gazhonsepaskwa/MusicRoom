@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
@@ -28,7 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 data class ActionItem(
     val label: String,
     val icon: Int,
-    val color: Color = Color.Black,
+    val color: Color? = null,
     val onClick: () -> Unit
 )
 
@@ -42,7 +43,7 @@ fun ActionSheet(
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         dragHandle = null
     ) {
         Column(
@@ -59,6 +60,8 @@ fun ActionSheet(
 
 @Composable
 fun ActionRow(action: ActionItem) {
+    val tintColor = action.color ?: MaterialTheme.colorScheme.onSurface
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -71,12 +74,12 @@ fun ActionRow(action: ActionItem) {
         Icon(
             painter = painterResource(id = action.icon),
             contentDescription = null,
-            tint = action.color,
+            tint = tintColor,
             modifier = Modifier.size(24.dp)
         )
         Text(
             text = action.label,
-            color = action.color,
+            color = tintColor,
             fontSize = 18.sp,
             fontWeight = FontWeight.Medium
         )

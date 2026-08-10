@@ -23,10 +23,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import be.nalebrun.musicroom.APIRepository
-import be.nalebrun.musicroom.repositories.CredentialRepository
 import be.nalebrun.musicroom.viewmodel.AuthViewModel
 import be.nalebrun.musicroom.ui.element.BlackOrWhiteButton
 import be.nalebrun.musicroom.ui.element.CustomTextField

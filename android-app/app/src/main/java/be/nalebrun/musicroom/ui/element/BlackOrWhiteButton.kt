@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,10 +28,10 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun BlackOrWhiteButton(
-    text : String,
-    modifier: Modifier = Modifier,
-    active : Boolean,
-    onClick: () -> Unit
+    text     : String,
+    modifier : Modifier = Modifier,
+    active   : Boolean,
+    onClick  : () -> Unit
 ) {
     Row(
         modifier = modifier
@@ -38,12 +39,12 @@ fun BlackOrWhiteButton(
             .clip(shape = RoundedCornerShape(99.dp))
             .border(
                 width = 2.dp,
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onBackground,
                 shape = RoundedCornerShape(99.dp)
             )
             .background(color = when (active) {
-                true -> Color.Black
-                false -> Color.White
+                true  -> MaterialTheme.colorScheme.onBackground
+                false -> MaterialTheme.colorScheme.background
             })
             .height(30.dp)
             .clickable(true, onClick = onClick),
@@ -53,8 +54,8 @@ fun BlackOrWhiteButton(
             text = text,
             textAlign = TextAlign.Center,
             color = when (active) {
-                true -> Color.White
-                false -> Color.Black
+                true  -> MaterialTheme.colorScheme.background
+                false -> MaterialTheme.colorScheme.onBackground
             },
             modifier = Modifier
                 .fillMaxWidth())

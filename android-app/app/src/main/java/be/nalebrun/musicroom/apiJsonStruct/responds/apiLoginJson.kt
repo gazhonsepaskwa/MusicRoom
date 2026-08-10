@@ -8,7 +8,7 @@ import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 @Serializable
 @JsonIgnoreUnknownKeys
 data class apiLoginFailureJson(
-    val message: String = "",
+    val message: List<String> = emptyList(),
     val error: String = "",
     val statusCode: Int
 )

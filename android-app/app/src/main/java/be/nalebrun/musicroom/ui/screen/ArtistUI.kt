@@ -2,7 +2,6 @@ package be.nalebrun.musicroom.ui.screen
 
 import android.util.Log
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,6 +20,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -103,7 +104,7 @@ fun ArtistUi(artistId: Int) {
                     contentDescription = null
                 )
             }
-            HorizontalDivider(thickness = 2.dp, color = Color.Black)
+            HorizontalDivider(thickness = 2.dp, color = MaterialTheme.colorScheme.onBackground)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -119,14 +120,15 @@ fun ArtistUi(artistId: Int) {
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Image(
+                        Icon(
                             painter = painterResource(R.drawable.outline_play_arrow_24),
                             contentDescription = "",
                             modifier = Modifier.clickable(true, onClick = {
 //                                viewModel.musicRepository.replaceWaitingList(musics)
-                            })
+                            }),
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
-                        Image(
+                        Icon(
                             painter = painterResource(
                                 if (shuffleOn) {
                                     R.drawable.outline_shuffle_on_24
@@ -137,7 +139,8 @@ fun ArtistUi(artistId: Int) {
                             contentDescription = "",
                             modifier = Modifier.clickable(
                                 true,
-                                onClick = { shuffleOn = !shuffleOn })
+                                onClick = { shuffleOn = !shuffleOn }),
+                            tint = if (shuffleOn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                         )
 
                     }
@@ -191,7 +194,7 @@ fun ArtistUi(artistId: Int) {
                 ) {
                     items(musics) { it ->
                         ArtistCard(it.title, "note")
-                        HorizontalDivider(thickness = 1.dp, color = Color.Black)
+                        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.onBackground)
                     }
                 }
             }

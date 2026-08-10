@@ -55,13 +55,15 @@ fun ServerSettingsUi() {
                     text = "Connect",
                     active = true,
                     onClick = {
-                        // TODO: check that the server is valid
-                        settingsViewModel.updateServerUrl(serverUrl) {
-                            navigationViewModel.navigateTo("auth")
+                        settingsViewModel.ifServerUrlValid(serverUrl) {
+                            settingsViewModel.updateServerUrl(serverUrl) {
+                                navigationViewModel.navigateTo("auth")
+                            }
+                            if (serverUrl == savedServerUrl) {
+                                navigationViewModel.navigateTo("settings")
+                            }
                         }
-                        if (serverUrl == savedServerUrl) {
-                            navigationViewModel.navigateTo("settings")
-                        }
+
                     },
                     modifier = Modifier.padding(top = 20.dp, start = 10.dp, end = 10.dp)
                 )

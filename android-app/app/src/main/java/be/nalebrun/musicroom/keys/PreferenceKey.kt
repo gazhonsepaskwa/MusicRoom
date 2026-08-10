@@ -11,4 +11,5 @@ object PreferenceKey {
     val serverUrl = stringPreferencesKey("serverUrl")
     val deviceUuid = stringPreferencesKey("deviceUuid")
     val deviceName = stringPreferencesKey("deviceName")
+    val debugText = stringPreferencesKey("debugText")
 }

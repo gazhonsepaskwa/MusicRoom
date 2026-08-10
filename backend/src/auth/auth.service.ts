@@ -36,16 +36,16 @@ export class AuthService {
     const user = userByUsername ?? userByEmail;
     if (user == undefined || user.username == null)
       throw new UnprocessableEntityException(
-        'Incorrect Password or User',
+        ['Incorrect Password or User'],
         'Invalid Log In Attempt ',
       );
 	if (user.verifiedEmail == false)
 		throw new UnprocessableEntityException(
-			'This account does not exist or was not confirmed by email. If you have created an account, check your mailbox!'
+			['This account does not exist or was not confirmed by email. If you have created an account, check your mailbox!']
 		);
     if (user.password == undefined || user.password == null)
       throw new UnprocessableEntityException(
-        'Connect with your google account and change your password!',
+        ['Connect with your google account and change your password!'],
       );
     await this.confirmPassword(user, pass);
     const payload = { sub: user.id, username: user.username };

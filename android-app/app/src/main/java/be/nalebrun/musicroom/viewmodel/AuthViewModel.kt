@@ -19,6 +19,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -233,4 +234,27 @@ class AuthViewModel @Inject constructor(
     fun resetLogoutComplete() {
         _logoutComplete.value = false
     }
+
+    /**
+     * Forgot password logic
+     */
+    fun forgotPassword(email: String, onSuccess: () -> Unit) { viewModelScope.launch {
+        val body = FormBody.Builder().add("email", email).build()
+        apiRepository.post(
+            url = "auth/forgot-password-email",
+            body = body,
+            auth = "Bearer ${credentialRepository.jwtFlow.first()}",
+            onResponse = { _, response ->
+                if (response.code in 200..<300) {
+                    onSuccess()
+                }
+                else {
+                    uiMessageManager.showMessage("Failed to send forgot password email")
+                }
+            },
+            onFailure = { _, e ->
+                Log.e("AuthViewModel", "Failed to send forgot password email", e)
+            }
+        )
+    }}
 }

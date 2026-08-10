@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import android.util.Log
 import androidx.navigation.navDeepLink
 import be.nalebrun.musicroom.ui.screen.DeleteAccountUi
+import be.nalebrun.musicroom.ui.screen.ResetPasswordUi
 
 /**
  * Function that Create the NavGraph.
@@ -196,6 +197,7 @@ fun CreateNavGraph(
         composable(route = "change-password") { ChangePasswordUi() }
         composable(route = "music-player")    { MusicPlayerUi() }
             composable(route = "delete-account")    { DeleteAccountUi() }
+            composable(route = "reset-password")    { ResetPasswordUi() }
         composable(route = "search")          { SearchUi() }
         composable(route = "artist/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")

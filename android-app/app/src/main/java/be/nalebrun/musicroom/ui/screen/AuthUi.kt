@@ -1,6 +1,8 @@
 package be.nalebrun.musicroom.ui.screen
 
+import android.content.Intent
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -32,6 +35,7 @@ import be.nalebrun.musicroom.viewmodel.SocketViewModel
 @Composable
 fun AuthUi() {
     val viewModel: AuthViewModel = hiltViewModel()
+    val context = LocalContext.current
     // passing the activity scope the view model to the activity
     // level making it share a global instance
     val activity = LocalActivity.current
@@ -148,6 +152,13 @@ fun AuthUi() {
                 }
             }
         )
+        Text("forgot password ?", textAlign = TextAlign.Right, modifier = Modifier
+            .padding(top = 5.dp, bottom = 10.dp)
+            .clickable {
+                navigationViewModel.navigateTo("reset-password")
+            }
+        )
+
         // Display response
         Text(currentResult ?: "", textAlign = TextAlign.Center)
     }

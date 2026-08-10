@@ -1,6 +1,7 @@
 package be.nalebrun.musicroom.ui.screen
 
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,10 +48,12 @@ fun ProfileUi() {
     val profile by viewModel.profile.collectAsState()
     val favoriteMusics by viewModel.favoriteMusics.collectAsState()
 
+    var isEditingUsername by rememberSaveable {
+        mutableStateOf(false)
+    }
     var selectedPlaylistTab by remember { mutableStateOf("owned") }
 
     LaunchedEffect(Unit) {
-        println("coucou")
         viewModel.fetchProfile(-1)
     }
 
@@ -57,23 +61,6 @@ fun ProfileUi() {
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Button(
-            onClick = {
-                //set profile to mofify mode where people can select
-            },
-            modifier = Modifier.weight(1f),
-            colors = ButtonDefaults.buttonColors(containerColor = when (friendRequestState) {
-                null -> Color.Black
-                else -> Color.Gray
-            }),
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Text(when (friendRequestState) {
-                FriendRequestStatus.PENDING -> "pending"
-                FriendRequestStatus.NOTVIEWED -> "pending"
-                FriendRequestStatus.ACCEPTED -> "already friends !"
-                else -> "send friend request" }, color = Color.White)
-        }
         profile?.let { user ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -102,7 +89,28 @@ fun ProfileUi() {
                         Column(modifier = Modifier.padding(start = 16.dp)) {
                             Text("username:", fontSize = 12.sp, color = Color.Gray)
                             Text(user.username, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                            Text("email:", fontSize = 12.sp, color = Color.Gray, modifier = Modifier.padding(top = 4.dp))
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("email:", fontSize = 12.sp, color = Color.Gray, modifier = Modifier.padding(top = 4.dp))
+                                Spacer(modifier = Modifier
+                                    .width(8.dp))
+                                Image(
+                                    painter = painterResource(id = when {
+                                        profile!!.showAddress == "PUBLIC" -> R.drawable.outline_visibility_24
+                                        profile!!.showAddress == "FRIEND" -> R.drawable.outline_connect_without_contact_24
+                                        else -> R.drawable.outline_visibility_off_24
+                                    } as Int ),
+                                    contentDescription = "",
+                                    Modifier
+                                        .size(22.dp)
+                                        .padding(top = 4.dp)
+                                        .clickable(onClick = {
+                                            viewModel.changeVisibility("showAddress", profile!!.showAddress)
+                                        })
+                                )
+                            }
                             Text(user.email ?: "N/A", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                         }
                     }
@@ -122,16 +130,55 @@ fun ProfileUi() {
                         ) {
                             Text("${user.friends} friends", fontWeight = FontWeight.Bold)
                         }
+                        Image(
+                            painter = painterResource(id = when {
+                                profile!!.showFriends == "PUBLIC" -> R.drawable.outline_visibility_24
+                                profile!!.showFriends == "FRIEND" -> R.drawable.outline_connect_without_contact_24
+                                else -> R.drawable.outline_visibility_off_24
+                            } as Int ),
+                            contentDescription = "",
+                            Modifier
+                                .size(22.dp)
+                                .clickable(onClick = {
+                                    viewModel.changeVisibility("showFriends", profile!!.showFriends)
+                                })
+                        )
                     }
                 }
 
                 item {
-                    Text(
-                        "Favorites",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 24.dp, bottom = 8.dp)
-                    )
+                    Row(
+                        modifier = Modifier
+                            .padding(top = 24.dp, bottom = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "Favorites",
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(end = 10.dp)
+
+                        )
+                        Image(
+                            painter = painterResource(
+                                id = when {
+                                    profile!!.showPreferedMusics == "PUBLIC" -> R.drawable.outline_visibility_24
+                                    profile!!.showPreferedMusics == "FRIEND" -> R.drawable.outline_connect_without_contact_24
+                                    else -> R.drawable.outline_visibility_off_24
+                                } as Int
+                            ),
+                            contentDescription = "",
+                            Modifier
+                                .size(22.dp)
+                                .clickable(onClick = {
+                                    viewModel.changeVisibility(
+                                        "showPreferedMusics",
+                                        profile!!.showPreferedMusics
+                                    )
+                                })
+                        )
+                    }
                 }
 
                 items(favoriteMusics) { music ->
@@ -148,6 +195,26 @@ fun ProfileUi() {
                         PlaylistTabSwitcher(
                             selectedTab = selectedPlaylistTab,
                             onTabSelected = { selectedPlaylistTab = it }
+                        )
+                        val visibilityValue = if (selectedPlaylistTab == "owned") profile!!.showCreatedPlaylist else profile!!.showInvitedPlaylist
+                        val paramJson =  if (selectedPlaylistTab == "owned") "showCreatedPlaylist" else "showInvitedPlaylist"
+                        Image(
+                            painter = painterResource(
+                                id = when {
+                                    visibilityValue == "PUBLIC" -> R.drawable.outline_visibility_24
+                                    visibilityValue == "FRIEND" -> R.drawable.outline_connect_without_contact_24
+                                    else -> R.drawable.outline_visibility_off_24
+                                } as Int
+                            ),
+                            contentDescription = "",
+                            Modifier
+                                .size(22.dp)
+                                .clickable(onClick = {
+                                    viewModel.changeVisibility(
+                                        paramJson,
+                                        visibilityValue
+                                    )
+                                })
                         )
                     }
                 }

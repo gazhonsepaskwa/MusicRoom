@@ -138,4 +138,33 @@ class UserProfileViewModel @Inject constructor(
             )
         }
     }
+    fun changeVisibility(param: String, currentValue: String) {
+        val nextVisibility = when (currentValue) {
+            "PUBLIC" -> "FRIEND"
+            "FRIEND" -> "PRIVATE"
+            "PRIVATE" -> "PUBLIC"
+            else -> {}
+        }
+        val body = """{"$param": "$nextVisibility"}""".toRequestBody("application/json".toMediaType())
+        viewModelScope.launch {
+            credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
+                apiRepository.patch(
+                    "users/update",
+                    body,
+                    "Bearer $jwt",
+                    {_, response ->
+                        val bodyStr = response.body?.toString()?: ""
+                        if (response.code in 200..<300) {
+                            try {
+                               fetchProfile(-1)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                    },
+                    { _, e -> e.printStackTrace() }
+                )
+            }
+        }
+    }
 }

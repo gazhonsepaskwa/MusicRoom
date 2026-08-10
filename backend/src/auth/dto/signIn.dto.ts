@@ -35,6 +35,7 @@ export class ResetPasswordDto {
   @IsNotEmpty()
   email!: string;
 
+  @ApiProperty({})
   @IsString()
   @IsNotEmpty()
   @MinLength(8)

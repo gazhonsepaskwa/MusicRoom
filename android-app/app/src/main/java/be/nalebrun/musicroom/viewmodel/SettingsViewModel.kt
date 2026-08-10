@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import be.nalebrun.musicroom.IAPIRepository
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiChangePasswordFailureJson
+import be.nalebrun.musicroom.apiJsonStruct.responds.apiServerCheck
 import be.nalebrun.musicroom.repositories.ICredentialRepository
 import be.nalebrun.musicroom.repositories.ISettingsRepository
 import be.nalebrun.musicroom.repositories.UiMessageManager
@@ -37,6 +38,23 @@ class SettingsViewModel @Inject constructor(
             initialValue = ""
         )
 
+    val debugText: StateFlow<String> = settingsRepository.debugTextFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = ""
+        )
+
+    /**
+     * Update the debug text in the repository
+     * @param text The new debug text
+     */
+    fun updateDebugText(text: String) {
+        viewModelScope.launch {
+            settingsRepository.setDebugText(text)
+        }
+    }
+
     /**
      * Update the server URL in the repository and clear the JWT
      * @param url The new server URL
@@ -44,9 +62,11 @@ class SettingsViewModel @Inject constructor(
      */
     fun updateServerUrl(url: String, onUrlChanged: () -> Unit) {
         viewModelScope.launch {
+            val baseUrl = if (url.startsWith("https://")) {url.replace("https://", "")} else {url}
+            Log.d("SettingsViewModel", "Updating server URL to $baseUrl")
             val currentUrl = settingsRepository.serverUrlFlow.first()
-            if (currentUrl != url) {
-                settingsRepository.setServerUrl(url)
+            if (currentUrl != baseUrl) {
+                settingsRepository.setServerUrl(baseUrl)
                 credentialRepository.setJWT("") // Clear JWT as it's likely invalid for the new server
                 uiMessageManager.showMessage("Server URL updated to $url")
                 onUrlChanged()
@@ -89,4 +109,64 @@ class SettingsViewModel @Inject constructor(
             }
         )
     }}
+
+    fun ifServerUrlValid(url: String, onValid: () -> Unit) { viewModelScope.launch {
+        Log.d("SettingsViewModel", "Testing connection to $url")
+        val baseUrl = if (url.startsWith("https://")) {url} else {"https://$url"}
+        val fullUrl = "$baseUrl/server-check"
+        apiRepository.get(
+            url = fullUrl,
+            auth = "Bearer ${credentialRepository.jwtFlow.first()}",
+            onResponse = { _, response ->
+                if (response.code in 200..<300) {
+                    try {
+                        val decodedJson = Json.decodeFromString<apiServerCheck>(response.body?.string() ?: "")
+                        if (decodedJson.server_name == "musicroom") {
+                            Log.d("SettingsViewModel", decodedJson.server_name)
+                        }
+                    } catch (e: Exception) {
+                        uiMessageManager.showMessage("Invalid server URL")
+                        Log.e("SettingsViewModel", "Failed to decode JSON", e)
+                    }
+                    viewModelScope.launch { onValid() }
+                } else {
+                    uiMessageManager.showMessage("Invalid server URL")
+                }
+            },
+            onFailure = { _, e ->
+                Log.e("SettingsViewModel", "Failed to test connection", e)
+                uiMessageManager.showMessage("Invalid server URL")
+            }
+        )
+
+    }}
+
+    fun deleteAccount(password: String, onSuccess: () -> Unit) { viewModelScope.launch {
+        val body = FormBody.Builder().add("password", password).build()
+
+        apiRepository.post(
+            "/auth/delete-account",
+            body = body,
+            auth = "Bearer ${credentialRepository.jwtFlow.first()}",
+            onResponse = {_, response ->
+                if (response.code in 200..<300) {
+                    uiMessageManager.showMessage("Account deleted successfully")
+                    viewModelScope.launch {
+                        credentialRepository.setJWT("")
+                        onSuccess()
+                    }
+                } else {
+                    uiMessageManager.showMessage("Password is incorrect") // (probably)
+                    Log.e("SettingsViewModel", "Failed to delete account: ${response.body?.string()}")
+                }
+            },
+            onFailure = { _, e ->
+                uiMessageManager.showMessage("Failed to delete your account")
+                Log.e("SettingsViewModel", "Failed to delete account", e)
+            }
+        )
+
+    }}
 }
+
+

@@ -85,7 +85,7 @@ class SocketViewModel @Inject constructor(
         }
 
         // to check
-        socketIORepository.on("disconnectFromDevice") { args ->
+        socketIORepository.on("userDisconnected") { args ->
             Log.d("SocketIORepository", ">>> [hostRequest] INCOMING: ${args.joinToString()}")
             val data = args.getOrNull(0)
             if (data is JSONObject) {
@@ -95,7 +95,7 @@ class SocketViewModel @Inject constructor(
         }
 
         // to check
-        socketIORepository.on("userDisconnect") { args ->
+        socketIORepository.on("disconnectFromDevice") { args ->
             Log.d("SocketIORepository", ">>> [hostRequest] INCOMING: ${args.joinToString()}")
             val data = args.getOrNull(0)
             if (data is JSONObject) {

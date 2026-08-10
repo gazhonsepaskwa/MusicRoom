@@ -3,6 +3,7 @@ package be.nalebrun.musicroom
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -25,6 +26,9 @@ import be.nalebrun.musicroom.viewmodel.AuthViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import be.nalebrun.musicroom.viewmodel.NavEvent
 import be.nalebrun.musicroom.viewmodel.SocketViewModel
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.collectAsState
@@ -61,6 +65,8 @@ fun CreateNavGraph(
     val backEvent by navigationViewModel.backEvent.observeAsState()
     val incomingRequest by socketViewModel.incomingRequest.collectAsState()
     val sheetState = rememberModalBottomSheetState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val messageEvent by navigationViewModel.messageEvent.observeAsState()
 
     LaunchedEffect(incomingRequest) {
         Log.d("NavGraph", "incomingRequest state changed: $incomingRequest")
@@ -70,7 +76,7 @@ fun CreateNavGraph(
         ModalBottomSheet(
             onDismissRequest = {
                 Log.d("NavGraph", "Dismissing Sheet")
-                socketViewModel.dismissRequest()
+                socketViewModel.answerRequest(false)
             },
             sheetState = sheetState
         ) {
@@ -95,10 +101,10 @@ fun CreateNavGraph(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    TextButton(onClick = { socketViewModel.dismissRequest() }) {
+                    TextButton(onClick = { socketViewModel.answerRequest(false) }) {
                         Text("No")
                     }
-                    Button(onClick = { socketViewModel.acceptRequest() }) {
+                    Button(onClick = { socketViewModel.answerRequest(true) }) {
                         Text("Yes")
                     }
                 }
@@ -135,13 +141,25 @@ fun CreateNavGraph(
         }
     }
 
-    NavHost(
-        navController =     navController,
-        startDestination =  startDestination,
-    ) {
-        ///////////////
-        // deep link //
-        /////////////// aka: from the outside
+    LaunchedEffect(messageEvent) {
+        messageEvent?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            navigationViewModel.clearMessageEvent()
+        }
+    }
+
+    // Scaffold needed to display the snackbar and manage its options
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { paddingValues ->
+        NavHost(
+            navController = navController,
+            startDestination = startDestination,
+            modifier = Modifier.padding(paddingValues)
+        ) {
+            ///////////////
+            // deep link //
+            /////////////// aka: from the outside
 
         // Validate email
         composable(
@@ -203,4 +221,5 @@ fun CreateNavGraph(
             UserProfileUi(userId = id)
         }
     }
+}
 }

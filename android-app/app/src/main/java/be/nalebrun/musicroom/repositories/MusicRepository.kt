@@ -2,7 +2,6 @@ package be.nalebrun.musicroom.repositories
 
 import android.content.ComponentName
 import android.content.Context
-import android.net.Uri
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
@@ -36,7 +35,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 import androidx.core.net.toUri
-import coil3.toUri
+import androidx.lifecycle.viewModelScope
+import org.json.JSONObject
 
 /**
  * Repository to manage the music.
@@ -148,6 +148,26 @@ interface IMusicRepository {
      */
     fun replaceWaitingList(newWaitingList: List<MusicJson>)
 
+    /**
+     * control another device, instead of the one that is currently playing.
+     * exactly the same behavior but without playback
+     * @param newIsPlaying   : String "true" or "false"
+     * @param newDuration    : Long in ms
+     * @param newPosition    : Long in ms
+     * @param newWaitingList : List<MusicJson>
+     * @param newCurrentSong : Int
+     */
+    fun startRemoteControl(
+        newIsPlaying   : String,
+        newPosition    : Long,
+        newWaitingList : List<MusicJson>,
+        newCurrentSong : Int
+    )
+
+    /**
+     * stop the remote control
+     */
+    fun stopRemoteControl()
     // other
     /**
      * release the music controller.
@@ -161,7 +181,8 @@ interface IMusicRepository {
 class MusicRepository @Inject constructor(
     @ApplicationContext private val context:                Context,
     private val                     apiRepository:          APIRepository,
-    private val                     credentialRepository:   CredentialRepository
+    private val                     credentialRepository:   CredentialRepository,
+    private val                     socketIORepository:     SocketIORepository
 ) : IMusicRepository {
 
     // controller variables
@@ -188,6 +209,8 @@ class MusicRepository @Inject constructor(
     override val waitingList = _waitingList.asStateFlow()
     private val _currentSongIndex = MutableStateFlow(0)
 
+    private val _isRemoteControl = MutableStateFlow(false)
+
     // bool that prevent multiple setups
     private var isFirstLoad = true
 
@@ -197,6 +220,10 @@ class MusicRepository @Inject constructor(
     // id of the song that is playing now (guard to don't fetch 2 time the same song)
     // always the real id of the song that is playing. Not affected by fetching delay
     private var currentPlayingId: Int? = null
+
+    // pending seek and play variables for the controller mode
+    private var pendingSeek: Long? = null
+    private var pendingPlay: Boolean? = null
 
     override val currentSong: StateFlow<Int> = combine(
         flow  = _waitingList,
@@ -218,6 +245,18 @@ class MusicRepository @Inject constructor(
         override fun onPlaybackStateChanged(playbackState: Int) {
             controller?.let {
                 _duration.value = it.duration.coerceAtLeast(0L)
+
+                // seek to the position when the media is ready
+                if (playbackState == Player.STATE_READY) {
+                    pendingSeek?.let { seekPos ->
+                        it.seekTo(seekPos)
+                        pendingSeek = null
+                    }
+                    pendingPlay?.let { shouldPlay ->
+                        if (shouldPlay) it.play() else it.pause()
+                        pendingPlay = null
+                    }
+                }
             }
             // go to the next song if the music is ended
             if (playbackState == Player.STATE_ENDED) {
@@ -299,13 +338,34 @@ class MusicRepository @Inject constructor(
     }
 
     override fun play() {
-        controller?.play()
+        pendingPlay = null
+        if (_isRemoteControl.value) {
+            val json = JSONObject().apply {
+                put("isPlaying", true)
+            }
+            socketIORepository.emit("modifyData", json)
+        }
+            controller?.play()
     }
     override fun pause() {
-        controller?.pause()
+        pendingPlay = null
+        if (_isRemoteControl.value) {
+            val json = JSONObject().apply {
+                put("isPlaying", false)
+            }
+            socketIORepository.emit("modifyData", json)
+        }
+            controller?.pause()
     }
     override fun seekTo(newPosition: Long) {
-        controller?.seekTo(newPosition)
+        pendingSeek = null
+        if (_isRemoteControl.value) {
+            val json = JSONObject().apply {
+                put("currentTime", newPosition)
+            }
+            socketIORepository.emit("modifyData", json)
+        }
+            controller?.seekTo(newPosition)
     }
 
     @OptIn(UnstableApi::class)
@@ -366,6 +426,59 @@ class MusicRepository @Inject constructor(
 
     override fun replaceWaitingList(newWaitingList: List<MusicJson>) {
         _waitingList.value = newWaitingList
+    }
+
+    override fun startRemoteControl(
+        newIsPlaying   : String,
+        newPosition    : Long,
+        newWaitingList : List<MusicJson>,
+        newCurrentSong : Int
+    ) {
+        // tell the media player to don't play for real and only play on the distant device
+        _isRemoteControl.value = true
+
+        // TODO : add dummy info in the interface temporarily while it wait. but not sure it's necessary
+
+        // replace waiting list
+        replaceWaitingList(newWaitingList)
+
+        // change the current song in the waiting list
+        _currentSongIndex.value = newCurrentSong
+
+        // seek to
+        pendingSeek = newPosition
+        pendingPlay = (newIsPlaying == "true")
+
+        controller?.let {
+            val newSongId = if (newCurrentSong in newWaitingList.indices) newWaitingList[newCurrentSong].id else 0
+            if (it.playbackState == Player.STATE_READY && newSongId == currentPlayingId) {
+                // seek
+                it.seekTo(newPosition)
+                pendingSeek = null
+                // play pause
+                if (pendingPlay == true) it.play() else it.pause()
+                pendingPlay = null
+            }
+        }
+    }
+
+    override fun stopRemoteControl() {
+        // reset everything
+        _isRemoteControl.value = false
+        pendingSeek = null
+        pendingPlay = null
+
+        _music.value = MusicJson(id = 0, title = "", album = AlbumJson(
+            title = "",
+            images = listOf("", "", "")
+        ), duration = 0)
+
+        clearWaitingList()
+
+        _isPlaying.value        = false
+        _currentSongIndex.value = 0
+        _currentPosition.value  = 0L
+        _duration.value         = 0L
     }
 
     override fun release() {

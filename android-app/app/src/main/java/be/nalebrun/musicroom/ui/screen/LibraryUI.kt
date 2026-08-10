@@ -47,6 +47,7 @@ import be.nalebrun.musicroom.ui.element.CustomTextField
 import be.nalebrun.musicroom.ui.element.LibraryCard
 import be.nalebrun.musicroom.ui.element.PlaylistInvitationCard
 import be.nalebrun.musicroom.ui.element.PlaylistSharedCard
+import be.nalebrun.musicroom.ui.element.Title
 import be.nalebrun.musicroom.viewmodel.LibraryViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import be.nalebrun.musicroom.viewmodel.PlaylistAccessViewModel
@@ -184,5 +185,5 @@ fun LibraryUi() {
         BottomScreenMenu(
             activeScreen = ActiveScreen.LIBRARY,
         )
-        }
+    }
 }

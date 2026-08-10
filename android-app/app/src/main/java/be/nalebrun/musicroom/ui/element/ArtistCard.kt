@@ -1,6 +1,5 @@
 package be.nalebrun.musicroom.ui.element
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -72,10 +73,11 @@ fun ArtistCard(music: MusicJson) {
             Text(music.title, fontWeight = FontWeight.Bold)
 //            Text(artist)
         }
-        Image(
+        Icon(
             painter = painterResource(R.drawable.outline_more_horiz_24),
             contentDescription = "",
-            modifier = Modifier.clickable(true, onClick = { showbottomSheet = true })
+            modifier = Modifier.clickable(true, onClick = { showbottomSheet = true }),
+            tint = MaterialTheme.colorScheme.onBackground
         )
     }
 

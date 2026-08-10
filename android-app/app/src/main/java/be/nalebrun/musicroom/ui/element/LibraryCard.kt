@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -128,5 +129,5 @@ fun LibraryCard(music: libraryJson, navigationViewModel: NavigationViewModel) {
             modifier = Modifier.clickable(true, onClick = { showBottomSheet = true })
         )
     }
-    HorizontalDivider(thickness = 1.dp, color = Color.Gray)
+    HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.onSurfaceVariant)
 }

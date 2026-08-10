@@ -15,6 +15,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 interface ISocketIORepository {
+
+    val isConnected: StateFlow<Boolean>
+
     /**
      * connect to the socket
      */
@@ -60,7 +63,7 @@ class SocketIORepository @Inject constructor(
 
     // reflect the socket connection state
     private val _isConnected = MutableStateFlow(false)
-    val          isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
+    override val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
 
     init {
         // Automatically reconnect when JWT or Server URL changes
@@ -146,11 +149,6 @@ class SocketIORepository @Inject constructor(
                     Log.e("SocketIORepository", "Connection Error: $error")
                 }
 
-                // custom sockets
-                socket?.on("hostRequest")       { args -> hostRequestListener(args)     } // (Host only)      Request sent from the device that want to connect to the host
-                socket?.on("hostResponse")      { args -> hostResponseListener(args)    } // (Non-host only)  Response sent from the host to the device
-                socket?.on("connectToDevice")   { args -> connectToDeviceListener(args) } // TODO
-
                 // General errors
                 socket?.on("error") { args ->
                     Log.e("SocketIORepository", "General Error: ${args.getOrNull(0)}")
@@ -183,6 +181,7 @@ class SocketIORepository @Inject constructor(
         listeners[event] = listener
         
         socket?.on(event) { args ->
+            Log.d("SocketIORepository", "<<< RECEIVED EVENT: '$event' | DATA: ${args?.joinToString()}")
             listener(args ?: emptyArray())
         }
     }
@@ -190,19 +189,5 @@ class SocketIORepository @Inject constructor(
     override fun off(event: String) {
         listeners.remove(event)
         socket?.off(event)
-    }
-
-    /////////////////////////////////
-    // custom listeners definition //
-    /////////////////////////////////
-
-    private fun hostRequestListener(args: Array<Any>?) {
-        Log.d("SocketIORepository", ">>> [hostRequest] INCOMING: ${args?.joinToString()}")
-    }
-    private fun hostResponseListener(args: Array<Any>?) {
-        Log.d("SocketIORepository", ">>> [hostResponse] INCOMING: ${args?.joinToString()}")
-    }
-    private fun connectToDeviceListener(args: Array<Any>?) {
-        Log.d("SocketIORepository", ">>> [connectToDevice] INCOMING: ${args?.joinToString()}")
     }
 }

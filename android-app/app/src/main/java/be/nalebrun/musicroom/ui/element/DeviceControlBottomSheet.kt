@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -84,10 +86,11 @@ fun DeviceItem(device: ForeignDevice, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.weight(1f)
         ) {
-            Image(
+            Icon(
                 painter = painterResource(id = R.drawable.outline_devices_other_24),
                 contentDescription = null,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text(
@@ -108,12 +111,13 @@ fun DeviceItem(device: ForeignDevice, onClick: () -> Unit) {
             
             Spacer(modifier = Modifier.width(12.dp))
             
-            Image(
+            Icon(
                 painter = painterResource(id = R.drawable.outline_arrow_back_ios_24),
                 contentDescription = null,
                 modifier = Modifier
                     .size(16.dp)
-                    .rotate(180f)
+                    .rotate(180f),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -121,10 +125,10 @@ fun DeviceItem(device: ForeignDevice, onClick: () -> Unit) {
 
 @Composable
 fun PermissionIcon(enabled: Boolean, icon: Int) {
-    Image(
+    Icon(
         painter = painterResource(id = icon),
         contentDescription = null,
         modifier = Modifier.size(24.dp),
-        alpha = if (enabled) 1f else 0.5f
+        tint = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
     )
 }

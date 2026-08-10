@@ -221,4 +221,28 @@ export class AuthService {
 	await this.playlistsService.deleteAllUserPlaylists(userId);
 	await this.usersService.deleteUser({ id: userId });
   }
+
+  async sendPasswordResetEmail(email: string) {
+	const user = await this.usersService.user({ email });
+	if (!user) {
+		throw new UnauthorizedException('No user at this email address!');
+	}
+	const token = this.generatePasswordResetToken();
+	await this.usersService.updateUser({
+		where: { id: user.id },
+		data: { tempPin: token },
+	});
+	const link = `${process.env.APP_SCHEME}://auth/reset-password?resetToken=${token}&email=${encodeURIComponent(email)}`;
+	this.mailService.sendVerificationEmail(email, link);
+  }
+
+  generatePasswordResetToken(): string {
+	let passwordResetToken = '';
+	for (let i = 0; i < 6; i++) {
+		const randomDigit = Math.floor(Math.random() * 10);
+		passwordResetToken += randomDigit.toString();
+	}
+	return passwordResetToken;
+  }
+
 }

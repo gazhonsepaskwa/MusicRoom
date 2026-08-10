@@ -39,28 +39,28 @@ class NavigationViewModel @Inject constructor(
      * Request navigation to a specific route
      */
     fun navigateTo(route: String, builder: (NavOptionsBuilder.() -> Unit)? = null) {
-        _navigationEvent.value = NavEvent(route, builder)
+        _navigationEvent.postValue(NavEvent(route, builder))
     }
 
     /**
      * Clear the current navigation event after it's been handled
      */
     fun clearNavigationEvent() {
-        _navigationEvent.value = null
+        _navigationEvent.postValue(null)
     }
 
     /**
      * Request to go back to the previous screen
      */
     fun navigateBack() {
-        _backEvent.value = true
+        _backEvent.postValue(true)
     }
 
     /**
      * Clear the back navigation event after it's been handled
      */
     fun clearBackEvent() {
-        _backEvent.value = false
+        _backEvent.postValue(false)
     }
 
     /**

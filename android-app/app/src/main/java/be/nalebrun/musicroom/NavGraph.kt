@@ -45,6 +45,7 @@ import android.util.Log
 import androidx.navigation.navDeepLink
 import be.nalebrun.musicroom.ui.screen.DeleteAccountUi
 import be.nalebrun.musicroom.ui.screen.ResetPasswordUi
+import be.nalebrun.musicroom.ui.screen.ResetPasswordConfirmationUi
 
 /**
  * Function that Create the NavGraph.
@@ -181,6 +182,16 @@ fun CreateNavGraph(
             navController.navigate("search") {
                 popUpTo(navController.graph.id) { inclusive = true }
             }
+        }
+
+        // Reset password callback
+        composable(
+            route = "reset-password-confirmation?resetToken={resetToken}&email={email}",
+            deepLinks = listOf(navDeepLink { uriPattern = "musicroom://auth/reset-password?resetToken={resetToken}&email={email}" })
+        ) { backStackEntry ->
+            val token = backStackEntry.arguments?.getString("resetToken")
+            val email = backStackEntry.arguments?.getString("email")
+            ResetPasswordConfirmationUi(email = email, token = token)
         }
 
         ////////////////

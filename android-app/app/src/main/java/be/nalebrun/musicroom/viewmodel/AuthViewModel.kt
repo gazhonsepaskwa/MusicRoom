@@ -236,6 +236,34 @@ class AuthViewModel @Inject constructor(
     }
 
     /**
+     * Reset password logic
+     */
+    fun resetPassword(email: String, token: String, newPassword: String, onSuccess: () -> Unit) { viewModelScope.launch {
+        val body = FormBody.Builder()
+            .add("email", email)
+            .add("token", token)
+            .add("password", newPassword)
+            .build()
+
+        apiRepository.post(
+            url = "auth/reset-password",
+            body = body,
+            onResponse = { _, response ->
+                if (response.code in 200..<300) {
+                    onSuccess()
+                } else {
+                    uiMessageManager.showMessage("Failed to reset password: ${response.code}")
+                    Log.e("AuthViewModel", Json.decodeFromString<apiSigninFailureJson>(response.body?.string() ?: "").message.first())
+                }
+            },
+            onFailure = { _, e ->
+                Log.e("AuthViewModel", "Failed to reset password", e)
+                uiMessageManager.showMessage("Network error")
+            }
+        )
+    }}
+
+    /**
      * Forgot password logic
      */
     fun forgotPassword(email: String, onSuccess: () -> Unit) { viewModelScope.launch {

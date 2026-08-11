@@ -20,7 +20,13 @@ data class UserProfileJson(
     val secondPreferedMusicId: Int? = null,
     val thirdPreferedMusicId: Int? = null,
     val ownedPlaylists: List<PlaylistProfileJson>? = emptyList(),
-    val invitedPlaylists: List<PlaylistProfileJson>? = emptyList()
+    val invitedPlaylists: List<PlaylistProfileJson>? = emptyList(),
+    val showAddress: String? = "PRIVATE",
+    val showCreatedPlaylist: String? = "PUBLIC",
+    val showFriends: String? = "PUBLIC",
+    val showInvitedPlaylist: String? = "PUBLIC",
+    val showPreferedMusics: String? = "PUBLIC",
+    val isYou: Boolean
 )
 
 @OptIn(ExperimentalSerializationApi::class)

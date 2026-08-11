@@ -149,6 +149,6 @@ export class AuthController {
 	if (!resetToken || !email) {
 	  throw new UnauthorizedException('Missing reset token or email.');
 	}
-	res.redirect(`${process.env.APP_SCHEME}://auth/reset-password?resetToken=${resetToken}&email=${email})`);
+	res.redirect(`${process.env.APP_SCHEME}://auth/reset-password?resetToken=${resetToken}&email=${email}`);
   }
 }

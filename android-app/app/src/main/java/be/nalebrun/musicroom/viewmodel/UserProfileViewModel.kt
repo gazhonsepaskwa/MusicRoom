@@ -73,6 +73,7 @@ class UserProfileViewModel @Inject constructor(
      * @param userId The ID of the user whose profile to fetch
      */
     fun fetchProfile(userId: Int) {
+        println(userId.toString())
         var url = ""
         if (userId == -1)
             url = "users/profile"
@@ -84,21 +85,39 @@ class UserProfileViewModel @Inject constructor(
                     url,
                     "Bearer $jwt",
                     { _, response ->
+                        val body = response.body?.string()
+
+                        println("PROFILE REQUEST: $url")
+                        println("PROFILE RESPONSE CODE: ${response.code}")
+                        println("PROFILE RESPONSE BODY: $body")
+
                         if (response.code in 200..<300) {
-                            val body = response.body?.string()
                             if (body != null) {
                                 try {
-                                    val parsedProfile = Json.decodeFromString<UserProfileJson>(body)
+                                    val parsedProfile =
+                                        Json.decodeFromString<UserProfileJson>(body)
+
+                                    println("PROFILE PARSED SUCCESSFULLY: $parsedProfile")
+
                                     _friendRequestState.value = parsedProfile.isFriend
                                     _profile.value = parsedProfile
+
                                     fetchFavoriteMusics(parsedProfile, jwt)
                                 } catch (e: Exception) {
+                                    println("PROFILE JSON PARSING FAILED")
                                     e.printStackTrace()
                                 }
+                            } else {
+                                println("PROFILE RESPONSE BODY IS NULL")
                             }
+                        } else {
+                            println("PROFILE REQUEST FAILED WITH HTTP ${response.code}")
                         }
                     },
-                    { _, e -> e.printStackTrace() }
+                    { _, e ->
+                        println("PROFILE REQUEST ERROR")
+                        e.printStackTrace()
+                    }
                 )
             }
         }

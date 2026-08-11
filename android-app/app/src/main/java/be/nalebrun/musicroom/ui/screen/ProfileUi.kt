@@ -96,7 +96,7 @@ fun ProfileUi() {
                                 Text("email:", fontSize = 12.sp, color = Color.Gray, modifier = Modifier.padding(top = 4.dp))
                                 Spacer(modifier = Modifier
                                     .width(8.dp))
-                                Image(
+                                Icon(
                                     painter = painterResource(id = when {
                                         profile!!.showAddress == "PUBLIC" -> R.drawable.outline_visibility_24
                                         profile!!.showAddress == "FRIEND" -> R.drawable.outline_connect_without_contact_24
@@ -107,8 +107,9 @@ fun ProfileUi() {
                                         .size(22.dp)
                                         .padding(top = 4.dp)
                                         .clickable(onClick = {
-                                            viewModel.changeVisibility("showAddress", profile!!.showAddress)
-                                        })
+                                            viewModel.changeVisibility("showAddress", profile!!.showAddress!!)
+                                        }),
+                                    tint = MaterialTheme.colorScheme.onSurface
                                 )
                             }
                             Text(user.email ?: "N/A", fontSize = 18.sp, fontWeight = FontWeight.Bold)
@@ -130,7 +131,7 @@ fun ProfileUi() {
                         ) {
                             Text("${user.friends} friends", fontWeight = FontWeight.Bold)
                         }
-                        Image(
+                        Icon(
                             painter = painterResource(id = when {
                                 profile!!.showFriends == "PUBLIC" -> R.drawable.outline_visibility_24
                                 profile!!.showFriends == "FRIEND" -> R.drawable.outline_connect_without_contact_24
@@ -140,8 +141,9 @@ fun ProfileUi() {
                             Modifier
                                 .size(22.dp)
                                 .clickable(onClick = {
-                                    viewModel.changeVisibility("showFriends", profile!!.showFriends)
-                                })
+                                    viewModel.changeVisibility("showFriends", profile!!.showFriends!!)
+                                }),
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -160,7 +162,7 @@ fun ProfileUi() {
                             modifier = Modifier.padding(end = 10.dp)
 
                         )
-                        Image(
+                        Icon(
                             painter = painterResource(
                                 id = when {
                                     profile!!.showPreferedMusics == "PUBLIC" -> R.drawable.outline_visibility_24
@@ -174,9 +176,10 @@ fun ProfileUi() {
                                 .clickable(onClick = {
                                     viewModel.changeVisibility(
                                         "showPreferedMusics",
-                                        profile!!.showPreferedMusics
+                                        profile!!.showPreferedMusics!!
                                     )
-                                })
+                                }),
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -198,7 +201,7 @@ fun ProfileUi() {
                         )
                         val visibilityValue = if (selectedPlaylistTab == "owned") profile!!.showCreatedPlaylist else profile!!.showInvitedPlaylist
                         val paramJson =  if (selectedPlaylistTab == "owned") "showCreatedPlaylist" else "showInvitedPlaylist"
-                        Image(
+                        Icon(
                             painter = painterResource(
                                 id = when {
                                     visibilityValue == "PUBLIC" -> R.drawable.outline_visibility_24
@@ -207,14 +210,15 @@ fun ProfileUi() {
                                 } as Int
                             ),
                             contentDescription = "",
-                            Modifier
+                            modifier = Modifier
                                 .size(22.dp)
                                 .clickable(onClick = {
                                     viewModel.changeVisibility(
                                         paramJson,
-                                        visibilityValue
+                                        visibilityValue!!
                                     )
-                                })
+                                }),
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }

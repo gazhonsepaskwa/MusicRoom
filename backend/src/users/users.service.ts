@@ -156,6 +156,7 @@ export class UsersService {
 		showFriends: visibilty == visibilityStatus.PRIVATE ? user.showFriends : null,
 		showInvitedPlaylist: visibilty == visibilityStatus.PRIVATE ? user.showInvitedPlaylist : null,
 		showPreferedMusics: visibilty == visibilityStatus.PRIVATE ? user.showPreferedMusics : null,
+		isYou: userId == requesterId
 	};
 	return result;
   }

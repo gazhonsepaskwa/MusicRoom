@@ -1,0 +1,214 @@
+[
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_baseline_library_music_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/baseline_library_music_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/mipmap-xhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/mipmap-hdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_baseline_favorite_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/baseline_favorite_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_check_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_check_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_artist.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/artist.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_skip_previous_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_skip_previous_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_arrow_back_ios_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_arrow_back_ios_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/mipmap-mdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/xml_backup_rules.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/xml/backup_rules.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_pause_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_pause_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/mipmap-mdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_ic_launcher_background.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_baseline_egg_alt_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/baseline_egg_alt_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_connect_without_contact_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_connect_without_contact_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_search_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_search_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_baseline_account_circle_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/baseline_account_circle_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_baseline_edit_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/baseline_edit_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_account_circle_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_account_circle_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_shuffle_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_shuffle_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_repeat_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_repeat_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_queue_music_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_queue_music_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_saved_search_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_saved_search_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_library_music_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_library_music_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_album.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/album.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_skip_next_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_skip_next_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_devices_other_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_devices_other_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_shuffle_on_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_shuffle_on_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_event_list_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_event_list_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_egg_alt_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_egg_alt_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/xml_data_extraction_rules.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_baseline_favorite_border_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/baseline_favorite_border_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_audio_wave.gif.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/audio_wave.gif"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_sliders_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_sliders_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/mipmap-hdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_note_1.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/note_1.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_repeat_on_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_repeat_on_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_visibility_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_visibility_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_more_horiz_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_more_horiz_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_play_arrow_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_play_arrow_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_cancel_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_cancel_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_playlist_tmp.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/playlist_tmp.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/mipmap-xxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_repeat_one_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_repeat_one_24.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/mipmap-xhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/mipmap-xxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_menu.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/menu.xml"
+    },
+    {
+        "merged": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-debug-52:/drawable_outline_visibility_off_24.xml.flat",
+        "source": "/home/xekhtyrl/.gradle/daemon/9.6.0/be.nalebrun.musicroom.app-main-54:/drawable/outline_visibility_off_24.xml"
+    }
+]

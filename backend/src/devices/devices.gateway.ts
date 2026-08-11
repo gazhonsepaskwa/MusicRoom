@@ -200,7 +200,7 @@ export class DevicesGateway {
     const playbackStateResponse: PlaybackStateResponseDto = {
       isPlaying: payload.data.isPlaying,
       currentTime: payload.data.currentTime,
-      deviceId: payload.emitDeviceID,
+      deviceId: client.data.deviceId,
       isAccepted: true,
       currentMusicId: payload.data.currentMusicId,
       musicList: musicListObj,

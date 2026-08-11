@@ -1,8 +1,6 @@
 package be.nalebrun.musicroom.ui.screen
 
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,10 +22,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import be.nalebrun.musicroom.R
-import be.nalebrun.musicroom.apiJsonStruct.responds.FriendRequestStatus
-import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
-import be.nalebrun.musicroom.apiJsonStruct.responds.PlaylistJson
-import be.nalebrun.musicroom.apiJsonStruct.responds.PlaylistProfileJson
 import be.nalebrun.musicroom.ui.element.ActiveScreen
 import be.nalebrun.musicroom.ui.element.BottomScreenMenu
 import be.nalebrun.musicroom.ui.element.PageTopBackButton

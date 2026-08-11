@@ -85,7 +85,7 @@ class SocketViewModel @Inject constructor(
         }
 
         // to check
-        socketIORepository.on("disconnectFromDevice") { args ->
+        socketIORepository.on("userDisconnected") { args ->
             Log.d("SocketIORepository", ">>> [hostRequest] INCOMING: ${args.joinToString()}")
             val data = args.getOrNull(0)
             if (data is JSONObject) {
@@ -95,7 +95,7 @@ class SocketViewModel @Inject constructor(
         }
 
         // to check
-        socketIORepository.on("userDisconnect") { args ->
+        socketIORepository.on("disconnectFromDevice") { args ->
             Log.d("SocketIORepository", ">>> [hostRequest] INCOMING: ${args.joinToString()}")
             val data = args.getOrNull(0)
             if (data is JSONObject) {
@@ -117,7 +117,7 @@ class SocketViewModel @Inject constructor(
                 val waitingListIds = JSONArray()
                 musicRepository.waitingList.value.forEach { waitingListIds.put(it.id) }
                 put("musicListIds", waitingListIds)
-                
+
                 // Get our own device ID from settings
                 val myDeviceId = settingsRepository.deviceUuidFlow.firstOrNull() ?: ""
                 put("deviceId", myDeviceId)
@@ -136,7 +136,7 @@ class SocketViewModel @Inject constructor(
 
             Log.d("SocketViewModel", "Sending hostResponse: $response")
             socketIORepository.emit("hostResponse", response)
-            
+
             _incomingRequest.value = null
         }
     }

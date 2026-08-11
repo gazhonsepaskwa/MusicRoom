@@ -2,6 +2,7 @@ package be.nalebrun.musicroom.ui.screen
 
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -53,10 +54,13 @@ fun SettingsUi() {
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Title("Settings")
-            SettingItem("my profile")      { navigationViewModel.navigateTo("profile") }
-            SettingItem("server settings") { navigationViewModel.navigateTo("server-settings") }
-            SettingItem("change password") { navigationViewModel.navigateTo("change-password") }
-            SettingItem("logout")          { authViewModel.logout() }
+            SettingItem("my profile")        { navigationViewModel.navigateTo("profile") }
+            SettingItem("server settings")   { navigationViewModel.navigateTo("server-settings") }
+            SettingItem("change password")   { navigationViewModel.navigateTo("change-password") }
+            SettingItem("logout")            { authViewModel.logout() }
+
+            Text("danger zone", color = Color.Red, fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 20.dp))
+            SettingItem("delete my account") { navigationViewModel.navigateTo("delete-account") }
         }
         BottomScreenMenu(
             activeScreen = ActiveScreen.SETTINGS,

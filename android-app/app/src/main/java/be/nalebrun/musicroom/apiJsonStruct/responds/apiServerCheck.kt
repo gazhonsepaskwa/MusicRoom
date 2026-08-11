@@ -1,4 +1,8 @@
 package be.nalebrun.musicroom.apiJsonStruct.responds
 
-class apiServerCheck {
-}
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class apiServerCheck (
+    val server_name: String = ""
+)

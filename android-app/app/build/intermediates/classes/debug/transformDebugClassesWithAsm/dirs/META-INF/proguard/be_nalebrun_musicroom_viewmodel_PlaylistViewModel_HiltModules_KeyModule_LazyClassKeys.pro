@@ -1,1 +1,0 @@
--keep,allowobfuscation,allowshrinking class be.nalebrun.musicroom.viewmodel.PlaylistViewModel

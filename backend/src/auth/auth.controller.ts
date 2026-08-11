@@ -17,7 +17,7 @@ import { Public } from './auth.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { DeleteAccountDto, NewUserDto } from './dto/newUser.dto';
 import { EmailDto } from './dto/email.dto';
-import { SignInDto } from './dto/signIn.dto';
+import { ResetPasswordDto, SignInDto } from './dto/signIn.dto';
 import { ApiBody, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { AuthMessageResponseDto, AuthTokenResponseDto, AuthProfileResponseDto } from './dto/auth-response.dto';
 import { Response } from 'express';
@@ -110,5 +110,30 @@ export class AuthController {
 	const user = (await this.usersService.user({id: userId}))!
 	await this.authService.confirmPassword(user, data.password);
 	return await this.usersService.deleteUser({id: userId});
+  }
+
+  @Post('forgot-password-email')
+  @Public()
+  @ApiBody({ type: EmailDto })
+  async forgotPasswordEmail(@Body() emailDto: EmailDto) {
+	await this.authService.sendPasswordResetEmail(emailDto.email);
+  }
+
+  @Post('reset-password')
+  @Public()
+  @ApiBody({ type: ResetPasswordDto })
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+	const { email, password, token } = resetPasswordDto;
+	const encryptedPassword = await this.usersService.encryptPassword(password);
+	const user = await this.usersService.user({ email, tempPin: token });
+	if (!user) {
+		throw new UnauthorizedException(['Invalid or expired reset token.']);
+	}
+	await this.usersService.updateUser({
+		where: { id: user.id },
+		data: { password: encryptedPassword, tempPin: null },
+	});
+
+	return { message: 'Password reset successful. You can now log in with your new password.' };
   }
 }

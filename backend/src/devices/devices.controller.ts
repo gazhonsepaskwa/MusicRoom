@@ -77,4 +77,11 @@ export class DevicesController {
   async getUserDevices(@CurrentUser() userId: number) {
     return await this.devicesService.getUserDevices(userId);
   }
+
+  @ApiOkResponse({ type: DeviceResponseDto})
+  @ApiBody({ type: DeviceRequestDto})
+  @Post('add-device')
+  async addDevice(@CurrentUser() useriId: number, data: DeviceRequestDto) {
+	return await this.devicesService.addDevice(useriId, data.deviceId, data.deviceName);
+  }
 }

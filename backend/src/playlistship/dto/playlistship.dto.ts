@@ -1,4 +1,4 @@
-import { IsIn, IsInt } from "class-validator"
+import { IsIn, IsInt, IsNotEmpty } from "class-validator"
 import { invitationStatus } from "../../../generated/prisma/enums"
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -10,6 +10,7 @@ export class PlaylistshipDto {
 	
 	@ApiProperty({})
 	@IsInt()
+	@IsNotEmpty()
 	addresseeId!: number
 }
 
@@ -24,5 +25,6 @@ export class PlaylistshipAnswerDto {
 		example: invitationStatus.ACCEPTED,
 	})
 	@IsIn(Object.values(invitationStatus))
+	@IsNotEmpty()
 	status!: invitationStatus
 }

@@ -42,6 +42,8 @@ model user {
   showPreferedMusics	visibilityStatus @default(PUBLIC)
   showCreatedPlaylist	visibilityStatus @default(PUBLIC)
   showInvitedPlaylist	visibilityStatus @default(PUBLIC)
+
+  tempPin	String?
 }
 
 enum visibilityStatus {

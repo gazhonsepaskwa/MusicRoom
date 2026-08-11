@@ -38,8 +38,6 @@ class PlaylistAccessViewModel @Inject constructor(
     fun getAccessFriends(playlistId: Int) {
         getFriends()
         getFriendsWithAccess(playlistId)
-        Log.d("FRIENDS", _friends.value.toString())
-        Log.d("SHAREFRIENDS", _friendsWithAccess.value.toString())
 
         val friendsWithAccessId = _friendsWithAccess.value.map { it.addresseeId }
         _friends.value = _friends.value.filter { it.otherId !in friendsWithAccessId }

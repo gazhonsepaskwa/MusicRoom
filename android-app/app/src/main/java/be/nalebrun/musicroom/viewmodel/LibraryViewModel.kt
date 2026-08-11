@@ -63,7 +63,13 @@ class LibraryViewModel @Inject constructor(
                 url = "/playlists/create",
                 body = body,
                 auth = "Bearer $jwt",
-                onResponse = { _, _ -> },
+                onResponse = { _, response ->
+                    if (response.code in 200..<300) {
+                        Log.d("Library", "Playlist was created")
+                    } else {
+                        Log.d("Library", "Create playlist error: ${response.code}")
+                    }
+                },
                 onFailure = { _, e -> e.printStackTrace() }
             )
         }

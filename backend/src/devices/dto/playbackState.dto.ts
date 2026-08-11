@@ -29,7 +29,7 @@ export class PlaybackStateResponseDto {
   @IsInt()
   currentMusicId?: number;
 
-  musicList: MusicDto[] = [];
+  musicList?: MusicDto[];
 
   @IsString()
   deviceId!: string;

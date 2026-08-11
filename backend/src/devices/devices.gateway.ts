@@ -274,7 +274,7 @@ export class DevicesGateway {
       currentTime: payload.currentTime,
       deviceId: payload.deviceId,
       currentMusicId: payload.currentMusicId,
-      musicList: musicListObj,
+      musicList: payload.musicListIds ? musicListObj : undefined,
     };
 
     this.server

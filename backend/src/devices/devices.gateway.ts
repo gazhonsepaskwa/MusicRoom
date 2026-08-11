@@ -211,45 +211,46 @@ export class DevicesGateway {
     const userId = client.data.userId;
     const userDeviceId = client.data.deviceId;
 
-    const canConnect = await this.devicesService.canConnectToDevice(
-      userId,
-      payload.deviceId,
-    );
-    if (canConnect === undefined) {
-      client.emit('app_error', {
-        message:
-          'Cannot connect to target device (device not exist or invalid permission)',
-      });
-      return;
-    }
+    if (userDeviceId !== payload.deviceId) {
+      const canConnect = await this.devicesService.canConnectToDevice(
+        userId,
+        payload.deviceId,
+      );
+      if (canConnect === undefined) {
+        client.emit('app_error', {
+          message:
+            'Cannot connect to target device (device not exist or invalid permission)',
+        });
+        return;
+      }
 
+      if (!canConnect.canModifyMusic && payload.musicListIds !== undefined) {
+        client.emit('app_error', { message: 'No permission to modify music' });
+        return;
+      }
+
+      if (!canConnect.canSeek && payload.currentTime !== undefined) {
+        client.emit('app_error', { message: 'No permission to seek' });
+        return;
+      }
+
+      if (
+        !canConnect.canTogglePlayPause &&
+        (payload.isPlaying !== undefined ||
+          payload.currentMusicId !== undefined)
+      ) {
+        client.emit('app_error', {
+          message: 'No permission to toggle play/pause',
+        });
+        return;
+      }
+    }
     const roomName = this.generateRoomName(payload.deviceId);
     const room = this.server.sockets.adapter.rooms.get(roomName);
     if (!room || !room.has(client.id)) {
       client.emit('app_error', { message: 'Not connected to target device' });
       return;
     }
-
-    if (!canConnect.canModifyMusic && payload.musicListIds !== undefined) {
-      client.emit('app_error', { message: 'No permission to modify music' });
-      return;
-    }
-
-    if (!canConnect.canSeek && payload.currentTime !== undefined) {
-      client.emit('app_error', { message: 'No permission to seek' });
-      return;
-    }
-
-    if (
-      !canConnect.canTogglePlayPause &&
-      (payload.isPlaying !== undefined || payload.currentMusicId !== undefined)
-    ) {
-      client.emit('app_error', {
-        message: 'No permission to toggle play/pause',
-      });
-      return;
-    }
-
     const musicListObj = await this.devicesService.getMusicListFromIds(
       payload.musicListIds || [],
     );

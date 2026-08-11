@@ -186,6 +186,13 @@ export class DevicesGateway {
       return;
     }
 
+    console.log(
+      'Room:',
+      roomName,
+      'Size:',
+      this.server.sockets.adapter.rooms.get(roomName)?.size,
+    );
+
     const musicListObj = await this.devicesService.getMusicListFromIds(
       payload.data.musicListIds || [],
     );
@@ -252,6 +259,8 @@ export class DevicesGateway {
     }
     const roomName = this.generateRoomName(payload.deviceId);
     const room = this.server.sockets.adapter.rooms.get(roomName);
+    console.log('Room:', roomName, 'Size:', room?.size);
+    console.log(room);
     if (!room || !room.has(client.id)) {
       client.emit('app_error', { message: 'Not connected to target device' });
       return;

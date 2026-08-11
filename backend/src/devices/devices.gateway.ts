@@ -211,16 +211,6 @@ export class DevicesGateway {
     const userId = client.data.userId;
     const userDeviceId = client.data.deviceId;
 
-    if (
-      userDeviceId !== payload.deviceId &&
-      payload.currentMusicId !== undefined
-    ) {
-      client.emit('app_error', {
-        message: 'You are not the owner of this device',
-      });
-      return;
-    }
-
     const canConnect = await this.devicesService.canConnectToDevice(
       userId,
       payload.deviceId,
@@ -250,7 +240,10 @@ export class DevicesGateway {
       return;
     }
 
-    if (!canConnect.canTogglePlayPause && payload.isPlaying !== undefined) {
+    if (
+      !canConnect.canTogglePlayPause &&
+      (payload.isPlaying !== undefined || payload.currentMusicId !== undefined)
+    ) {
       client.emit('app_error', {
         message: 'No permission to toggle play/pause',
       });

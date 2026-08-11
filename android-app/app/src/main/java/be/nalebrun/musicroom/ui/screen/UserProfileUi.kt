@@ -79,7 +79,11 @@ fun UserProfileUi(userId: Int) {
                             modifier = Modifier
                                 .size(100.dp)
                                 .clip(RoundedCornerShape(999.dp))
-                                .border(3.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(999.dp)),
+                                .border(
+                                    3.dp,
+                                    MaterialTheme.colorScheme.onBackground,
+                                    RoundedCornerShape(999.dp)
+                                ),
                             contentScale = ContentScale.Crop
                         )
                         Column(modifier = Modifier.padding(start = 16.dp)) {
@@ -99,30 +103,41 @@ fun UserProfileUi(userId: Int) {
                     ) {
                         Surface(
                             modifier = Modifier
-                                .border(1.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(8.dp))
+                                .border(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.onBackground,
+                                    RoundedCornerShape(8.dp)
+                                )
                                 .padding(horizontal = 12.dp, vertical = 8.dp),
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Text("${user.friends} friends", fontWeight = FontWeight.Bold)
                         }
-                        Button(
-                            onClick = {
-                                if (friendRequestState == null) {
-                                    viewModel.sendFriendRequest(userId)
-                                }
-                            },
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(containerColor = when (friendRequestState) {
-                                null -> MaterialTheme.colorScheme.onBackground
-                                else -> MaterialTheme.colorScheme.outline
-                            }),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(when (friendRequestState) {
-                                FriendRequestStatus.PENDING -> "pending"
-                                FriendRequestStatus.NOTVIEWED -> "pending"
-                                FriendRequestStatus.ACCEPTED -> "already friends !"
-                                else -> "send friend request" }, color = MaterialTheme.colorScheme.background)
+                        if (!profile!!.isYou) {
+                            Button(
+                                onClick = {
+                                    if (friendRequestState == null) {
+                                        viewModel.sendFriendRequest(userId)
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = when (friendRequestState) {
+                                        null -> MaterialTheme.colorScheme.onBackground
+                                        else -> MaterialTheme.colorScheme.outline
+                                    }
+                                ),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text(
+                                    when (friendRequestState) {
+                                        FriendRequestStatus.PENDING -> "pending"
+                                        FriendRequestStatus.NOTVIEWED -> "pending"
+                                        FriendRequestStatus.ACCEPTED -> "already friends !"
+                                        else -> "send friend request"
+                                    }, color = MaterialTheme.colorScheme.background
+                                )
+                            }
                         }
                     }
                 }
@@ -142,7 +157,9 @@ fun UserProfileUi(userId: Int) {
 
                 item {
                     Row(
-                        modifier = Modifier.padding(top = 24.dp, bottom = 8.dp).fillMaxWidth(),
+                        modifier = Modifier
+                            .padding(top = 24.dp, bottom = 8.dp)
+                            .fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -164,7 +181,9 @@ fun UserProfileUi(userId: Int) {
                     }
                 }
             }
-        } ?: Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+        } ?: Box(modifier = Modifier
+            .weight(1f)
+            .fillMaxWidth(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(color = MaterialTheme.colorScheme.onBackground)
         }
 

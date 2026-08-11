@@ -25,7 +25,8 @@ data class UserProfileJson(
     val showCreatedPlaylist: String? = "PUBLIC",
     val showFriends: String? = "PUBLIC",
     val showInvitedPlaylist: String? = "PUBLIC",
-    val showPreferedMusics: String? = "PUBLIC"
+    val showPreferedMusics: String? = "PUBLIC",
+    val isYou: Boolean
 )
 
 @OptIn(ExperimentalSerializationApi::class)

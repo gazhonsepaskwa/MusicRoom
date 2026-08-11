@@ -264,6 +264,7 @@ export class DevicesGateway {
 
     this.server
       .to(roomName)
+      .except(client.id)
       .emit('playback_state', playbackStateResponse, { userId: userId });
   }
 }

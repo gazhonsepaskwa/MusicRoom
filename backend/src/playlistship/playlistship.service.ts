@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { invitationStatus, playlistship, Prisma } from '../../generated/prisma/browser';
 import { PlaylistsService } from '../playlists/playlists.service';
 import { PlaylistshipAnswerDto, PlaylistshipDto } from './dto/playlistship.dto';
-import { InvitationNotification } from './dto/playlistshipResponse.dto';
+import { InvitationNotification, InvitationResponseDto } from './dto/playlistshipResponse.dto';
 
 @Injectable()
 export class PlaylistshipService {
@@ -129,12 +129,34 @@ export class PlaylistshipService {
 		}))
 	}
 
-	async getPlaylistUsers(id: number): Promise<playlistship[] | null>{
+	async getPlaylistUsers(id: number): Promise<InvitationResponseDto[] | null>{
 		if (!await this.playlistsService.findOne({id}))
 			throw new BadRequestException("Playlist Not FOund");
-		return await this.prisma.playlistship.findMany({
-			where: {playlistId: id, status: 'ACCEPTED'}
+		const playlistships =  await this.prisma.playlistship.findMany({
+			where: {playlistId: id, status: 'ACCEPTED'},
+			select: {
+				addresseeId: true,
+				user: {
+					select: {
+						username: true,
+					},
+				},
+				playlistId: true,
+				playlist: {
+					select: {
+						title: true,
+					},
+				},
+				status: true,
+				createdAt: true,
+			}
 		});
+
+		return playlistships.map(({ user, playlist, ...rest }) => ({
+			addresseeName: user.username,
+			playlistName: playlist.title,
+			...rest,
+		}));
 	}
 
 	async answerPlaylistInvitation(playlistshipDto: PlaylistshipAnswerDto, userId: number): Promise<playlistship> {

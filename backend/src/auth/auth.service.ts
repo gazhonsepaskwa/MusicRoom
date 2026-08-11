@@ -36,16 +36,16 @@ export class AuthService {
     const user = userByUsername ?? userByEmail;
     if (user == undefined || user.username == null)
       throw new UnprocessableEntityException(
-        'Incorrect Password or User',
+        ['Incorrect Password or User'],
         'Invalid Log In Attempt ',
       );
 	if (user.verifiedEmail == false)
 		throw new UnprocessableEntityException(
-			'This account does not exist or was not confirmed by email. If you have created an account, check your mailbox!'
+			['This account does not exist or was not confirmed by email. If you have created an account, check your mailbox!']
 		);
     if (user.password == undefined || user.password == null)
       throw new UnprocessableEntityException(
-        'Connect with your google account and change your password!',
+        ['Connect with your google account and change your password!'],
       );
     await this.confirmPassword(user, pass);
     const payload = { sub: user.id, username: user.username };
@@ -221,4 +221,30 @@ export class AuthService {
 	await this.playlistsService.deleteAllUserPlaylists(userId);
 	await this.usersService.deleteUser({ id: userId });
   }
+
+  async sendPasswordResetEmail(email: string) {
+	const user = await this.usersService.user({ email });
+	if (!user) {
+		throw new UnauthorizedException('No user at this email address!');
+	}
+	const token = this.generatePasswordResetToken();
+	console.log(`Generated password reset token for ${email}: ${token}`);
+	await this.usersService.updateUser({
+		where: { id: user.id },
+		data: { tempPin: token },
+	});
+	const domainName = process.env.DOMAIN_NAME == 'localhost' ? process.env.DOMAIN_NAME + (process.env.EXTERNAL_PORT ? `:${process.env.EXTERNAL_PORT}` : '') : process.env.DOMAIN_NAME;
+	const link = `https://${domainName}/auth/callback-reset-password?resetToken=${token}&email=${email}`;
+	this.mailService.sendPasswordResetEmail(email, link);
+  }
+
+  generatePasswordResetToken(): string {
+	let passwordResetToken = '';
+	for (let i = 0; i < 6; i++) {
+		const randomDigit = Math.floor(Math.random() * 10);
+		passwordResetToken += randomDigit.toString();
+	}
+	return passwordResetToken;
+  }
+
 }

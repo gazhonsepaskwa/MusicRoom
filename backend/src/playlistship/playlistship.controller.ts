@@ -4,7 +4,7 @@ import { PlaylistshipAnswerDto, PlaylistshipDto } from './dto/playlistship.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import { ParseSafeIntPipe } from '../common/pipe/parse_safe_int.pipe';
-import { InvitationResponseDto } from './dto/playlistshipResponse.dto';
+import { InvitationResponseDetailedDto, InvitationResponseDto } from './dto/playlistshipResponse.dto';
 
 @Controller('playlistship')
 export class PlaylistshipController {
@@ -43,7 +43,7 @@ export class PlaylistshipController {
 
 	@ApiOkResponse({
 		description: 'List of invitations.',
-		type: InvitationResponseDto,
+		type: InvitationResponseDetailedDto,
 		isArray: true,
 	})
   @Get('allowed-playlist-users/:id')

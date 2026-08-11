@@ -211,6 +211,11 @@ export class DevicesGateway {
     const userId = client.data.userId;
     const userDeviceId = client.data.deviceId;
 
+    if (!payload.deviceId) {
+      client.emit('app_error', { message: 'Missing deviceId' });
+      return;
+    }
+
     if (userDeviceId !== payload.deviceId) {
       const canConnect = await this.devicesService.canConnectToDevice(
         userId,

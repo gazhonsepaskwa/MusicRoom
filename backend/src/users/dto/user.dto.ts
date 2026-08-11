@@ -91,6 +91,9 @@ export class UserProfileResponseDto {
 		description: 'The new visibility status.',
 	})
 	showPreferedMusics!: visibilityStatus | null
+	
+	@ApiProperty({ example: true })
+	isYou!: boolean
 }
 
 export class UserProfileDto {

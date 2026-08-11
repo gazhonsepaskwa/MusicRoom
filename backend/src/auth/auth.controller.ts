@@ -136,4 +136,19 @@ export class AuthController {
 
 	return { message: 'Password reset successful. You can now log in with your new password.' };
   }
+
+  @Get('callback-reset-password')
+  @Public()
+  @ApiQuery({ name: 'resetToken', required: true })
+  @ApiQuery({ name: 'email', required: true })
+  async callbackResetPassword(
+	@Res() res: Response,
+	@Query('resetToken') resetToken: string,
+	@Query('email') email: string,
+  ) {
+	if (!resetToken || !email) {
+	  throw new UnauthorizedException('Missing reset token or email.');
+	}
+	res.redirect(`${process.env.APP_SCHEME}://auth/reset-password?resetToken=${resetToken}&email=${email})`);
+  }
 }

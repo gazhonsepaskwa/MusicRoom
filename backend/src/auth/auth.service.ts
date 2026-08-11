@@ -228,12 +228,14 @@ export class AuthService {
 		throw new UnauthorizedException('No user at this email address!');
 	}
 	const token = this.generatePasswordResetToken();
+	console.log(`Generated password reset token for ${email}: ${token}`);
 	await this.usersService.updateUser({
 		where: { id: user.id },
 		data: { tempPin: token },
 	});
-	const link = `${process.env.APP_SCHEME}://auth/reset-password?resetToken=${token}&email=${encodeURIComponent(email)}`;
-	this.mailService.sendVerificationEmail(email, link);
+	const domainName = process.env.DOMAIN_NAME == 'localhost' ? process.env.DOMAIN_NAME + (process.env.EXTERNAL_PORT ? `:${process.env.EXTERNAL_PORT}` : '') : process.env.DOMAIN_NAME;
+	const link = `https://${domainName}/auth/callback-reset-password?resetToken=${token}&email=${email}`;
+	this.mailService.sendPasswordResetEmail(email, link);
   }
 
   generatePasswordResetToken(): string {

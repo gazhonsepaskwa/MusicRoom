@@ -241,16 +241,16 @@ export class DevicesGateway {
         return;
       }
 
-      if (!canConnect.canSeek && payload.currentTime !== undefined) {
+      if (
+        !canConnect.canSeek &&
+        (payload.currentTime !== undefined ||
+          payload.currentMusicId !== undefined)
+      ) {
         client.emit('app_error', { message: 'No permission to seek' });
         return;
       }
 
-      if (
-        !canConnect.canTogglePlayPause &&
-        (payload.isPlaying !== undefined ||
-          payload.currentMusicId !== undefined)
-      ) {
+      if (!canConnect.canTogglePlayPause && payload.isPlaying !== undefined) {
         client.emit('app_error', {
           message: 'No permission to toggle play/pause',
         });

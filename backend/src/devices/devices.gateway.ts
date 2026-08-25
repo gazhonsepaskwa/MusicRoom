@@ -236,18 +236,28 @@ export class DevicesGateway {
         return;
       }
 
-      if (!canConnect.canModifyMusic && payload.musicListIds !== undefined) {
+      if (
+        !canConnect.canModifyMusic &&
+        (payload.musicListIds !== undefined ||
+          payload.currentMusicId !== undefined)
+      ) {
         client.emit('app_error', { message: 'No permission to modify music' });
         return;
       }
 
-      if (
-        !canConnect.canSeek &&
-        (payload.currentTime !== undefined ||
-          payload.currentMusicId !== undefined)
-      ) {
-        client.emit('app_error', { message: 'No permission to seek' });
-        return;
+      if (!canConnect.canSeek && payload.currentTime !== undefined) {
+        if (
+          !(
+            payload.currentTime >= 0 &&
+            payload.currentTime < 1 &&
+            payload.currentMusicId !== undefined
+          )
+        ) {
+          {
+            client.emit('app_error', { message: 'No permission to seek' });
+            return;
+          }
+        }
       }
 
       if (!canConnect.canTogglePlayPause && payload.isPlaying !== undefined) {

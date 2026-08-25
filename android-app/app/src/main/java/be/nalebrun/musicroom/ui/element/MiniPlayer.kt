@@ -27,14 +27,19 @@ import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
 import be.nalebrun.musicroom.viewmodel.MusicViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
+import be.nalebrun.musicroom.viewmodel.DevicesViewModel
 
 @Composable
 fun MiniPlayer(musicViewModel: MusicViewModel, activity: Activity) {
     val navigationViewModel: NavigationViewModel = hiltViewModel(activity as ViewModelStoreOwner)
+    val devicesViewModel: DevicesViewModel = hiltViewModel(activity as ViewModelStoreOwner)
 
     val currentSong: Int by musicViewModel.currentSong.collectAsStateWithLifecycle()
     val musicJson: MusicJson by musicViewModel.music.collectAsStateWithLifecycle()
     val playing by musicViewModel.isPlaying.collectAsStateWithLifecycle()
+
+    val canTogglePlayPause by devicesViewModel.canTogglePlayPause.collectAsStateWithLifecycle()
+    val canModifyMusic by devicesViewModel.canModifyMusic.collectAsStateWithLifecycle()
 
     // on song change, fetch the info of the next song
     LaunchedEffect(currentSong) {
@@ -67,10 +72,13 @@ fun MiniPlayer(musicViewModel: MusicViewModel, activity: Activity) {
                 contentDescription = "",
                 modifier = Modifier
                     .size(30.dp)
-                    .clickable(onClick = {
-                        musicViewModel.goToPreviousSong()
-                    }),
-                tint = MaterialTheme.colorScheme.onSurface
+                    .clickable(
+                        enabled = canModifyMusic,
+                        onClick = {
+                            musicViewModel.goToPreviousSong()
+                        }
+                    ),
+                tint = if (canModifyMusic) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
             )
             Icon(
                 painter = painterResource(id =
@@ -80,20 +88,26 @@ fun MiniPlayer(musicViewModel: MusicViewModel, activity: Activity) {
                 contentDescription = "",
                 modifier = Modifier
                     .size(30.dp)
-                    .clickable(onClick = {
-                        if (playing) musicViewModel.pause() else musicViewModel.play()
-                    }),
-                tint = MaterialTheme.colorScheme.onSurface
+                    .clickable(
+                        enabled = canTogglePlayPause,
+                        onClick = {
+                            if (playing) musicViewModel.pause() else musicViewModel.play()
+                        }
+                    ),
+                tint = if (canTogglePlayPause) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
             )
             Icon(
                 painter = painterResource(id = R.drawable.outline_skip_next_24),
                 contentDescription = "",
                 modifier = Modifier
                     .size(30.dp)
-                    .clickable(onClick = {
-                        musicViewModel.goToNextSong()
-                    }),
-                tint = MaterialTheme.colorScheme.onSurface
+                    .clickable(
+                        enabled = canModifyMusic,
+                        onClick = {
+                            musicViewModel.goToNextSong()
+                        }
+                    ),
+                tint = if (canModifyMusic) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
             )
         }
     }

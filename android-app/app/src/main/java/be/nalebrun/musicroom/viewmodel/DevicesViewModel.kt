@@ -6,14 +6,15 @@ import be.nalebrun.musicroom.APIRepository
 import be.nalebrun.musicroom.apiJsonStruct.responds.ForeignDevice
 import be.nalebrun.musicroom.repositories.CredentialRepository
 import be.nalebrun.musicroom.repositories.SocketIORepository
+import be.nalebrun.musicroom.repositories.IMusicRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import org.json.JSONObject
 
 /**
  * The logic for the Devices page
@@ -23,12 +24,34 @@ import org.json.JSONObject
 class DevicesViewModel @Inject constructor(
     val credentialRepository: CredentialRepository,
     val apiRepository: APIRepository,
-    val socketIORepository: SocketIORepository
+    val socketIORepository: SocketIORepository,
+    val musicRepository: IMusicRepository
 ) : ViewModel() {
 
     // List of available devices that can be controlled or used for playback
     private val _devices = MutableStateFlow<List<ForeignDevice>>(emptyList())
     val devices: StateFlow<List<ForeignDevice>> = _devices
+
+    // Current remote control permissions
+    private val _canTogglePlayPause = MutableStateFlow(true)
+    val canTogglePlayPause = _canTogglePlayPause.asStateFlow()
+
+    private val _canModifyMusic = MutableStateFlow(true)
+    val canModifyMusic = _canModifyMusic.asStateFlow()
+
+    private val _canSeek = MutableStateFlow(true)
+    val canSeek = _canSeek.asStateFlow()
+
+    init {
+        // Observe remote control state to reset permissions when it ends
+        viewModelScope.launch {
+            musicRepository.isRemoteControl.collect { isRemote ->
+                if (!isRemote) {
+                    resetPermissions()
+                }
+            }
+        }
+    }
 
     /**
      * Fetch the list of available devices from the server
@@ -67,8 +90,20 @@ class DevicesViewModel @Inject constructor(
      * Message send via the websocket
      */
     fun askDeviceControl(device: ForeignDevice) {
+        _canTogglePlayPause.value = device.canTogglePlayPause
+        _canModifyMusic.value = device.canModifyMusic
+        _canSeek.value = device.canSeek
         viewModelScope.launch {
             socketIORepository.emit("connectToDevice", device.deviceId)
         }
+    }
+
+    /**
+     * Reset permissions to default (all allowed)
+     */
+    fun resetPermissions() {
+        _canTogglePlayPause.value = true
+        _canModifyMusic.value = true
+        _canSeek.value = true
     }
 }

@@ -1,5 +1,6 @@
 package be.nalebrun.musicroom.ui.screen
 
+import android.util.Log
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -55,9 +56,9 @@ import be.nalebrun.musicroom.viewmodel.PlaylistAccessViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryUi() {
+    val activity = LocalActivity.current
     val viewModel: LibraryViewModel = hiltViewModel()
     val accessViewModel: PlaylistAccessViewModel = hiltViewModel()
-    val activity = LocalActivity.current
     val navigationView: NavigationViewModel = if (activity != null) {
         hiltViewModel(activity as ViewModelStoreOwner)
     } else {
@@ -107,10 +108,11 @@ fun LibraryUi() {
                     active = false,
                     onClick = {
                         if (newPlaylist.isNotBlank()) {
-                            viewModel.createPlaylist(newPlaylist, newPlaylistPublicStatus)
-                            newPlaylist = ""
-                            showCreatePlaylistSheet = false
-                            viewModel.getPlaylists()
+                            viewModel.createPlaylist(newPlaylist, newPlaylistPublicStatus) {
+                                newPlaylist = ""
+                                showCreatePlaylistSheet = false
+                                viewModel.getPlaylists()
+                            }
                         }
                     }
                 )
@@ -153,6 +155,7 @@ fun LibraryUi() {
                 modifier = Modifier.weight(1f)
             ) {
                 items(playlists) { it ->
+                    Log.d("DEBUG LIBRARY", it.title)
                     LibraryCard(it, navigationView)
                 }
                 if (sharedPlaylists.isNotEmpty()) {

@@ -1,5 +1,6 @@
 package be.nalebrun.musicroom.ui.element
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +16,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.apiJsonStruct.responds.PlaylistNotificationJson
 import be.nalebrun.musicroom.viewmodel.LibraryViewModel
@@ -22,8 +25,9 @@ import be.nalebrun.musicroom.viewmodel.PlaylistAccessViewModel
 
 @Composable
 fun PlaylistInvitationCard(invite: PlaylistNotificationJson) {
+    val activity = LocalActivity.current
     val accessViewModel : PlaylistAccessViewModel = hiltViewModel()
-    val libraryViewModel : LibraryViewModel = hiltViewModel()
+    val libraryViewModel: LibraryViewModel = hiltViewModel()
     Row(
         modifier = Modifier
             .fillMaxWidth()

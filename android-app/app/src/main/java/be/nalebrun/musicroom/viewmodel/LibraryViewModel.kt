@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import be.nalebrun.musicroom.APIRepository
 import be.nalebrun.musicroom.IAPIRepository
 import be.nalebrun.musicroom.apiJsonStruct.responds.AllPlaylistsJson
+import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.libraryJson
 import be.nalebrun.musicroom.repositories.ICredentialRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -46,6 +47,7 @@ class LibraryViewModel @Inject constructor(
                             Json.decodeFromString<AllPlaylistsJson>(response.body?.string() ?: "")
                         _playlists.value = res.ownedPlaylists
                         _sharedPlaylists.value = res.invitedPlaylists
+                        Log.d("GetPlaylist Library", "Get playlists success")
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -56,8 +58,8 @@ class LibraryViewModel @Inject constructor(
     }
     }}
 
-    fun createPlaylist(title: String, status: Boolean) { viewModelScope.launch {
-        val body = """{"title": "$title", "isPublic": $status, "status":""}""".toRequestBody("application/json".toMediaType())
+    fun createPlaylist(title: String, status: Boolean, callback: () -> Unit) { viewModelScope.launch {
+        val body = """{"title": "$title", "isPublic": $status, "status":"status"}""".toRequestBody("application/json".toMediaType())
         credentialRepository.jwtFlow.firstOrNull().let { jwt ->
             apiRepository.post(
                 url = "/playlists/create",
@@ -66,8 +68,9 @@ class LibraryViewModel @Inject constructor(
                 onResponse = { _, response ->
                     if (response.code in 200..<300) {
                         Log.d("Library", "Playlist was created")
+                        callback()
                     } else {
-                        Log.d("Library", "Create playlist error: ${response.code}")
+                        Log.d("Library", "Create playlist error: ${response.body?.string()}")
                     }
                 },
                 onFailure = { _, e -> e.printStackTrace() }
@@ -100,6 +103,38 @@ class LibraryViewModel @Inject constructor(
                 onResponse = { _, response ->
                     if (response.code in 200..<300) {
                         _playlists.value = _playlists.value.filter { it.id != id }
+                    }
+                },
+                onFailure = { _, e -> e.printStackTrace()}
+            )
+        }
+    }}
+
+    fun renamePlaylist(id: Int, title: String) { viewModelScope.launch {
+        val body = """{"title": "$title"}""".toRequestBody("application/json".toMediaType())
+        credentialRepository.jwtFlow.firstOrNull().let { jwt ->
+            apiRepository.patch(
+                url = "/playlists/update/$id",
+                body = body,
+                auth = "Bearer $jwt",
+                onResponse = { _, response ->
+                    if (response.code in 200..<300) {
+                        val newPlaylists = _playlists.value.toMutableList()
+                        var i = 0
+                        for (playlist in newPlaylists) {
+                            if (playlist.id == id) {
+                                val newPlaylist = libraryJson(
+                                    id = playlist.id,
+                                    title = title,
+                                    songs = playlist.songs,
+                                    duration = playlist.duration
+                                )
+                                newPlaylists[i] = newPlaylist
+                                break
+                            }
+                            i++
+                        }
+                        _playlists.value = newPlaylists
                     }
                 },
                 onFailure = { _, e -> e.printStackTrace()}

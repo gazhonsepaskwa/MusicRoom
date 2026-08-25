@@ -1,6 +1,7 @@
 package be.nalebrun.musicroom.ui.element
 
 import android.util.Log
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
 import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.apiJsonStruct.responds.libraryJson
 import be.nalebrun.musicroom.viewmodel.LibraryViewModel
@@ -42,7 +44,12 @@ fun PlaylistSharedCard(music: libraryJson, navigationViewModel: NavigationViewMo
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
 
-    val viewModel: LibraryViewModel = hiltViewModel()
+    val activity = LocalActivity.current
+    val viewModel: LibraryViewModel = if (activity != null) {
+        hiltViewModel(activity as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
     val profileModel: UserProfileViewModel = hiltViewModel()
     val accessViewModel: PlaylistAccessViewModel = hiltViewModel()
     val hours = music.duration / (1000 * 60 * 60)

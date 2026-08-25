@@ -1,6 +1,7 @@
 package be.nalebrun.musicroom.ui.element
 
 import android.util.Log
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
 import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.apiJsonStruct.responds.libraryJson
 import be.nalebrun.musicroom.viewmodel.LibraryViewModel
@@ -45,10 +47,11 @@ fun LibraryCard(music: libraryJson, navigationViewModel: NavigationViewModel) {
     var changeNameSheetState = rememberModalBottomSheetState()
 
     var newName by remember {mutableStateOf("")}
-    var newTitle by remember { mutableStateOf(music.title)}
+    var newTitle = music.title // by remember { mutableStateOf(music.title)}
 
-    val playlistViewModel: PlaylistViewModel = hiltViewModel()
+    val activity = LocalActivity.current
     val libraryViewModel: LibraryViewModel = hiltViewModel()
+    Log.d("DEBUG CARD LIB", music.title)
     val hours = music.duration / (1000 * 60 * 60)
     val minutes = (music.duration / (1000 * 60)) % 60
     var time = "${hours}h$minutes"
@@ -98,7 +101,7 @@ fun LibraryCard(music: libraryJson, navigationViewModel: NavigationViewModel) {
                     active = false,
                     onClick = {
                         if (newName.isNotBlank()) {
-                            playlistViewModel.renamePlaylist(music.id, newName)
+                            libraryViewModel.renamePlaylist(music.id, newName)
                             newTitle = newName
                             newName = ""
                             showChangeName = false
@@ -121,6 +124,7 @@ fun LibraryCard(music: libraryJson, navigationViewModel: NavigationViewModel) {
     ) {
         Column{
             Text(newTitle, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Log.d("CARD LIB WRITE", "$newTitle, ${music.title}")
             Text("${music.songs} songs ● $time")
         }
         Image(

@@ -35,8 +35,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 import androidx.core.net.toUri
-import androidx.lifecycle.viewModelScope
 import org.json.JSONObject
+import org.json.JSONArray
 
 /**
  * Repository to manage the music.
@@ -78,6 +78,27 @@ interface IMusicRepository {
      */
     val currentSong: StateFlow<Int>
 
+    /**
+     * The index of the current song in the waiting list
+     */
+    val currentSongIndex: MutableStateFlow<Int>
+
+    /**
+     * The remote control state
+     */
+    val isRemoteControl: MutableStateFlow<Boolean>
+    /**
+     * The host of the remote control
+     */
+    val remoteControlHost: MutableStateFlow<String>
+
+    /**
+     * permissions for the remote control
+     */
+    val canTogglePlayPause: MutableStateFlow<Boolean>
+    val canModifyMusic:     MutableStateFlow<Boolean>
+    val canSeek:            MutableStateFlow<Boolean>
+
 
     // music playback
 
@@ -89,25 +110,30 @@ interface IMusicRepository {
     /**
      * go to the next song in the waiting list
      */
-    fun goToNextSong()
+    fun goToNextSong(fromRemote: Boolean = false)
     /**
      * go to the previous song in the waiting list
      */
-    fun goToPreviousSong()
+    fun goToPreviousSong(fromRemote: Boolean = false)
 
     /**
      * play the music via the controller
      */
-    fun play()
+    fun play(fromRemote: Boolean = false)
 
     /**
      * pause the music via the controller
      */
-    fun pause()
+    fun pause(fromRemote: Boolean = false)
+
+    /**
+     * toggle the play/pause state via the controller
+     */
+    fun togglePlayPause(fromRemote: Boolean = false)
     /**
      * seek to a position in the music via the controller
      */
-    fun seekTo(newPosition: Long)
+    fun seekTo(newPosition: Long, fromRemote: Boolean = false)
 
 
     // Waiting list control
@@ -115,17 +141,17 @@ interface IMusicRepository {
     /**
      * Add a song to the waiting list after the song that is currently being played (or fetched)
      */
-    fun addSongToWaitingListNext(music: MusicJson)
+    fun addSongToWaitingListNext(music: MusicJson, fromRemote: Boolean = false)
 
     /**
      * Add a song to the waiting list at the end of the list
      */
-    fun addSongToWaitingListEnd(music: MusicJson)
+    fun addSongToWaitingListEnd(music: MusicJson, fromRemote: Boolean = false)
 
     /**
      * Remove a song from the waiting list by its music object
      */
-    fun removeSongFromWaitingListByMusic(music: MusicJson)
+    fun removeSongFromWaitingListByMusic(music: MusicJson, fromRemote: Boolean = false)
 
     /**
      * remove a song from the waiting list by its index in the waiting list
@@ -136,17 +162,17 @@ interface IMusicRepository {
      * 3 - Test Drive,
      * 4 - ...
      */
-    fun removeSongFromWaitingListByIndex(index: Int)
+    fun removeSongFromWaitingListByIndex(index: Int, fromRemote: Boolean = false)
 
     /**
      * clear the waiting list
      */
-    fun clearWaitingList()
+    fun clearWaitingList(fromRemote: Boolean = false)
 
     /**
      * replace the actual waiting list by the one given as parameter
      */
-    fun replaceWaitingList(newWaitingList: List<MusicJson>)
+    fun replaceWaitingList(newWaitingList: List<MusicJson>, fromRemote: Boolean = false)
 
     /**
      * control another device, instead of the one that is currently playing.
@@ -182,7 +208,8 @@ class MusicRepository @Inject constructor(
     @ApplicationContext private val context:                Context,
     private val                     apiRepository:          APIRepository,
     private val                     credentialRepository:   CredentialRepository,
-    private val                     socketIORepository:     SocketIORepository
+    private val                     socketIORepository:     SocketIORepository,
+    private val                     settingsRepository:     SettingsRepository,
 ) : IMusicRepository {
 
     // controller variables
@@ -207,9 +234,14 @@ class MusicRepository @Inject constructor(
 
     private val _waitingList = MutableStateFlow<List<MusicJson>>(emptyList())
     override val waitingList = _waitingList.asStateFlow()
-    private val _currentSongIndex = MutableStateFlow(0)
+    override val currentSongIndex = MutableStateFlow(0)
 
-    private val _isRemoteControl = MutableStateFlow(false)
+    // remote control things
+    override val isRemoteControl = MutableStateFlow(false)
+    override val remoteControlHost = MutableStateFlow("")
+    override val canTogglePlayPause = MutableStateFlow(true)
+    override val canModifyMusic     = MutableStateFlow(true)
+    override val canSeek            = MutableStateFlow(true)
 
     // bool that prevent multiple setups
     private var isFirstLoad = true
@@ -227,7 +259,7 @@ class MusicRepository @Inject constructor(
 
     override val currentSong: StateFlow<Int> = combine(
         flow  = _waitingList,
-        flow2 = _currentSongIndex
+        flow2 = currentSongIndex
     ) { list, index ->
         if (index in list.indices) list[index].id else list.firstOrNull()?.id ?: 0
     }.stateIn(
@@ -284,23 +316,49 @@ class MusicRepository @Inject constructor(
         }
     }
 
-    override fun goToNextSong() {
-        _currentSongIndex.value =
-            if (_currentSongIndex.value >= _waitingList.value.size - 1)
+    override fun goToNextSong(fromRemote: Boolean) {
+        // update the current index
+        currentSongIndex.value =
+            if (currentSongIndex.value >= _waitingList.value.size - 1)
                 0 // loop the list for the moment
-                // TODO : see what else can be done (ex: smart suggestions)
+            // TODO : see what else can be done (ex: smart suggestions)
             else
-                _currentSongIndex.value + 1
+                currentSongIndex.value + 1
+
+        // propagate the change
+        if (isRemoteControl.value && !fromRemote) {
+            val json = JSONObject().apply {
+                put("currentMusicId", currentSongIndex.value)
+                put("currentTime"   , 0)
+                put("deviceId"      , remoteControlHost.value)
+            }
+            socketIORepository.emit("modifyData", json)
+            Log.d("SocketViewModel", "Sending modifyData: $json")
+        }
     }
 
-    override fun goToPreviousSong() {
-        _currentSongIndex.value =
-            if (_currentSongIndex.value == 0)
+    override fun goToPreviousSong(fromRemote: Boolean) {
+        // update the current index
+        currentSongIndex.value =
+            if (currentSongIndex.value == 0)
                 _waitingList.value.size - 1
-                // loop the list for the moment
-                // TODO : see what else can be done (ex: smart suggestions)
+            // loop the list for the moment
+            // TODO : see what else can be done (ex: smart suggestions)
             else
-                _currentSongIndex.value - 1
+                currentSongIndex.value - 1
+
+        // propagate the change
+        if (isRemoteControl.value && !fromRemote) {
+            val json = JSONObject().apply {
+
+                put("currentMusicId", currentSongIndex.value)
+                put("currentTime"   , 0)
+                put("deviceId", remoteControlHost.value)
+            }
+            socketIORepository.emit("modifyData", json)
+            Log.d("SocketViewModel", "Sending modifyData: $json")
+        }
+
     }
 
     override fun fetchMusicById(id : Int) {
@@ -337,35 +395,46 @@ class MusicRepository @Inject constructor(
         }
     }
 
-    override fun play() {
+    override fun play(fromRemote: Boolean) {
         pendingPlay = null
-        if (_isRemoteControl.value) {
+        if (isRemoteControl.value && !fromRemote) {
             val json = JSONObject().apply {
                 put("isPlaying", true)
+                put("deviceId", remoteControlHost.value)
             }
             socketIORepository.emit("modifyData", json)
+            Log.d("SocketViewModel", "Sending modifyData: $json")
         }
-            controller?.play()
+        controller?.play()
     }
-    override fun pause() {
+    override fun pause(fromRemote: Boolean) {
         pendingPlay = null
-        if (_isRemoteControl.value) {
+        if (isRemoteControl.value && !fromRemote) {
             val json = JSONObject().apply {
                 put("isPlaying", false)
+                put("deviceId", remoteControlHost.value)
             }
             socketIORepository.emit("modifyData", json)
+            Log.d("SocketViewModel", "Sending modifyData: $json")
         }
-            controller?.pause()
+        controller?.pause()
     }
-    override fun seekTo(newPosition: Long) {
+
+    override fun togglePlayPause(fromRemote: Boolean) {
+        if (isPlaying.value) { pause(fromRemote) }
+        else                 { play(fromRemote)  }
+    }
+    override fun seekTo(newPosition: Long, fromRemote: Boolean) {
         pendingSeek = null
-        if (_isRemoteControl.value) {
+        if (isRemoteControl.value && !fromRemote) {
             val json = JSONObject().apply {
                 put("currentTime", newPosition)
+                put("deviceId", remoteControlHost.value)
             }
             socketIORepository.emit("modifyData", json)
+            Log.d("SocketViewModel", "Sending modifyData: $json")
         }
-            controller?.seekTo(newPosition)
+        controller?.seekTo(newPosition)
     }
 
     @OptIn(UnstableApi::class)
@@ -391,41 +460,59 @@ class MusicRepository @Inject constructor(
         if (autoPlay) { controller?.play() }
     }
 
-    override fun addSongToWaitingListEnd(music : MusicJson) {
+    override fun addSongToWaitingListEnd(music : MusicJson, fromRemote: Boolean) {
         _waitingList.value += music
+        emitWaitingListChange(fromRemote)
     }
 
-    override fun addSongToWaitingListNext(music: MusicJson) {
+    override fun addSongToWaitingListNext(music: MusicJson, fromRemote: Boolean) {
         if (_waitingList.value.isNotEmpty()) {
             val currentList = _waitingList.value.toMutableList()
-            val insertIndex = _currentSongIndex.value + 1
+            val insertIndex = currentSongIndex.value + 1
             currentList.add(insertIndex, music)
             _waitingList.value = currentList
         } else {
             _waitingList.value = listOf(music)
-            _currentSongIndex.value = 0
+            currentSongIndex.value = 0
         }
+        emitWaitingListChange(fromRemote)
     }
 
-    override fun removeSongFromWaitingListByMusic(music: MusicJson) {
+    override fun removeSongFromWaitingListByMusic(music: MusicJson, fromRemote: Boolean) {
         val index = _waitingList.value.indexOf(music)
-        removeSongFromWaitingListByIndex(index)
+        removeSongFromWaitingListByIndex(index, fromRemote)
     }
 
-    override fun removeSongFromWaitingListByIndex(index: Int) {
+    override fun removeSongFromWaitingListByIndex(index: Int, fromRemote: Boolean) {
         val currentList = _waitingList.value.toMutableList()
         if (index in currentList.indices) {
             currentList.removeAt(index)
             _waitingList.value = currentList
         }
+        emitWaitingListChange(fromRemote)
     }
 
-    override fun clearWaitingList() {
+    override fun clearWaitingList(fromRemote: Boolean) {
         _waitingList.value = emptyList()
+        emitWaitingListChange(fromRemote)
     }
 
-    override fun replaceWaitingList(newWaitingList: List<MusicJson>) {
+    override fun replaceWaitingList(newWaitingList: List<MusicJson>, fromRemote: Boolean) {
         _waitingList.value = newWaitingList
+        emitWaitingListChange(fromRemote)
+    }
+
+    private fun emitWaitingListChange(fromRemote: Boolean) {
+        if (isRemoteControl.value && !fromRemote) {
+            val json = JSONObject().apply {
+                val ids = JSONArray()
+                _waitingList.value.forEach { ids.put(it.id) }
+                put("musicListIds", ids)
+                put("deviceId"    , remoteControlHost.value)
+            }
+            socketIORepository.emit("modifyData", json)
+            Log.d("SocketViewModel", "Sending modifyData (waitingList): $json")
+        }
     }
 
     override fun startRemoteControl(
@@ -435,15 +522,15 @@ class MusicRepository @Inject constructor(
         newCurrentSong : Int
     ) {
         // tell the media player to don't play for real and only play on the distant device
-        _isRemoteControl.value = true
+        isRemoteControl.value = true
 
         // TODO : add dummy info in the interface temporarily while it wait. but not sure it's necessary
 
         // replace waiting list
-        replaceWaitingList(newWaitingList)
+        replaceWaitingList(newWaitingList, fromRemote = true)
 
         // change the current song in the waiting list
-        _currentSongIndex.value = newCurrentSong
+        currentSongIndex.value = newCurrentSong
 
         // seek to
         pendingSeek = newPosition
@@ -464,9 +551,14 @@ class MusicRepository @Inject constructor(
 
     override fun stopRemoteControl() {
         // reset everything
-        _isRemoteControl.value = false
+        isRemoteControl.value = false
+        remoteControlHost.value = ""
         pendingSeek = null
         pendingPlay = null
+
+        canTogglePlayPause.value = true
+        canModifyMusic.value     = true
+        canSeek.value            = true
 
         _music.value = MusicJson(id = 0, title = "", album = AlbumJson(
             title = "",
@@ -476,7 +568,7 @@ class MusicRepository @Inject constructor(
         clearWaitingList()
 
         _isPlaying.value        = false
-        _currentSongIndex.value = 0
+        currentSongIndex.value = 0
         _currentPosition.value  = 0L
         _duration.value         = 0L
     }

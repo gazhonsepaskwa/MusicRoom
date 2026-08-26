@@ -180,6 +180,7 @@ class SocketIORepository @Inject constructor(
     override fun on(event: String, listener: (Array<Any>) -> Unit) {
         listeners[event] = listener
         
+        socket?.off(event)
         socket?.on(event) { args ->
             Log.d("SocketIORepository", "<<< RECEIVED EVENT: '$event' | DATA: ${args?.joinToString()}")
             listener(args ?: emptyArray())

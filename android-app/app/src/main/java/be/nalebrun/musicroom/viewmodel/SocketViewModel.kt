@@ -128,8 +128,21 @@ class SocketViewModel @Inject constructor(
                     "No permission to toggle play/pause" -> {
                         viewModelScope.launch {
                             musicRepository.canTogglePlayPause.value = false
-                            musicRepository.togglePlayPause(fromRemote = false)
+                            musicRepository.togglePlayPause(fromRemote = true)
                             uiMessageManager.showMessage("You no longer have permission to toggle play/pause")
+                        }
+                    }
+                    "No permission to seek" -> {
+                        viewModelScope.launch {
+                            musicRepository.canSeek.value = false
+                            musicRepository.seekTo(musicRepository.currentPosition.value, fromRemote = true)
+                            uiMessageManager.showMessage("You no longer have permission to seek")
+                        }
+                    }
+                    "No permission to modify music" -> {
+                        viewModelScope.launch {
+                            musicRepository.canModifyMusic.value = false
+                            uiMessageManager.showMessage("You no longer have permission to modify the music")
                         }
                     }
                 }

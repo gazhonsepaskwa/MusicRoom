@@ -65,13 +65,11 @@ export class AuthController {
   @ApiOkResponse({ type: AuthProfileResponseDto })
   @Get('profile')
   getProfile(@Request() req) {
-    console.log(req.user);
     let profile = {
       id: req.user.sub,
       username: req.user.username,
       email: req.user.email,
     };
-    console.log('Profile:', profile);
     return profile;
   }
 

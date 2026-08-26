@@ -1,5 +1,6 @@
 package be.nalebrun.musicroom.ui.element
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,9 +30,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
 import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.apiJsonStruct.responds.ForeignDevice
 import be.nalebrun.musicroom.viewmodel.DevicesViewModel
+import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,6 +45,7 @@ fun DeviceControlBottomSheet(
 ) {
     val devices by viewModel.devices.collectAsState()
 
+    // when the page is opened, fetch the list of available devices
     LaunchedEffect(Unit) {
         viewModel.fetchAvailableDevices()
     }

@@ -81,7 +81,7 @@ fun MusicPlayerUi() {
     } else {
         hiltViewModel()
     }
-    val DevicesViewModel: DevicesViewModel = hiltViewModel()
+    val devicesViewModel: DevicesViewModel = hiltViewModel()
 
     val currentSong: Int by musicViewModel.currentSong.collectAsStateWithLifecycle()
 
@@ -108,14 +108,14 @@ fun MusicPlayerUi() {
         CoverArt(musicJson.album?.images?.getOrNull(1) ?: "", lyrics) // take the second image because the screen quality is low
 
         // Title and artist
-        Column() {
+        Column {
             Text(musicJson.title, fontSize = 18.sp, fontWeight = FontWeight.Black)
             Text(musicJson.artists.firstOrNull()?.title ?: "Unknown Artist")
         }
 
-        SongProgressBar(musicViewModel)
+        SongProgressBar(musicViewModel, devicesViewModel)
 
-        MusicControlButtons(musicViewModel)
+    MusicControlButtons(musicViewModel, devicesViewModel)
 
         BottomButtons(
             onQueueClick = { showQueueSheet = true },
@@ -139,7 +139,7 @@ fun MusicPlayerUi() {
 
     if (showDeviceSheet) {
         DeviceControlBottomSheet(
-            viewModel = DevicesViewModel,
+            viewModel = devicesViewModel,
             onDismissRequest = { showDeviceSheet = false }
         )
     }
@@ -188,22 +188,27 @@ fun CoverArt(url: String, lyrics: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SongProgressBar(viewModel: MusicViewModel) {
+fun SongProgressBar(viewModel: MusicViewModel, devicesViewModel: DevicesViewModel) {
     val songNow by viewModel.currentPosition.collectAsStateWithLifecycle()
     val songEnd by viewModel.duration.collectAsStateWithLifecycle()
+    val canSeek by devicesViewModel.canSeek.collectAsStateWithLifecycle()
 
-    Column() {
+    Column {
         val sliderPosition = if (songEnd > 0) songNow.toFloat() / songEnd.toFloat() else 0f
         Slider(
+            enabled = canSeek,
             value = sliderPosition,
             onValueChange = {
                 val newPosition = (it * songEnd).toLong()
                 viewModel.seekTo(newPosition)
             },
             colors = SliderDefaults.colors(
-                thumbColor = MaterialTheme.colorScheme.onBackground,
-                activeTrackColor = MaterialTheme.colorScheme.onBackground,
-                inactiveTrackColor = MaterialTheme.colorScheme.outlineVariant
+                thumbColor = if (canSeek) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                activeTrackColor = if (canSeek) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                inactiveTrackColor = MaterialTheme.colorScheme.outlineVariant,
+                disabledThumbColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                disabledActiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                disabledInactiveTrackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.38f)
             ),
             thumb = {
                 Box(
@@ -244,11 +249,14 @@ fun SongProgressBar(viewModel: MusicViewModel) {
 }
 
 @Composable
-fun MusicControlButtons(viewModel: MusicViewModel) {
+fun MusicControlButtons(viewModel: MusicViewModel, devicesViewModel: DevicesViewModel) {
 
     var repeat  by remember { mutableStateOf(Repeat.NO) }
     var shuffle by remember { mutableStateOf(false    ) }
-    val play     =viewModel.isPlaying
+    val isPlaying by viewModel.isPlaying.collectAsStateWithLifecycle()
+
+    val canTogglePlayPause by devicesViewModel.canTogglePlayPause.collectAsStateWithLifecycle()
+    val canModifyMusic by devicesViewModel.canModifyMusic.collectAsStateWithLifecycle()
 
     Row(
         Modifier
@@ -264,10 +272,14 @@ fun MusicControlButtons(viewModel: MusicViewModel) {
             contentDescription = "",
             Modifier
                 .size(controlIconsSize)
-                .clickable(onClick = {
-                    shuffle = !shuffle
-                }),
-            tint = if (shuffle) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                .clickable(
+                    enabled = canModifyMusic,
+                    onClick = {
+                        // TODO : implement a shuffle system
+                        //shuffle = !shuffle
+                    }
+                ),
+            tint = if (shuffle) MaterialTheme.colorScheme.primary.copy(alpha = 0.38f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -277,33 +289,39 @@ fun MusicControlButtons(viewModel: MusicViewModel) {
                 contentDescription = "",
                 Modifier
                     .size(controlIconsSize)
-                    .clickable(onClick = {
-                        viewModel.goToPreviousSong()
-                    }),
-                tint = MaterialTheme.colorScheme.onSurface
+                    .clickable(
+                        enabled = canModifyMusic,
+                        onClick = {
+                            viewModel.goToPreviousSong()
+                        }
+                    ),
+                tint = if (canModifyMusic) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
             )
             Icon(
-                painter = painterResource(id = when {
-                    play.collectAsState().value -> R.drawable.outline_pause_24
-                    else -> R.drawable.outline_play_arrow_24
-                }),
+                painter = painterResource(id = if (isPlaying) R.drawable.outline_pause_24 else R.drawable.outline_play_arrow_24),
                 contentDescription = "",
                 Modifier
                     .size(controlIconsSize)
-                    .clickable(onClick = {
-                        if (play.value) viewModel.pause() else viewModel.play()
-                    }),
-                tint = MaterialTheme.colorScheme.onSurface
+                    .clickable(
+                        enabled = canTogglePlayPause,
+                        onClick = {
+                            if (isPlaying) viewModel.pause() else viewModel.play()
+                        }
+                    ),
+                tint = if (canTogglePlayPause) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
             )
             Icon(
                 painter = painterResource(id = R.drawable.outline_skip_next_24),
                 contentDescription = "",
                 Modifier
                     .size(controlIconsSize)
-                    .clickable(onClick = {
-                        viewModel.goToNextSong()
-                    }),
-                tint = MaterialTheme.colorScheme.onSurface
+                    .clickable(
+                        enabled = canModifyMusic,
+                        onClick = {
+                            viewModel.goToNextSong()
+                        }
+                    ),
+                tint = if (canModifyMusic) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
             )
         }
         Icon(
@@ -315,11 +333,15 @@ fun MusicControlButtons(viewModel: MusicViewModel) {
             contentDescription = "",
             Modifier
                 .size(controlIconsSize)
-                .clickable(onClick = {
-                    // go to next state
-                    repeat = Repeat.entries.toTypedArray()[(repeat.ordinal + 1) % Repeat.entries.size]
-                }),
-            tint = if (repeat != Repeat.NO) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                .clickable(
+                    enabled = canModifyMusic,
+                    onClick = {
+                        // go to next state
+                        // TODO implement a repeat system
+                        //repeat = Repeat.entries.toTypedArray()[(repeat.ordinal + 1) % Repeat.entries.size]
+                    }
+                ),
+            tint = if (repeat != Repeat.NO) MaterialTheme.colorScheme.primary.copy(alpha = 0.38f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
         )
     }
 }

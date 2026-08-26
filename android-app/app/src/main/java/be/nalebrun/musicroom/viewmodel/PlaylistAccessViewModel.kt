@@ -13,8 +13,10 @@ import be.nalebrun.musicroom.repositories.MusicRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -29,18 +31,20 @@ class PlaylistAccessViewModel @Inject constructor(
 ) : ViewModel() {
     private val _friends = MutableStateFlow<List<apiFriendJson>>(emptyList())
     private val _friendsWithAccess = MutableStateFlow<List<PlaylistAccessJson>>(emptyList())
+//    private val _friendsWithoutAccess = MutableStateFlow<List<apiFriendJson>>(emptyList())
     private val _playlistRequests = MutableStateFlow<List<PlaylistNotificationJson>>(emptyList())
 
     val friends : StateFlow<List<apiFriendJson>> = _friends
     val friendsWithAccess : StateFlow<List<PlaylistAccessJson>> = _friendsWithAccess
+//    val friendsWithoutAccess : StateFlow<List<apiFriendJson>> = _friendsWithoutAccess
     val playlistRequest : StateFlow<List<PlaylistNotificationJson>> = _playlistRequests
 
     fun getAccessFriends(playlistId: Int) {
         getFriends()
         getFriendsWithAccess(playlistId)
 
-        val friendsWithAccessId = _friendsWithAccess.value.map { it.addresseeId }
-        _friends.value = _friends.value.filter { it.otherId !in friendsWithAccessId }
+//        val friendsWithAccessId = _friendsWithAccess.value.map { it.addresseeId }
+//        _friendsWithoutAccess.value = _friends.value.filter { it.otherId !in friendsWithAccessId }
     }
 
     fun getFriends() { viewModelScope.launch {
@@ -101,7 +105,9 @@ class PlaylistAccessViewModel @Inject constructor(
                 auth = "Bearer $jwt",
                 onResponse = { _, response ->
                     if (response.code in 200..<300) {
-                        // ?
+                        Log.d("Invite to playlist", "Success")
+                    } else {
+                        Log.d("Invite to playlist", response.body?.string() ?: "")
                     }
                 },
                 onFailure = { _, e -> e.printStackTrace() }
@@ -126,16 +132,25 @@ class PlaylistAccessViewModel @Inject constructor(
         }
     }}
 
-    fun leavePlaylistAccess(playlistId: Int, userId: Int) { viewModelScope.launch {
-        val body = """{"playlistId": $playlistId, "addresseeId": $userId}""".toRequestBody("application/json".toMediaType())
+    fun leavePlaylistAccess(playlistId: Int, userId: Int = -1) { viewModelScope.launch {
+        var newId = userId
+        if (userId == -1) {
+            val userIdString =  credentialRepository.userId.first()
+            newId = userIdString.toInt()
+        }
+
+        val body = """{"playlistId": $playlistId, "addresseeId": $newId}""".toRequestBody("application/json".toMediaType())
         credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
             apiRepository.post(
-                url = "/playlistship/answer-playlist-invitation",
+                url = "/playlistship/leave-playlist",
                 body = body,
                 auth = "Bearer $jwt",
                 onResponse = { _, response ->
                     if (response.code in 200..<300) {
+                        _friendsWithAccess.value = _friendsWithAccess.value.filter { it.addresseeId != userId }
 
+                    } else {
+                        Log.d("Leave playlistship", response.body?.string() ?: "")
                     }
                 },
                 onFailure = { _, e -> e.printStackTrace() }
@@ -157,7 +172,7 @@ class PlaylistAccessViewModel @Inject constructor(
                                     try {
                                         val notifications = Json.decodeFromString<List<PlaylistNotificationJson>>(body)
                                         _playlistRequests.value = notifications.filter { it.type == "PLAYLIST_INVITATION" }
-                                        Log.d("PlaylistAccessViewModel", "Filtered requests: ${_playlistRequests.value}")
+                                        Log.d("PlaylistAccessViewModel", "Requests: ${notifications}\nFiltered requests: ${_playlistRequests.value}")
                                     } catch (e: Exception) {
                                         Log.e("PlaylistAccessViewModel", "Parsing error", e)
                                     }

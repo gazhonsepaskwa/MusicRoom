@@ -21,11 +21,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.apiJsonStruct.responds.PlaylistNotificationJson
 import be.nalebrun.musicroom.viewmodel.LibraryViewModel
+import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import be.nalebrun.musicroom.viewmodel.PlaylistAccessViewModel
 
 @Composable
 fun PlaylistInvitationCard(invite: PlaylistNotificationJson) {
     val activity = LocalActivity.current
+    val navigationView: NavigationViewModel = if (activity != null) {
+        hiltViewModel(activity as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
     val accessViewModel : PlaylistAccessViewModel = hiltViewModel()
     val libraryViewModel: LibraryViewModel = hiltViewModel()
     Row(
@@ -39,7 +45,7 @@ fun PlaylistInvitationCard(invite: PlaylistNotificationJson) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(R.drawable.baseline_account_circle_24),
+                painter = painterResource(R.drawable.playlist_tmp),
                 contentDescription = null,
                 modifier = Modifier.padding(10.dp)
             )
@@ -56,8 +62,7 @@ fun PlaylistInvitationCard(invite: PlaylistNotificationJson) {
                             invite.playlistId,
                             "ACCEPTED"
                         )
-                        libraryViewModel.getPlaylists()
-                        accessViewModel.getPlaylistInvitations()
+                        navigationView.navigateTo("library")
                     }
                 })
             )
@@ -70,8 +75,7 @@ fun PlaylistInvitationCard(invite: PlaylistNotificationJson) {
                             invite.playlistId,
                             "REJECTED"
                         )
-                        libraryViewModel.getPlaylists()
-                        accessViewModel.getPlaylistInvitations()
+                        navigationView.navigateTo("library")
                     }
                 })
             )

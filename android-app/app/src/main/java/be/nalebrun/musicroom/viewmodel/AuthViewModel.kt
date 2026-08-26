@@ -14,6 +14,7 @@ import be.nalebrun.musicroom.apiJsonStruct.responds.apiLoginFailureJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiLoginSuccessJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiSigninFailureJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiSigninSuccessJson
+import be.nalebrun.musicroom.apiJsonStruct.responds.apiUserProfileJson
 import be.nalebrun.musicroom.repositories.ICredentialRepository
 import be.nalebrun.musicroom.repositories.ISettingsRepository
 import be.nalebrun.musicroom.repositories.MusicRepository
@@ -86,6 +87,7 @@ class AuthViewModel @Inject constructor(
                     viewModelScope.launch {
                         //  store the jwt
                         credentialRepository.setJWT(jwt)
+                        getUserId()
                         _loginOk.value = true
                     }
                 } else {
@@ -236,5 +238,31 @@ class AuthViewModel @Inject constructor(
     }}
     fun resetLogoutComplete() {
         _logoutComplete.value = false
+    }
+
+    fun getUserId() {
+        viewModelScope.launch {
+            credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
+                if (jwt.isNotEmpty()) {
+                    apiRepository.get(
+                        url = "auth/profile",
+                        auth = "Bearer $jwt",
+                        onResponse = { _, response ->
+                                if (response.code in 200..<300) {
+                                    val userProfile = Json.decodeFromString<apiUserProfileJson>(
+                                        response.body?.string() ?: ""
+                                    )
+                                    viewModelScope.launch { credentialRepository.setUserId("${userProfile.id}") }
+                                } else {
+                                    Log.i("AuthViewModel", "where is id ? :(")
+                                }
+                                                  },
+                        onFailure = { _, e ->
+                            Log.i("AuthViewModel", "can not get profile")
+                        }
+                    )
+                }
+            }
+        }
     }
 }

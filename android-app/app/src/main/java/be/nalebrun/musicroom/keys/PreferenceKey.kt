@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
  */
 object PreferenceKey {
     val jwtString = stringPreferencesKey("jwtPreferenceKey")
+    val userId = stringPreferencesKey("userId")
     val serverUrl = stringPreferencesKey("serverUrl")
     val deviceUuid = stringPreferencesKey("deviceUuid")
     val deviceName = stringPreferencesKey("deviceName")

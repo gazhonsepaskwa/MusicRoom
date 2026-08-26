@@ -51,7 +51,6 @@ fun LibraryCard(music: libraryJson, navigationViewModel: NavigationViewModel) {
 
     val activity = LocalActivity.current
     val libraryViewModel: LibraryViewModel = hiltViewModel()
-    Log.d("DEBUG CARD LIB", music.title)
     val hours = music.duration / (1000 * 60 * 60)
     val minutes = (music.duration / (1000 * 60)) % 60
     var time = "${hours}h$minutes"
@@ -91,21 +90,35 @@ fun LibraryCard(music: libraryJson, navigationViewModel: NavigationViewModel) {
                     .padding(16.dp)
                     .padding(bottom = 32.dp)
             ) {
+                var error by remember { mutableStateOf(false) }
+                if (error) {
+                    Text(
+                        text = "Name unavailable",
+                        color = Color.Red
+                    )
+                }
                 CustomTextField(
                     title = "Change playlist name:",
                     text = newName,
-                    onValueChange = { newName = it },
+                    onValueChange = {
+                        newName = it
+                        error = false
+                                    },
                     modifier = Modifier.padding(bottom = 10.dp))
                 BlackOrWhiteButton(
                     text = "Confirm",
                     active = false,
                     onClick = {
-                        if (newName.isNotBlank()) {
+                        if (newName == "Favorite") {
+                            error = true
+                        }
+                        else if (newName.isNotBlank()) {
                             libraryViewModel.renamePlaylist(music.id, newName)
                             newTitle = newName
                             newName = ""
                             showChangeName = false
                             showBottomSheet = false
+                            error = false
                         }
                     }
                 )
@@ -124,14 +137,15 @@ fun LibraryCard(music: libraryJson, navigationViewModel: NavigationViewModel) {
     ) {
         Column{
             Text(newTitle, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-            Log.d("CARD LIB WRITE", "$newTitle, ${music.title}")
             Text("${music.songs} songs ● $time")
         }
-        Image(
-            painter = painterResource(R.drawable.outline_more_horiz_24),
-            contentDescription = "",
-            modifier = Modifier.clickable(true, onClick = { showBottomSheet = true })
-        )
+        if (music.title != "Favorite") {
+            Image(
+                painter = painterResource(R.drawable.outline_more_horiz_24),
+                contentDescription = "",
+                modifier = Modifier.clickable(true, onClick = { showBottomSheet = true })
+            )
+        }
     }
     HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.onSurfaceVariant)
 }

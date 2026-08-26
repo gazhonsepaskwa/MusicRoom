@@ -4,8 +4,10 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 
-//@Serializable
-//class Playlistship
+@Serializable
+@JsonIgnoreUnknownKeys
+class Playlistship(
+)
 @Serializable
 class PlaylistMusicJson(
     val index: Int,
@@ -22,6 +24,6 @@ class PlaylistJson(
     val status: String,
     val type: String,
     val musics: List<PlaylistMusicJson>,
-//    val playlistships: List<String>,
+    val playlistships: List<Playlistship>,
 ) {
 }

@@ -63,7 +63,9 @@ fun ManageAccessUi(playlistId: Int) {
         hiltViewModel()
     }
     val friendsWithAccess by viewModel.friendsWithAccess.collectAsState()
-    val friendsWithoutAccess by viewModel.friends.collectAsState()
+    val friends by viewModel.friends.collectAsState()
+    val friendsId = friendsWithAccess.map { it.addresseeId }
+    val friendsWithoutAccess = friends.filter { it.otherId !in friendsId }
 
     LaunchedEffect(playlistId) {
         viewModel.getAccessFriends(playlistId)

@@ -66,6 +66,7 @@ class PlaylistViewModel @Inject constructor(
                             _id.value = res.id
                             _musics.value = eph
                             _isDefault.value = res.isDefault
+                            _friends.value = res.playlistships.size
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
@@ -101,6 +102,7 @@ class PlaylistViewModel @Inject constructor(
                                 _musics.value = eph
                                 _isDefault.value = res.isDefault
                                 _id.value = res.id
+                                _friends.value = 0
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }

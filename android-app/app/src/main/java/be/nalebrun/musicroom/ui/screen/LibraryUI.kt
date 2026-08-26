@@ -79,6 +79,7 @@ fun LibraryUi() {
         accessViewModel.getPlaylistInvitations()
     }
 
+
     if (showCreatePlaylistSheet) {
         ModalBottomSheet(
             onDismissRequest = { showCreatePlaylistSheet = false },
@@ -90,10 +91,20 @@ fun LibraryUi() {
                     .padding(16.dp)
                     .padding(bottom = 32.dp)
             ){
+                var error by remember { mutableStateOf(false) }
+                if (error) {
+                    Text(
+                        text = "Name unavailable",
+                        color = Color.Red
+                    )
+                }
                 CustomTextField(
                     title = "Create a new playlist",
                     text = newPlaylist,
-                    onValueChange = { newPlaylist = it },
+                    onValueChange = {
+                        newPlaylist = it
+                        error = false
+                                    },
                     modifier = Modifier.padding(bottom = 10.dp)
                 )
                 PermissionToggle(
@@ -107,11 +118,15 @@ fun LibraryUi() {
                     text = "Confirm",
                     active = false,
                     onClick = {
-                        if (newPlaylist.isNotBlank()) {
+                        if (newPlaylist == "Favorite") {
+                            error = true
+                        }
+                        else if (newPlaylist.isNotBlank()) {
                             viewModel.createPlaylist(newPlaylist, newPlaylistPublicStatus) {
                                 newPlaylist = ""
                                 showCreatePlaylistSheet = false
                                 viewModel.getPlaylists()
+                                error = false
                             }
                         }
                     }
@@ -155,17 +170,9 @@ fun LibraryUi() {
                 modifier = Modifier.weight(1f)
             ) {
                 items(playlists) { it ->
-                    Log.d("DEBUG LIBRARY", it.title)
                     LibraryCard(it, navigationView)
                 }
                 if (sharedPlaylists.isNotEmpty()) {
-//                    item {
-//                        Text(
-//                            "Shared playlists:",
-//                            modifier = Modifier.padding(10.dp),
-//                            fontWeight = FontWeight.Bold
-//                        )
-//                    }
                     items(sharedPlaylists) { item ->
                         PlaylistSharedCard(item, navigationView)
                     }

@@ -36,6 +36,7 @@ import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import be.nalebrun.musicroom.viewmodel.PlaylistAccessViewModel
 import be.nalebrun.musicroom.viewmodel.PlaylistViewModel
 import be.nalebrun.musicroom.viewmodel.UserProfileViewModel
+import kotlinx.coroutines.runBlocking
 import org.w3c.dom.Text
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,7 +51,6 @@ fun PlaylistSharedCard(music: libraryJson, navigationViewModel: NavigationViewMo
     } else {
         hiltViewModel()
     }
-    val profileModel: UserProfileViewModel = hiltViewModel()
     val accessViewModel: PlaylistAccessViewModel = hiltViewModel()
     val hours = music.duration / (1000 * 60 * 60)
     val minutes = (music.duration / (1000 * 60)) % 60
@@ -66,10 +66,9 @@ fun PlaylistSharedCard(music: libraryJson, navigationViewModel: NavigationViewMo
                     label = "leave playlist",
                     icon = R.drawable.outline_devices_other_24,
                     onClick = {
-                        //GET REAL OWN ID
-//                        accessViewModel.leavePlaylistAccess(music.id, userId)
+                        accessViewModel.leavePlaylistAccess(music.id)
                         showBottomSheet = false
-                        viewModel.getPlaylists()
+                        navigationViewModel.navigateTo("library")
                     }
                 )
             ),

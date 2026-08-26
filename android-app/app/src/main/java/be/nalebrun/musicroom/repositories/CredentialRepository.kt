@@ -1,6 +1,7 @@
 package be.nalebrun.musicroom.repositories
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.edit
 import be.nalebrun.musicroom.dataStore
 import be.nalebrun.musicroom.keys.PreferenceKey
@@ -19,6 +20,7 @@ interface ICredentialRepository {
      * @author nalebrun
      */
     val jwtFlow: Flow<String>
+    val userId: Flow<String>
 
     /**
      * function to store the JWT in datastore
@@ -26,6 +28,7 @@ interface ICredentialRepository {
      * @author nalebrun
      */
     suspend fun setJWT(newToken: String)
+    suspend fun setUserId(newId: String)
 }
 
 class CredentialRepository @Inject constructor(
@@ -38,7 +41,15 @@ class CredentialRepository @Inject constructor(
         get() = dataStore.data
         .map { prefs -> prefs[PreferenceKey.jwtString] ?: "" }
 
+    override val userId: Flow<String>
+        get() = dataStore.data
+            .map { prefs -> prefs[PreferenceKey.userId] ?: "" }
+
     override suspend fun setJWT(newToken : String) {
         dataStore.edit { preferences -> preferences[PreferenceKey.jwtString] = newToken }
+    }
+
+    override suspend fun setUserId(newId: String) {
+        dataStore.edit { preferences -> preferences[PreferenceKey.userId] = newId }
     }
 }

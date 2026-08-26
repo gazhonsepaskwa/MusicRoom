@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import android.util.Log
 import androidx.navigation.navDeepLink
+import be.nalebrun.musicroom.ui.screen.ManageAccessUi
 import be.nalebrun.musicroom.ui.screen.DeleteAccountUi
 import be.nalebrun.musicroom.ui.screen.ResetPasswordUi
 import be.nalebrun.musicroom.ui.screen.ResetPasswordConfirmationUi
@@ -217,6 +218,14 @@ fun CreateNavGraph(
         composable(route = "playlist/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")
             PlaylistUi(id = id!!.toInt())
+        }
+        composable(route = "playlist/shared/{id}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id")
+            PlaylistUi(id = id!!.toInt(), false)
+        }
+        composable(route = "playlist/{id}/access") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id")
+            ManageAccessUi(playlistId = id!!.toInt())
         }
         composable(route = "album/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id")

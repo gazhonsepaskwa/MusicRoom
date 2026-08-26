@@ -5,17 +5,22 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import be.nalebrun.musicroom.IAPIRepository
+import be.nalebrun.musicroom.APIRepository
+import be.nalebrun.musicroom.apiJsonStruct.responds.FriendRequestStatus
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiLoginFailureJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiLoginSuccessJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiSigninFailureJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.apiSigninSuccessJson
+import be.nalebrun.musicroom.apiJsonStruct.responds.apiUserProfileJson
 import be.nalebrun.musicroom.repositories.ICredentialRepository
 import be.nalebrun.musicroom.repositories.ISettingsRepository
 import be.nalebrun.musicroom.repositories.MusicRepository
 import be.nalebrun.musicroom.repositories.UiMessageManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import be.nalebrun.musicroom.repositories.CredentialRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -83,6 +88,7 @@ class AuthViewModel @Inject constructor(
                     viewModelScope.launch {
                         //  store the jwt
                         credentialRepository.setJWT(jwt)
+                        getUserId()
                         _loginOk.value = true
                     }
                 } else {
@@ -233,6 +239,32 @@ class AuthViewModel @Inject constructor(
     }}
     fun resetLogoutComplete() {
         _logoutComplete.value = false
+    }
+
+    fun getUserId() {
+        viewModelScope.launch {
+            credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
+                if (jwt.isNotEmpty()) {
+                    apiRepository.get(
+                        url = "auth/profile",
+                        auth = "Bearer $jwt",
+                        onResponse = { _, response ->
+                                if (response.code in 200..<300) {
+                                    val userProfile = Json.decodeFromString<apiUserProfileJson>(
+                                        response.body?.string() ?: ""
+                                    )
+                                    viewModelScope.launch { credentialRepository.setUserId("${userProfile.id}") }
+                                } else {
+                                    Log.i("AuthViewModel", "where is id ? :(")
+                                }
+                                                  },
+                        onFailure = { _, e ->
+                            Log.i("AuthViewModel", "can not get profile")
+                        }
+                    )
+                }
+            }
+        }
     }
 
     /**

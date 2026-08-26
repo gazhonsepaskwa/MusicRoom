@@ -19,3 +19,11 @@ data class apiLoginFailureJson(
 data class apiLoginSuccessJson(
     val access_token: String = ""
 )
+
+@OptIn(ExperimentalSerializationApi::class)
+@Serializable
+@JsonIgnoreUnknownKeys
+data class apiUserProfileJson(
+    val id: Int,
+    val username: String
+)

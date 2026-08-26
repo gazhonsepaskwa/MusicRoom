@@ -83,7 +83,6 @@ fun AlbumUi(albumId: Int) {
             ) {
                 Column {
                     Text(name, fontWeight = FontWeight.Bold, lineHeight = 10.sp)
-//                    Text(artist)
                 }
                 Box(
                     modifier = Modifier
@@ -114,7 +113,7 @@ fun AlbumUi(albumId: Int) {
                         painter = painterResource(R.drawable.outline_play_arrow_24),
                         contentDescription = "",
                         modifier = Modifier.clickable(true, onClick = {
-//                            viewModel.musicRepository.replaceWaitingList(musics)
+                            viewModel.musicRepository.replaceWaitingList(musics)
                         }),
                         tint = MaterialTheme.colorScheme.onBackground
                     )

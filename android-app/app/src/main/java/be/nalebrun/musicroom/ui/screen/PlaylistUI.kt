@@ -1,5 +1,8 @@
 package be.nalebrun.musicroom.ui.screen
 
+import android.util.Log
+import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
@@ -39,12 +43,18 @@ import be.nalebrun.musicroom.ui.element.ActionSheet
 import be.nalebrun.musicroom.ui.element.ActiveScreen
 import be.nalebrun.musicroom.ui.element.BottomScreenMenu
 import be.nalebrun.musicroom.ui.element.PlaylistCard
+import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import be.nalebrun.musicroom.viewmodel.PlaylistViewModel
 
 @Composable
-fun PlaylistUi(id: Int) {
+fun PlaylistUi(id: Int, owned: Boolean = true) {
     val viewModel: PlaylistViewModel = hiltViewModel()
-
+    val activity = LocalActivity.current
+    val navigationView: NavigationViewModel = if (activity != null) {
+        hiltViewModel(activity as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
     val friends: Int? by viewModel.friends.collectAsState()
     val playlistId: Int by viewModel.id.collectAsState()
     val title: String? by viewModel.title.collectAsState()
@@ -82,7 +92,7 @@ fun PlaylistUi(id: Int) {
                     Text(title ?: "", fontWeight = FontWeight.Bold, lineHeight = 10.sp)
                     Text("$number songs", fontSize = 10.sp, lineHeight = 10.sp)
                 }
-                if (!isDefault) {
+                if (!isDefault && owned) {
                     Row(
                         modifier = Modifier
                             .clickable(true, onClick = {
@@ -140,7 +150,7 @@ fun PlaylistUi(id: Int) {
                         tint = if (shuffleOn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                     )
                 }
-                if (!isDefault) {
+                if (!isDefault && owned) {
                     Column(
                         horizontalAlignment = Alignment.End,
                         modifier = Modifier.clickable(true, onClick = {})
@@ -151,7 +161,13 @@ fun PlaylistUi(id: Int) {
                             fontSize = 10.sp,
                             lineHeight = 10.sp
                         )
-                        Text("Manage access →", fontSize = 10.sp, lineHeight = 10.sp)
+                        Text(
+                            text = "Manage access →",
+                            fontSize = 10.sp,
+                            lineHeight = 10.sp,
+                            modifier = Modifier.clickable(true, onClick = {
+                                navigationView.navigateTo("playlist/$id/access")
+                            }))
                     }
                 }
             }

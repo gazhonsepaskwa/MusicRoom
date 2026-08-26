@@ -192,14 +192,6 @@ export class DevicesService {
       return undefined;
     }
 
-    if (
-      !deviceship.canModifyMusic &&
-      !deviceship.canSeek &&
-      !deviceship.canTogglePlayPause
-    ) {
-      return undefined;
-    }
-
     return deviceship;
   }
 }

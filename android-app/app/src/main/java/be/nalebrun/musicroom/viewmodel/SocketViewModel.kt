@@ -2,6 +2,7 @@ package be.nalebrun.musicroom.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import be.nalebrun.musicroom.repositories.IMusicRepository
 import be.nalebrun.musicroom.repositories.ISettingsRepository
@@ -25,10 +26,10 @@ data class ConnectionRequest(
 
 @HiltViewModel
 class SocketViewModel @Inject constructor(
-    private val socketIORepository: ISocketIORepository,
-    private val musicRepository: IMusicRepository,
-    private val settingsRepository: ISettingsRepository,
-    private val uiMessageManager: UiMessageManager,
+    private val socketIORepository : ISocketIORepository,
+    private val musicRepository    : IMusicRepository,
+    private val settingsRepository : ISettingsRepository,
+    private val uiMessageManager   : UiMessageManager,
 ) : ViewModel() {
 
     private val _incomingRequest = MutableStateFlow<ConnectionRequest?>(null)
@@ -121,6 +122,18 @@ class SocketViewModel @Inject constructor(
         }
         socketIORepository.on("app_error") { args ->
             Log.e("SocketIORepository", ">>> [Error] INCOMING: ${args.joinToString()}")
+            val data = args.getOrNull(0)
+            if (data is JSONObject) {
+                when (data.optString("message")) {
+                    "No permission to toggle play/pause" -> {
+                        viewModelScope.launch {
+                            musicRepository.canTogglePlayPause.value = false
+                            musicRepository.togglePlayPause(fromRemote = false)
+                            uiMessageManager.showMessage("You no longer have permission to toggle play/pause")
+                        }
+                    }
+                }
+            }
         }
 
         // to check

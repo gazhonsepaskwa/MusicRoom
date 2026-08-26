@@ -275,10 +275,11 @@ fun MusicControlButtons(viewModel: MusicViewModel, devicesViewModel: DevicesView
                 .clickable(
                     enabled = canModifyMusic,
                     onClick = {
-                        shuffle = !shuffle
+                        // TODO : implement a shuffle system
+                        //shuffle = !shuffle
                     }
                 ),
-            tint = if (shuffle) MaterialTheme.colorScheme.primary else (if (canModifyMusic) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f))
+            tint = if (shuffle) MaterialTheme.colorScheme.primary.copy(alpha = 0.38f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -336,10 +337,11 @@ fun MusicControlButtons(viewModel: MusicViewModel, devicesViewModel: DevicesView
                     enabled = canModifyMusic,
                     onClick = {
                         // go to next state
-                        repeat = Repeat.entries.toTypedArray()[(repeat.ordinal + 1) % Repeat.entries.size]
+                        // TODO implement a repeat system
+                        //repeat = Repeat.entries.toTypedArray()[(repeat.ordinal + 1) % Repeat.entries.size]
                     }
                 ),
-            tint = if (repeat != Repeat.NO) MaterialTheme.colorScheme.primary else (if (canModifyMusic) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f))
+            tint = if (repeat != Repeat.NO) MaterialTheme.colorScheme.primary.copy(alpha = 0.38f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
         )
     }
 }

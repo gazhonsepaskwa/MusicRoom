@@ -92,6 +92,13 @@ interface IMusicRepository {
      */
     val remoteControlHost: MutableStateFlow<String>
 
+    /**
+     * permissions for the remote control
+     */
+    val canTogglePlayPause: MutableStateFlow<Boolean>
+    val canModifyMusic:     MutableStateFlow<Boolean>
+    val canSeek:            MutableStateFlow<Boolean>
+
 
     // music playback
 
@@ -118,6 +125,11 @@ interface IMusicRepository {
      * pause the music via the controller
      */
     fun pause(fromRemote: Boolean = false)
+
+    /**
+     * toggle the play/pause state via the controller
+     */
+    fun togglePlayPause(fromRemote: Boolean = false)
     /**
      * seek to a position in the music via the controller
      */
@@ -227,6 +239,9 @@ class MusicRepository @Inject constructor(
     // remote control things
     override val isRemoteControl = MutableStateFlow(false)
     override val remoteControlHost = MutableStateFlow("")
+    override val canTogglePlayPause = MutableStateFlow(true)
+    override val canModifyMusic     = MutableStateFlow(true)
+    override val canSeek            = MutableStateFlow(true)
 
     // bool that prevent multiple setups
     private var isFirstLoad = true
@@ -404,6 +419,11 @@ class MusicRepository @Inject constructor(
         }
         controller?.pause()
     }
+
+    override fun togglePlayPause(fromRemote: Boolean) {
+        if (isPlaying.value) { pause(fromRemote) }
+        else                 { play(fromRemote)  }
+    }
     override fun seekTo(newPosition: Long, fromRemote: Boolean) {
         pendingSeek = null
         if (isRemoteControl.value && !fromRemote) {
@@ -535,6 +555,10 @@ class MusicRepository @Inject constructor(
         remoteControlHost.value = ""
         pendingSeek = null
         pendingPlay = null
+
+        canTogglePlayPause.value = true
+        canModifyMusic.value     = true
+        canSeek.value            = true
 
         _music.value = MusicJson(id = 0, title = "", album = AlbumJson(
             title = "",

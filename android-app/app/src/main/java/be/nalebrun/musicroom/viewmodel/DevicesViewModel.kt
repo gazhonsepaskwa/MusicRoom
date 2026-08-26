@@ -33,21 +33,18 @@ class DevicesViewModel @Inject constructor(
     val devices: StateFlow<List<ForeignDevice>> = _devices
 
     // Current remote control permissions
-    private val _canTogglePlayPause = MutableStateFlow(true)
-    val canTogglePlayPause = _canTogglePlayPause.asStateFlow()
-
-    private val _canModifyMusic = MutableStateFlow(true)
-    val canModifyMusic = _canModifyMusic.asStateFlow()
-
-    private val _canSeek = MutableStateFlow(true)
-    val canSeek = _canSeek.asStateFlow()
+    val canTogglePlayPause = musicRepository.canTogglePlayPause.asStateFlow()
+    val canModifyMusic     = musicRepository.canModifyMusic.asStateFlow()
+    val canSeek            = musicRepository.canSeek.asStateFlow()
 
     init {
         // Observe remote control state to reset permissions when it ends
         viewModelScope.launch {
             musicRepository.isRemoteControl.collect { isRemote ->
                 if (!isRemote) {
-                    resetPermissions()
+                    musicRepository.canTogglePlayPause.value = true
+                    musicRepository.canModifyMusic.value     = true
+                    musicRepository.canSeek.value            = true
                 }
             }
         }
@@ -90,20 +87,12 @@ class DevicesViewModel @Inject constructor(
      * Message send via the websocket
      */
     fun askDeviceControl(device: ForeignDevice) {
-        _canTogglePlayPause.value = device.canTogglePlayPause
-        _canModifyMusic.value = device.canModifyMusic
-        _canSeek.value = device.canSeek
+        musicRepository.canTogglePlayPause.value = device.canTogglePlayPause
+        musicRepository.canModifyMusic.value     = device.canModifyMusic
+        musicRepository.canSeek.value            = device.canSeek
         viewModelScope.launch {
             socketIORepository.emit("connectToDevice", device.deviceId)
         }
     }
 
-    /**
-     * Reset permissions to default (all allowed)
-     */
-    fun resetPermissions() {
-        _canTogglePlayPause.value = true
-        _canModifyMusic.value = true
-        _canSeek.value = true
-    }
 }

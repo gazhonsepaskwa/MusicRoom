@@ -120,6 +120,7 @@ class SocketViewModel @Inject constructor(
                 }
             }
         }
+
         socketIORepository.on("app_error") { args ->
             Log.e("SocketIORepository", ">>> [Error] INCOMING: ${args.joinToString()}")
             val data = args.getOrNull(0)
@@ -168,6 +169,18 @@ class SocketViewModel @Inject constructor(
                 uiMessageManager.showMessage("The music room ended")
             }
         }
+
+        socketIORepository.on("join_playlist") { args ->
+            Log.d("SocketIORepository", ">>> [join_playlist] INCOMING: ${args.joinToString()}")
+            val data = args.getOrNull(0)
+            if (data is JSONObject){
+                val version: Int = data.optInt("version")
+            }
+        }
+        
+        socketIORepository.on("leave_playlist") { args ->
+            Log.d("SocketIORepository", ">>> [leave_playlist] INCOMING: ${args.joinToString()}")
+        }
     }
 
     fun answerRequest(yes: Boolean) {
@@ -211,6 +224,20 @@ class SocketViewModel @Inject constructor(
             socketIORepository.emit("hostResponse", response)
 
             _incomingRequest.value = null
+        }
+    }
+
+    fun playlistJoin(id: Int) {
+        viewModelScope.launch {
+            Log.d("SocketViewModel", "Joining playlist $id")
+            socketIORepository.emit("join_playlist", id)
+        }
+    }
+
+    fun playlistLeave(id: Int) {
+        viewModelScope.launch {
+            Log.d("SocketViewModel", "Leaving playlist $id")
+            socketIORepository.emit("leave_playlist", id)
         }
     }
 

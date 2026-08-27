@@ -23,15 +23,16 @@ export class PlaylistsGateway {
   async handleJoinPlaylist(client: Socket, playlistId: String) {
     const playlistIdNum = Number(playlistId);
     if (isNaN(playlistIdNum)) {
-      console.log(
-        `Client ${client.data.userId} provided invalid playlist ID: ${playlistId}`,
-      );
+      client.emit('app_error', {
+        message:
+          'Invalid playlist ID provided. Please check the playlist ID and try again.',
+      });
       return;
     }
     if (client.rooms.has(`playlist_${playlistId}`)) {
-      console.log(
-        `Client ${client.data.userId} is already a member of playlist ${playlistId}`,
-      );
+      client.emit('app_error', {
+        message: 'Client is already a member of this playlist',
+      });
       return;
     }
 
@@ -40,13 +41,16 @@ export class PlaylistsGateway {
       client.data.userId,
     );
     if (version === undefined) {
-      console.log(`Failed to join playlist ${playlistId}: playlist not found`);
+      client.emit('app_error', {
+        message: 'Playlist not found',
+      });
       return;
     }
     client.join(`playlist_${playlistId}`);
-    this.server
-      .to(`playlist_${playlistId}`)
-      .emit('join_playlist', client.data.userId, version);
+    this.server.to(`playlist_${playlistId}`).emit('join_playlist', {
+      userId: client.data.userId,
+      version: version,
+    });
     console.log(`Client ${client.data.userId} joined playlist ${playlistId}`);
   }
 
@@ -62,24 +66,24 @@ export class PlaylistsGateway {
     const playlistIdNum = Number(playlistId);
     const songIdNum = Number(songId);
     if (isNaN(playlistIdNum) || isNaN(songIdNum)) {
-      console.log(
-        `Client ${client.id} provided invalid playlist ID or song ID: playlistId=${playlistId}, songId=${songId}`,
-      );
+      client.emit('app_error', {
+        message: 'Invalid playlist ID or song ID provided',
+      });
       return;
     }
     if (!client.rooms.has(`playlist_${playlistId}`)) {
-      console.log(
-        `Client ${client.id} cannot add music to playlist ${playlistId} because they are not a member`,
-      );
+      client.emit('app_error', {
+        message: 'Client is not a member of this playlist',
+      });
       return;
     }
 
     const true_version =
       await this.playlistsService.getPlaylistVersion(playlistIdNum);
     if (version !== true_version) {
-      console.log(
-        `Failed to add music to playlist ${playlistId}: version mismatch (client version ${version}, server version ${true_version})`,
-      );
+      client.emit('app_error', {
+        message: `Version mismatch: client version ${version}, server version ${true_version}`,
+      });
       return;
     }
     console.log('playlist version before adding music:', version);
@@ -93,7 +97,9 @@ export class PlaylistsGateway {
       throw error;
     }
     if (newVersion === undefined) {
-      console.log(`Failed to add music ${songId} to playlist ${playlistId}`);
+      client.emit('app_error', {
+        message: 'Failed to add music to playlist',
+      });
       return;
     }
 
@@ -120,24 +126,25 @@ export class PlaylistsGateway {
     const playlistIdNum = Number(playlistId);
     const musicIdNum = Number(musicId);
     if (isNaN(playlistIdNum) || isNaN(musicIdNum) || isNaN(index)) {
-      console.log(
-        `Client ${client.id} provided invalid playlist ID, music ID, or index: playlistId=${playlistId}, musicId=${musicId}, index=${index}`,
-      );
+      client.emit('app_error', {
+        message:
+          'Invalid playlist ID, music ID, or index provided. Please check the values and try again.',
+      });
       return;
     }
     if (!client.rooms.has(`playlist_${playlistId}`)) {
-      console.log(
-        `Client ${client.id} cannot move music in playlist ${playlistId} because they are not a member`,
-      );
+      client.emit('app_error', {
+        message: 'Client is not a member of this playlist',
+      });
       return;
     }
 
     const true_version =
       await this.playlistsService.getPlaylistVersion(playlistIdNum);
     if (version !== true_version) {
-      console.log(
-        `Version mismatch for playlist ${playlistId}: client version ${version}, server version ${true_version}`,
-      );
+      client.emit('app_error', {
+        message: `Version mismatch: client version ${version}, server version ${true_version}`,
+      });
       return;
     }
 
@@ -148,9 +155,9 @@ export class PlaylistsGateway {
     );
 
     if (newVersion === undefined) {
-      console.log(
-        `Failed to move music ${musicId} in playlist ${playlistId} to index ${index}`,
-      );
+      client.emit('app_error', {
+        message: 'Failed to move music in playlist',
+      });
       return;
     }
 
@@ -166,28 +173,30 @@ export class PlaylistsGateway {
   handleLeavePlaylist(client: Socket, playlistId: String) {
     const playlistIdNum = Number(playlistId);
     if (isNaN(playlistIdNum)) {
-      console.log(
-        `Client ${client.id} provided invalid playlist ID: ${playlistId}`,
-      );
+      client.emit('app_error', {
+        message: 'Invalid playlist ID provided',
+      });
       return;
     }
     if (!client.rooms.has(`playlist_${playlistId}`)) {
-      console.log(
-        `Client ${client.id} cannot leave playlist ${playlistId} because they are not a member`,
-      );
+      client.emit('app_error', {
+        message: 'Client is not a member of this playlist',
+      });
       return;
     }
 
     const version = this.playlistsService.getPlaylistVersion(playlistIdNum);
     if (version === undefined) {
-      console.log(`Failed to leave playlist ${playlistId}: playlist not found`);
+      client.emit('app_error', {
+        message: 'Failed to leave playlist: playlist not found',
+      });
       return;
     }
 
     client.leave(`playlist_${playlistId}`);
     this.server
       .to(`playlist_${playlistId}`)
-      .emit('leave_playlist', client.id, version);
+      .emit('leave_playlist', { userId: client.data.userId, version: version });
     console.log(`Client ${client.id} left playlist ${playlistId}`);
   }
 }

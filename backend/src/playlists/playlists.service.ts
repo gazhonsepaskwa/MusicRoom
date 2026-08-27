@@ -7,7 +7,6 @@ import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { playlist } from '../../generated/prisma/browser';
 import { PlaylistVersionResponseDto } from './dto/playlists.dto';
-import { title } from 'process';
 
 @Injectable()
 export class PlaylistsService {
@@ -183,7 +182,7 @@ export class PlaylistsService {
   async addMusic(
     playlistId: number,
     songId: number,
-  ): Promise<PlaylistVersionResponseDto | void> {
+  ): Promise<PlaylistVersionResponseDto | undefined> {
     try {
       const playlist = await this.prisma.playlist.findUnique({
         where: { id: playlistId },
@@ -191,13 +190,13 @@ export class PlaylistsService {
       });
 
       if (!playlist) {
-        throw new NotFoundException('Playlist not found');
+        return undefined;
       }
 
       const existingMusic = playlist.musics.find((pm) => pm.musicId === songId);
 
       if (existingMusic) {
-        throw new BadRequestException('Music already in playlist');
+        return undefined;
       }
 
       await this.prisma.playlistMusic.create({
@@ -216,18 +215,16 @@ export class PlaylistsService {
       };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        throw new BadRequestException(
-          'Invalid data for adding music to playlist',
-        );
+        return undefined;
       }
-      throw error;
+      return undefined;
     }
   }
 
   async removeMusic(
     playlistId: number,
     songId: number,
-  ): Promise<PlaylistVersionResponseDto | void> {
+  ): Promise<PlaylistVersionResponseDto | undefined> {
     try {
       const playlist = await this.prisma.playlist.findUnique({
         where: { id: playlistId },
@@ -235,13 +232,13 @@ export class PlaylistsService {
       });
 
       if (!playlist) {
-        throw new NotFoundException('Playlist not found');
+        return undefined;
       }
 
       const existingMusic = playlist.musics.find((pm) => pm.musicId === songId);
 
       if (!existingMusic) {
-        throw new BadRequestException('Music not in playlist');
+        return undefined;
       }
 
       await this.prisma.playlistMusic.delete({
@@ -261,11 +258,9 @@ export class PlaylistsService {
       };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        throw new BadRequestException(
-          'Invalid data for adding music to playlist',
-        );
+        return undefined;
       }
-      throw error;
+      return undefined;
     }
   }
 
@@ -304,7 +299,7 @@ export class PlaylistsService {
     playlistId: number,
     musicId: number,
     newIndex: number,
-  ): Promise<number | void> {
+  ): Promise<number | undefined> {
     const playlist = await this.prisma.playlist.findUnique({
       where: { id: playlistId },
       include: {
@@ -315,13 +310,13 @@ export class PlaylistsService {
     });
 
     if (!playlist) {
-      throw new NotFoundException('Playlist not found');
+      return undefined;
     }
 
     const musicToMove = playlist.musics.find((pm) => pm.musicId === musicId);
 
     if (!musicToMove) {
-      throw new NotFoundException('Music not found in playlist');
+      return undefined;
     }
 
     const oldIndex = musicToMove.index;
@@ -331,7 +326,7 @@ export class PlaylistsService {
       newIndex >= playlist.musics.length ||
       newIndex === oldIndex
     ) {
-      throw new BadRequestException('Invalid new index for music');
+      return undefined;
     }
 
     try {
@@ -380,7 +375,7 @@ export class PlaylistsService {
       console.log(
         `Failed to move music ${musicId} in playlist ${playlistId} to index ${newIndex}: ${error}`,
       );
-      throw error;
+      return undefined;
     }
 
     return await this.incrementPlaylistVersion(playlistId);

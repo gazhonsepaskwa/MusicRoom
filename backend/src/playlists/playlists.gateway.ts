@@ -48,7 +48,7 @@ export class PlaylistsGateway {
     }
     client.join(`playlist_${playlistId}`);
     this.server.to(`playlist_${playlistId}`).emit('join_playlist', {
-      userId: client.data.userId,
+      deviceId: client.data.deviceId,
       version: version,
     });
 
@@ -65,7 +65,7 @@ export class PlaylistsGateway {
     client.emit('playlist_content', {
       playList: playlist,
     });
-    console.log(`Client ${client.data.userId} joined playlist ${playlistId}`);
+    console.log(`Client ${client.data.deviceId} joined playlist ${playlistId}`);
   }
 
   sendRemoveMusic(playlistId: number, songId: number, version: number): void {

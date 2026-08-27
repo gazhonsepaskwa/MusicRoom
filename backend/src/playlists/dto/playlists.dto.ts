@@ -10,7 +10,7 @@ export class MusicPlaylistDto {
   playlistId!: number;
 
   @ApiProperty({ example: 1 })
-  version!: number;
+  version?: number;
 }
 
 export class PlaylistListItemDto {

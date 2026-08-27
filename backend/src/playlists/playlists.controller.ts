@@ -4,12 +4,9 @@ import {
   Controller,
   Delete,
   Get,
-  NotFoundException,
   Param,
   Patch,
   Post,
-  Query,
-  Req,
 } from '@nestjs/common';
 import { PlaylistsService } from './playlists.service';
 import { ParseSafeIntPipe } from '../common/pipe/parse_safe_int.pipe';
@@ -133,6 +130,11 @@ export class PlaylistsController {
     ) {
       throw new BadRequestException('You are not the owner of this playlist');
     }
+
+    if (musicPlaylistDto.version === undefined) {
+      throw new BadRequestException('Version is required to remove music');
+    }
+
     const result = await this.playlistsService.removeMusic(
       musicPlaylistDto.playlistId,
       musicPlaylistDto.musicId,

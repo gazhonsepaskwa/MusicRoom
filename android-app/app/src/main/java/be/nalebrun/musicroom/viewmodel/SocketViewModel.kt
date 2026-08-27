@@ -120,6 +120,7 @@ class SocketViewModel @Inject constructor(
                 }
             }
         }
+
         socketIORepository.on("app_error") { args ->
             Log.e("SocketIORepository", ">>> [Error] INCOMING: ${args.joinToString()}")
             val data = args.getOrNull(0)

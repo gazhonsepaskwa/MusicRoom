@@ -1,8 +1,8 @@
 package be.nalebrun.musicroom.ui.screen
 
-import android.util.Log
+import androidx.compose.animation.core.animateDpAsState
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,13 +12,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,7 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,14 +38,13 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
-import be.nalebrun.musicroom.apiJsonStruct.responds.PlaylistMusicJson
-import be.nalebrun.musicroom.ui.element.ActionItem
-import be.nalebrun.musicroom.ui.element.ActionSheet
 import be.nalebrun.musicroom.ui.element.ActiveScreen
 import be.nalebrun.musicroom.ui.element.BottomScreenMenu
 import be.nalebrun.musicroom.ui.element.PlaylistCard
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import be.nalebrun.musicroom.viewmodel.PlaylistViewModel
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun PlaylistUi(id: Int, owned: Boolean = true) {
@@ -70,6 +70,21 @@ fun PlaylistUi(id: Int, owned: Boolean = true) {
             viewModel.getFavorite()
         } else {
             viewModel.getPlaylist(id)
+        }
+    }
+
+    val effectiveJoinId = remember(id, playlistId) {
+        if (id == -1) playlistId else id
+    }
+
+    DisposableEffect(effectiveJoinId) {
+        if (effectiveJoinId > 0) {
+            viewModel.joinPlaylist(effectiveJoinId)
+        }
+        onDispose {
+            if (effectiveJoinId > 0) {
+                viewModel.leavePlaylist(effectiveJoinId)
+            }
         }
     }
 
@@ -171,13 +186,60 @@ fun PlaylistUi(id: Int, owned: Boolean = true) {
                     }
                 }
             }
+        var dragStartStartIndex by remember { mutableStateOf<Int?>(null) }
+        var dragEndIndex by remember { mutableStateOf<Int?>(null) }
+        val lazyListState = rememberLazyListState()
+        val reorderableLazyColumnState = rememberReorderableLazyListState(lazyListState) { from, to ->
+            if (dragStartStartIndex == null) {
+                dragStartStartIndex = from.index
+            }
+            dragEndIndex = to.index
+            // Handle item move event in the app back
+            viewModel.moveMusic(from.index, to.index)
+        }
+
+        LaunchedEffect(reorderableLazyColumnState.isAnyItemDragging) {
+            if (!reorderableLazyColumnState.isAnyItemDragging) {
+                val start = dragStartStartIndex
+                val end = dragEndIndex
+                if (start != null && end != null && start != end) {
+                    // broadcast the move to the other users of the app
+                    viewModel.broadcastMove(start, end)
+                }
+                dragStartStartIndex = null
+                dragEndIndex = null
+            }
+        }
+
         HorizontalDivider(thickness = 2.dp, color = MaterialTheme.colorScheme.onBackground)
         LazyColumn(
+            state = lazyListState,
             modifier = Modifier.weight(1f)
         ) {
-            items(musics) { item ->
-                PlaylistCard(playlistId, item)
-                HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.onBackground)
+            itemsIndexed(musics, key = { _, item: MusicJson -> item.id }) { index: Int, item: MusicJson ->
+                ReorderableItem(
+                    reorderableLazyColumnState,
+                    key = item.id,
+                    animateItemModifier = Modifier.animateItem()
+                ) { isDragging: Boolean ->
+                    // lift effect when dragging, normal card when not dragging
+                    val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
+                    Column(
+                        modifier = Modifier
+                            .shadow(elevation)
+                            .background(MaterialTheme.colorScheme.background)
+                    ) {
+                        PlaylistCard(
+                            playlistId = playlistId,
+                            music = item,
+                            modifier = Modifier.longPressDraggableHandle()
+                        )
+                        HorizontalDivider(
+                            thickness = 1.dp,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
             }}
         }
 

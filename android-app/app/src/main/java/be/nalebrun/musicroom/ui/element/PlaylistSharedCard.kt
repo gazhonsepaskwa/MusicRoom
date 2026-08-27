@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -88,20 +90,22 @@ fun PlaylistSharedCard(music: libraryJson, navigationViewModel: NavigationViewMo
     ) {
         Column{
             Row {
-                Image(
+                Icon(
                     modifier = Modifier.padding(end = 2.dp),
                     painter = painterResource(R.drawable.outline_group_24),
                     contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
                 )
                 Text(music.title, fontWeight = FontWeight.Bold, fontSize = 20.sp)
             }
             Text("${music.songs} songs ● $time")
         }
-        Image(
+        Icon(
             painter = painterResource(R.drawable.outline_more_horiz_24),
             contentDescription = "",
-            modifier = Modifier.clickable(true, onClick = { showBottomSheet = true })
+            modifier = Modifier.clickable(true, onClick = { showBottomSheet = true }),
+            tint = MaterialTheme.colorScheme.onBackground
         )
     }
-    HorizontalDivider(thickness = 1.dp, color = Color.Gray)
+    HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
 }

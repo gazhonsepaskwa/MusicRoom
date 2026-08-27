@@ -16,6 +16,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -95,7 +97,7 @@ fun LibraryUi() {
                 if (error) {
                     Text(
                         text = "Name unavailable",
-                        color = Color.Red
+                        color = MaterialTheme.colorScheme.error
                     )
                 }
                 CustomTextField(
@@ -158,14 +160,15 @@ fun LibraryUi() {
                     textAlign = TextAlign.Center,
                     fontSize = 25.sp
                 )
-                Image(
+                Icon(
                     painter = painterResource(R.drawable.outline_add_24),
                     contentDescription = "",
                     modifier = Modifier
-                        .clickable(true, onClick = { showCreatePlaylistSheet = true })
+                        .clickable(true, onClick = { showCreatePlaylistSheet = true }),
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
             }
-            HorizontalDivider(thickness = 2.dp, color = Color.Black)
+            HorizontalDivider(thickness = 2.dp, color = MaterialTheme.colorScheme.onBackground)
             LazyColumn(
                 modifier = Modifier.weight(1f)
             ) {

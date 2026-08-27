@@ -2,7 +2,6 @@ package be.nalebrun.musicroom.ui.screen
 
 import android.util.Log
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Switch
@@ -33,7 +34,6 @@ import be.nalebrun.musicroom.ui.element.ActionSheet
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -129,19 +129,21 @@ fun ManageAccessCard(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
+            Icon(
                 painter = painterResource(R.drawable.baseline_account_circle_24),
                 contentDescription = null,
-                modifier = Modifier.padding(end = 10.dp)
+                modifier = Modifier.padding(end = 10.dp),
+                tint = MaterialTheme.colorScheme.onBackground
             )
             Text(text = name, fontWeight = FontWeight.Bold)
         }
-        Image(
+        Icon(
             painter = painterResource(R.drawable.outline_cancel_24),
             contentDescription = "Remove",
             modifier = Modifier.clickable(true, onClick = {
                 viewModel.leavePlaylistAccess(playlistId, friendId)
-            })
+            }),
+            tint = MaterialTheme.colorScheme.error
         )
     }
 }
@@ -165,14 +167,15 @@ fun AddAccessCard(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
+            Icon(
                 painter = painterResource(R.drawable.baseline_account_circle_24),
                 contentDescription = null,
-                modifier = Modifier.padding(end = 10.dp)
+                modifier = Modifier.padding(end = 10.dp),
+                tint = MaterialTheme.colorScheme.onBackground
             )
             Text(text = name, fontWeight = FontWeight.Bold)
         }
-        Image(
+        Icon(
             painter = painterResource(if (invitSent) {
                 R.drawable.outline_expand_circle_down_24
             } else {
@@ -182,7 +185,8 @@ fun AddAccessCard(
             modifier = Modifier.clickable(true, onClick = {
                 accessViewModel.giveFriendAccessToPlaylist(friendId, playlistId)
                 invitSent = true
-            })
+            }),
+            tint = MaterialTheme.colorScheme.primary
         )
     }
 }

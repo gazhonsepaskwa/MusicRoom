@@ -29,7 +29,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -101,7 +100,7 @@ fun FriendsUi() {
                 ActionItem(
                     label = "remove friend",
                     icon = R.drawable.baseline_favorite_border_24,
-                    color = Color.Red,
+                    color = MaterialTheme.colorScheme.error,
                     onClick = {
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
                             viewModel.removeFriend(selectedFriendId)
@@ -259,7 +258,7 @@ fun FriendRequestCard(
                 painter = painterResource(R.drawable.outline_cancel_24),
                 contentDescription = "Decline",
                 modifier = Modifier.clickable { onDecline() },
-                tint = Color.Red
+                tint = MaterialTheme.colorScheme.error
             )
         }
     }

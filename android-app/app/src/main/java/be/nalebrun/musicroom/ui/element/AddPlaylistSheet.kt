@@ -79,13 +79,6 @@ fun AddPlaylistSheet(
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
 
-    // Scroll to the currently playing song
-//    LaunchedEffect(currentMusicIndex) {
-//        if (currentMusicIndex >= 0) {
-//            listState.scrollToItem(currentMusicIndex)
-//        }
-//    }
-
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
@@ -138,38 +131,3 @@ fun AddPlaylistElem(
         }
     }
 }
-//@Composable
-//fun WaitingListElem(music: MusicJson, isPlaying: Boolean) {
-//    Column(
-//        modifier = Modifier
-//            .padding(bottom = 5.dp)
-//    ) {
-//        Row(
-//            verticalAlignment = Alignment.CenterVertically,
-//            horizontalArrangement = Arrangement.SpaceBetween,
-//            modifier = Modifier.fillMaxWidth()
-//        ) {
-//            Column() {
-//                // title
-//                if (music.title.isNotEmpty())   { Text(music.title) }
-//                else                            { Text("Unknown Title") }
-//
-//                // artist
-//                if (music.artists.isNotEmpty()) {
-//                    Text(music.artists.firstOrNull()?.title ?: "Unknown Artist")
-//                }
-//                else { Text("Unknown Artist") }
-//            }
-//
-//            if (isPlaying) {
-//                Image(
-//                    painter = rememberDrawablePainter(drawable = getDrawable(LocalContext.current, R.drawable.audio_wave)),
-//                    contentDescription = "...",
-//                    modifier = Modifier.size(30.dp)
-//                )
-//            }
-//        }
-//        // separator
-//        HorizontalDivider(thickness = 0.5f.dp, color = Color.Gray, modifier = Modifier.padding(top = 5.dp))
-//    }
-//}

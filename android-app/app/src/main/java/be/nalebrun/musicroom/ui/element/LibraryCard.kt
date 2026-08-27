@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -94,7 +95,7 @@ fun LibraryCard(music: libraryJson, navigationViewModel: NavigationViewModel) {
                 if (error) {
                     Text(
                         text = "Name unavailable",
-                        color = Color.Red
+                        color = MaterialTheme.colorScheme.error
                     )
                 }
                 CustomTextField(
@@ -140,10 +141,11 @@ fun LibraryCard(music: libraryJson, navigationViewModel: NavigationViewModel) {
             Text("${music.songs} songs ● $time")
         }
         if (music.title != "Favorite") {
-            Image(
+            Icon(
                 painter = painterResource(R.drawable.outline_more_horiz_24),
                 contentDescription = "",
-                modifier = Modifier.clickable(true, onClick = { showBottomSheet = true })
+                modifier = Modifier.clickable(true, onClick = { showBottomSheet = true }),
+                tint = MaterialTheme.colorScheme.onBackground
             )
         }
     }

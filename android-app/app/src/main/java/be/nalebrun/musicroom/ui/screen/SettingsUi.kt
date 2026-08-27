@@ -14,7 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,7 +58,7 @@ fun SettingsUi() {
             SettingItem("change password")   { navigationViewModel.navigateTo("change-password") }
             SettingItem("logout")            { authViewModel.logout() }
 
-            Text("danger zone", color = Color.Red, fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 20.dp))
+            Text("danger zone", color = MaterialTheme.colorScheme.error, fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 20.dp))
             SettingItem("delete my account") { navigationViewModel.navigateTo("delete-account") }
         }
         BottomScreenMenu(

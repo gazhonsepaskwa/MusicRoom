@@ -13,7 +13,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -77,17 +76,17 @@ fun ProfileUi() {
                             modifier = Modifier
                                 .size(100.dp)
                                 .clip(RoundedCornerShape(999.dp))
-                                .border(3.dp, Color.Black, RoundedCornerShape(999.dp)),
+                                .border(3.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(999.dp)),
                             contentScale = ContentScale.Crop
                         )
                         Column(modifier = Modifier.padding(start = 16.dp)) {
-                            Text("username:", fontSize = 12.sp, color = Color.Gray)
+                            Text("username:", fontSize = 12.sp, color = MaterialTheme.colorScheme.secondary)
                             Text(user.username, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                             Row(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("email:", fontSize = 12.sp, color = Color.Gray, modifier = Modifier.padding(top = 4.dp))
+                                Text("email:", fontSize = 12.sp, color = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(top = 4.dp))
                                 Spacer(modifier = Modifier
                                     .width(8.dp))
                                 Icon(
@@ -119,7 +118,7 @@ fun ProfileUi() {
                     ) {
                         Surface(
                             modifier = Modifier
-                                .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
+                                .border(1.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(8.dp))
                                 .padding(horizontal = 12.dp, vertical = 8.dp),
                             shape = RoundedCornerShape(8.dp)
                         ) {
@@ -228,7 +227,7 @@ fun ProfileUi() {
                 }
             }
         } ?: Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = Color.Black)
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
         }
 
         BottomScreenMenu(activeScreen = ActiveScreen.SEARCH)

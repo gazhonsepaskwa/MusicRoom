@@ -1,13 +1,14 @@
 package be.nalebrun.musicroom.ui.element
 
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -44,16 +45,17 @@ fun PlaylistInvitationCard(invite: PlaylistNotificationJson) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
+            Icon(
                 painter = painterResource(R.drawable.playlist_tmp),
                 contentDescription = null,
-                modifier = Modifier.padding(10.dp)
+                modifier = Modifier.padding(10.dp),
+                tint = MaterialTheme.colorScheme.primary
             )
             Text(invite.playlistName ?: "???", fontWeight = FontWeight.Bold)
 //            Text(text = invite.requesterName ?: "???", fontWeight = FontWeight.Bold)
         }
         Row() {
-            Image(
+            Icon(
                 painter = painterResource(R.drawable.outline_expand_circle_down_24),
                 contentDescription = "Accept",
                 modifier = Modifier.clickable(true, onClick = {
@@ -64,9 +66,10 @@ fun PlaylistInvitationCard(invite: PlaylistNotificationJson) {
                         )
                         navigationView.navigateTo("library")
                     }
-                })
+                }),
+                tint = MaterialTheme.colorScheme.primary
             )
-            Image(
+            Icon(
                 painter = painterResource(R.drawable.outline_cancel_24),
                 contentDescription = "Refuse",
                 modifier = Modifier.clickable(true, onClick = {
@@ -77,7 +80,8 @@ fun PlaylistInvitationCard(invite: PlaylistNotificationJson) {
                         )
                         navigationView.navigateTo("library")
                     }
-                })
+                }),
+                tint = MaterialTheme.colorScheme.error
             )
         }
     }

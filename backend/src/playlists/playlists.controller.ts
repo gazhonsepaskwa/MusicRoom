@@ -14,7 +14,11 @@ import {
 import { PlaylistsService } from './playlists.service';
 import { ParseSafeIntPipe } from '../common/pipe/parse_safe_int.pipe';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { MusicPlaylistDto, PlaylistListItemDto, PlaylistVersionResponseDto } from './dto/playlists.dto';
+import {
+  MusicPlaylistDto,
+  PlaylistListItemDto,
+  PlaylistVersionResponseDto,
+} from './dto/playlists.dto';
 import { ApiBody, ApiOkResponse, ApiParam } from '@nestjs/swagger';
 import {
   CreatePlaylistDto,
@@ -22,20 +26,19 @@ import {
   PlaylistResponseDto,
   UpdatePlaylistDto,
 } from './dto/playlists.dto';
+import { PlaylistsGateway } from './playlists.gateway';
 
 @Controller('playlists')
 export class PlaylistsController {
   constructor(
     private readonly playlistsService: PlaylistsService,
+    private readonly playlistsGateway: PlaylistsGateway,
   ) {}
 
   @ApiBody({ type: CreatePlaylistDto })
   @ApiOkResponse({ type: PlaylistResponseDto })
   @Post('create')
-  create(
-    @Body() body: CreatePlaylistDto,
-    @CurrentUser() userId: number,
-  ) {
+  create(@Body() body: CreatePlaylistDto, @CurrentUser() userId: number) {
     try {
       return this.playlistsService.create({
         ...body,
@@ -51,13 +54,13 @@ export class PlaylistsController {
   @ApiOkResponse({ type: PlaylistResponseDto })
   @Patch('update/:id')
   async updatePublicStatus(
-	@CurrentUser() userId: number,
+    @CurrentUser() userId: number,
     @Param('id', ParseSafeIntPipe) id: number,
     @Body() body: UpdatePlaylistDto,
   ) {
-	if (await this.playlistsService.canAccess(id, userId) === false) {
-		throw new BadRequestException('You are not the owner of this playlist');
-	}
+    if ((await this.playlistsService.canAccess(id, userId)) === false) {
+      throw new BadRequestException('You are not the owner of this playlist');
+    }
     return await this.playlistsService.update({
       where: { id },
       data: body,
@@ -74,44 +77,79 @@ export class PlaylistsController {
   @ApiParam({ name: 'id', type: Number })
   @ApiOkResponse({ type: PlaylistResponseDto })
   @Delete('delete/:id')
-  async delete(@CurrentUser() userId: number, @Param('id', ParseSafeIntPipe) id: number) {
+  async delete(
+    @CurrentUser() userId: number,
+    @Param('id', ParseSafeIntPipe) id: number,
+  ) {
     return await this.playlistsService.delete({ id }, userId);
   }
 
   @ApiOkResponse({ type: [PlaylistListItemDto] })
   @Get('available')
   async getAvailable(@CurrentUser() userId: number) {
-	return await this.playlistsService.getPersonnal(userId);
+    return await this.playlistsService.getPersonnal(userId);
   }
 
   @ApiOkResponse({ type: PlaylistVersionResponseDto })
   @Post('add-music')
-  async addMusic(@CurrentUser() userId: number, @Body() musicPlaylistDto: MusicPlaylistDto) {
-	if (await this.playlistsService.canAccess(musicPlaylistDto.playlistId, userId) === false) {
-		throw new BadRequestException('You are not the owner of this playlist');
-	}
-	return await this.playlistsService.addMusic(musicPlaylistDto.playlistId, musicPlaylistDto.musicId);
+  async addMusic(
+    @CurrentUser() userId: number,
+    @Body() musicPlaylistDto: MusicPlaylistDto,
+  ) {
+    if (
+      (await this.playlistsService.canAccess(
+        musicPlaylistDto.playlistId,
+        userId,
+      )) === false
+    ) {
+      throw new BadRequestException('You are not the owner of this playlist');
+    }
+    return await this.playlistsService.addMusic(
+      musicPlaylistDto.playlistId,
+      musicPlaylistDto.musicId,
+    );
   }
 
-  @ApiOkResponse({ type: PlaylistVersionResponseDto })  
+  @ApiOkResponse({ type: PlaylistVersionResponseDto })
   @Delete('remove-music')
-  async removeMusic(@CurrentUser() userId: number, @Body() musicPlaylistDto: MusicPlaylistDto) {
-	if (await this.playlistsService.canAccess(musicPlaylistDto.playlistId, userId) === false) {
-		throw new BadRequestException('You are not the owner of this playlist');
-	}
-	return await this.playlistsService.removeMusic(musicPlaylistDto.playlistId, musicPlaylistDto.musicId);
+  async removeMusic(
+    @CurrentUser() userId: number,
+    @Body() musicPlaylistDto: MusicPlaylistDto,
+  ) {
+    if (
+      (await this.playlistsService.canAccess(
+        musicPlaylistDto.playlistId,
+        userId,
+      )) === false
+    ) {
+      throw new BadRequestException('You are not the owner of this playlist');
+    }
+    const result = await this.playlistsService.removeMusic(
+      musicPlaylistDto.playlistId,
+      musicPlaylistDto.musicId,
+    );
+    if (result) {
+      this.playlistsGateway.sendRemoveMusic(
+        musicPlaylistDto.playlistId,
+        musicPlaylistDto.musicId,
+        result.version,
+      );
+    }
+    return result;
   }
 
   @ApiOkResponse({ type: PlaylistDetailResponseDto })
   @Get('favorite')
   async getFavorite(@CurrentUser() userId: number) {
-	const favoritePlaylist = await this.playlistsService.playlist({
-	  title_userId_isDefault: {
-		title: 'Favorite',
-		userId: userId,
-		isDefault: true,
-	  },
-	});
-	return favoritePlaylist;
+    try {
+      const favoritePlaylist = await this.playlistsService.playlist({
+        title_userId_isDefault: {
+          title: 'Favorite',
+          userId: userId,
+          isDefault: true,
+        },
+      });
+      return favoritePlaylist;
+    } catch (error) {}
   }
 }

@@ -54,6 +54,13 @@ export class PlaylistsGateway {
     console.log(`Client ${client.data.userId} joined playlist ${playlistId}`);
   }
 
+  sendRemoveMusic(playlistId: number, songId: number, version: number): void {
+    this.server.to(`playlist_${playlistId}`).emit('remove_music', {
+      songId: songId,
+      version: version,
+    });
+  }
+
   @SubscribeMessage('add_music')
   async handleAddMusic(
     client: Socket,

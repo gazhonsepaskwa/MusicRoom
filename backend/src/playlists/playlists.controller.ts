@@ -104,10 +104,19 @@ export class PlaylistsController {
     ) {
       throw new BadRequestException('You are not the owner of this playlist');
     }
-    return await this.playlistsService.addMusic(
+    const result = await this.playlistsService.addMusic(
       musicPlaylistDto.playlistId,
       musicPlaylistDto.musicId,
     );
+
+    if (result) {
+      this.playlistsGateway.sendAddMusic(
+        musicPlaylistDto.playlistId,
+        musicPlaylistDto.musicId,
+        result.version,
+      );
+    }
+    return result;
   }
 
   @ApiOkResponse({ type: PlaylistVersionResponseDto })

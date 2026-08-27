@@ -93,17 +93,28 @@ export class PlaylistsController {
     @CurrentUser() userId: number,
     @Body() musicPlaylistDto: MusicPlaylistDto,
   ) {
+    console.log(
+      `User ${userId} is trying to add music ${musicPlaylistDto.musicId} to playlist ${musicPlaylistDto.playlistId}`,
+    );
     if (
       (await this.playlistsService.canAccess(
         musicPlaylistDto.playlistId,
         userId,
       )) === false
     ) {
+      console.log(
+        `User ${userId} does not have access to playlist ${musicPlaylistDto.playlistId}`,
+      );
       throw new BadRequestException('You are not the owner of this playlist');
     }
+
     const result = await this.playlistsService.addMusic(
       musicPlaylistDto.playlistId,
       musicPlaylistDto.musicId,
+    );
+
+    console.log(
+      `Music ${musicPlaylistDto.musicId} added to playlist ${musicPlaylistDto.playlistId} with new version ${result?.version}`,
     );
 
     if (result) {

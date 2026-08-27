@@ -540,7 +540,7 @@ export class PlaylistsService {
       },
       select: { userId: true },
     });
-    return playlist?.userId === userId;
+    return !!playlist;
   }
 
   async getPlaylistCounts(

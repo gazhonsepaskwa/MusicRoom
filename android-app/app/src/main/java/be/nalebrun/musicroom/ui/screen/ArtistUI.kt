@@ -138,9 +138,9 @@ fun ArtistUi(artistId: Int) {
                             ),
                             contentDescription = "",
                             modifier = Modifier.clickable(
-                                true,
-                                onClick = { shuffleOn = !shuffleOn }),
-                            tint = if (shuffleOn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                enabled = false,
+                                onClick = { /*shuffleOn = !shuffleOn*/ }),
+                            tint = if (shuffleOn) MaterialTheme.colorScheme.primary.copy(alpha = 0.38f) else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.38f)
                         )
 
                     }

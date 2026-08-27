@@ -51,6 +51,20 @@ export class PlaylistsGateway {
       userId: client.data.userId,
       version: version,
     });
+
+    const playlist = await this.playlistsService.playlist({
+      id: playlistIdNum,
+    });
+    if (!playlist) {
+      client.emit('app_error', {
+        message: 'Playlist not found',
+      });
+      return;
+    }
+
+    client.emit('playlist_content', {
+      playList: playlist,
+    });
     console.log(`Client ${client.data.userId} joined playlist ${playlistId}`);
   }
 

@@ -7,7 +7,11 @@ import { Server, Socket } from 'socket.io';
 import { DevicesService } from './devices.service';
 import { WebSocketsService } from '../websockets/websockets.service';
 import { BaseGateway } from '../websockets/base.gateway';
-import { PlaybackStateDto } from './dto/playbackState.dto';
+import {
+  PlaybackStateDto,
+  PlaybackStateResponseDto,
+  PlaybackStateResponseRejectDto,
+} from './dto/playbackState.dto';
 
 @WebSocketGateway()
 export class DevicesGateway {
@@ -74,7 +78,7 @@ export class DevicesGateway {
     }
   }
 
-  leaveRoom(client: Socket, roomName: string) {
+  leaveRoom(client: Socket, roomName: string): boolean {
     const room = this.server.sockets.adapter.rooms.get(roomName);
     if (room && room.has(client.id)) {
       if (client.data.deviceId === this.getDeviceIdFromRoomName(roomName)) {
@@ -90,8 +94,10 @@ export class DevicesGateway {
           this.deleteRoom(roomName);
         }
       }
+      return true;
     } else {
       client.emit('app_error', { message: 'Not connected to the device' });
+      return false;
     }
   }
 
@@ -99,7 +105,9 @@ export class DevicesGateway {
   async handleDisconnectFromDevice(client: Socket, deviceId: string) {
     const roomName = this.generateRoomName(deviceId);
 
-    this.leaveRoom(client, roomName);
+    if (this.leaveRoom(client, roomName)) {
+      client.emit('disconnectedFromDevice', { deviceId: deviceId });
+    }
   }
 
   private async joinDeviceToRoom(
@@ -122,19 +130,41 @@ export class DevicesGateway {
     payload: {
       emitDeviceID: string;
       emitUserId: number;
-      data: PlaybackStateDto;
+      data: PlaybackStateDto | undefined;
+      isAccepted: boolean;
     },
   ) {
-    const canConnect = await this.devicesService.canConnectToDevice(
-      payload.emitUserId,
-      client.data.deviceId,
-    );
-
-    if (canConnect === undefined) {
+    try {
+      const canConnect = await this.devicesService.canConnectToDevice(
+        payload.emitUserId,
+        client.data.deviceId,
+      );
+      if (canConnect === undefined) {
+        client.emit('app_error', {
+          message:
+            'Cannot connect to target device (device not exist or invalid permission)',
+        });
+        return;
+      }
+    } catch (error) {
       client.emit('app_error', {
         message:
           'Cannot connect to target device (device not exist or invalid permission)',
       });
+      return;
+    }
+
+    if (!payload.isAccepted || !payload.data) {
+      const playbackStateResponseReject: PlaybackStateResponseRejectDto = {
+        deviceId: client.data.deviceId,
+        isAccepted: false,
+      };
+
+      this.baseGateway.sendToDevice(
+        payload.emitDeviceID,
+        'hostResponse',
+        playbackStateResponseReject,
+      );
       return;
     }
 
@@ -156,53 +186,100 @@ export class DevicesGateway {
       return;
     }
 
+    const musicListObj = await this.devicesService.getMusicListFromIds(
+      payload.data.musicListIds || [],
+    );
+
+    const playbackStateResponse: PlaybackStateResponseDto = {
+      isPlaying: payload.data.isPlaying,
+      currentTime: payload.data.currentTime,
+      deviceId: client.data.deviceId,
+      isAccepted: true,
+      currentMusicId: payload.data.currentMusicId,
+      musicList: musicListObj,
+    };
+
     this.baseGateway.sendToDevice(
       payload.emitDeviceID,
       'hostResponse',
-      payload.data,
+      playbackStateResponse,
     );
   }
 
   @SubscribeMessage('modifyData')
   async handleModifyData(client: Socket, payload: PlaybackStateDto) {
     const userId = client.data.userId;
+    const userDeviceId = client.data.deviceId;
 
-    const canConnect = await this.devicesService.canConnectToDevice(
-      userId,
-      payload.deviceId,
-    );
-    if (canConnect === undefined) {
-      client.emit('app_error', {
-        message:
-          'Cannot connect to target device (device not exist or invalid permission)',
-      });
+    if (!payload.deviceId) {
+      client.emit('app_error', { message: 'Missing deviceId' });
       return;
     }
 
+    if (userDeviceId !== payload.deviceId) {
+      const canConnect = await this.devicesService.canConnectToDevice(
+        userId,
+        payload.deviceId,
+      );
+      if (canConnect === undefined) {
+        client.emit('app_error', {
+          message:
+            'Cannot connect to target device (device not exist or invalid permission)',
+        });
+        return;
+      }
+
+      if (
+        !canConnect.canModifyMusic &&
+        (payload.musicListIds !== undefined ||
+          payload.currentMusicId !== undefined)
+      ) {
+        client.emit('app_error', { message: 'No permission to modify music' });
+        return;
+      }
+
+      if (!canConnect.canSeek && payload.currentTime !== undefined) {
+        if (
+          !(
+            payload.currentTime >= 0 &&
+            payload.currentTime < 1 &&
+            payload.currentMusicId !== undefined
+          )
+        ) {
+          {
+            client.emit('app_error', { message: 'No permission to seek' });
+            return;
+          }
+        }
+      }
+
+      if (!canConnect.canTogglePlayPause && payload.isPlaying !== undefined) {
+        client.emit('app_error', {
+          message: 'No permission to toggle play/pause',
+        });
+        return;
+      }
+    }
     const roomName = this.generateRoomName(payload.deviceId);
     const room = this.server.sockets.adapter.rooms.get(roomName);
     if (!room || !room.has(client.id)) {
       client.emit('app_error', { message: 'Not connected to target device' });
       return;
     }
+    const musicListObj = await this.devicesService.getMusicListFromIds(
+      payload.musicListIds || [],
+    );
 
-    if (!canConnect.canModifyMusic && payload.musicListIds !== undefined) {
-      client.emit('app_error', { message: 'No permission to modify music' });
-      return;
-    }
+    const playbackStateResponse: PlaybackStateResponseDto = {
+      isPlaying: payload.isPlaying,
+      currentTime: payload.currentTime,
+      deviceId: payload.deviceId,
+      currentMusicId: payload.currentMusicId,
+      musicList: payload.musicListIds ? musicListObj : undefined,
+    };
 
-    if (!canConnect.canSeek && payload.currentTime !== undefined) {
-      client.emit('app_error', { message: 'No permission to seek' });
-      return;
-    }
-
-    if (!canConnect.canTogglePlayPause && payload.isPlaying !== undefined) {
-      client.emit('app_error', {
-        message: 'No permission to toggle play/pause',
-      });
-      return;
-    }
-
-    this.server.to(roomName).emit('playback_state', payload, {userId: userId});
+    this.server
+      .to(roomName)
+      .emit('playback_state', playbackStateResponse, { userId: userId });
   }
 }

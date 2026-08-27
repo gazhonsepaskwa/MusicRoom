@@ -16,7 +16,7 @@ export class MusicArtistDto {
   title!: string;
 }
 
-export class MusicResponseDto {
+export class MusicDto {
   @ApiProperty({ example: 1 })
   id!: number;
 
@@ -31,7 +31,9 @@ export class MusicResponseDto {
 
   @ApiProperty({ type: [MusicArtistDto] })
   artists!: MusicArtistDto[];
+}
 
+export class MusicResponseDto extends MusicDto {
   @ApiProperty({ example: 'music' })
   type!: string;
 }

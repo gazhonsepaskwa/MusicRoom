@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { deviceship } from '../../generated/prisma/client.js';
 import { WebSocketsService } from '../websockets/websockets.service';
+import { MusicService } from '../music/music.service';
 import { DeviceRequestDto } from './dto/device.dto';
 
 @Injectable()
@@ -9,6 +10,7 @@ export class DevicesService {
   constructor(
     private prisma: PrismaService,
     private websocketsService: WebSocketsService,
+    private musicService: MusicService,
   ) {}
   async addDevice(ownerId: number, id: string, name: string) {
     const device = await this.prisma.device.upsert({
@@ -25,6 +27,12 @@ export class DevicesService {
       },
     });
     return device;
+  }
+
+  async getMusicListFromIds(musicListIds: number[]) {
+    const musicList =
+      await this.musicService.convertMusicListIdsToMusicList(musicListIds);
+    return musicList;
   }
 
   async isAccessibleDevice(userId: number, deviceId: string) {
@@ -94,18 +102,20 @@ export class DevicesService {
     return device;
   }
 
-  async deviceship(deviceId: string, userId: number) : Promise<deviceship> {
-	const deviceship = await this.prisma.deviceship.findUnique({
-		where: {
-			deviceId_userId: {
-				deviceId,
-				userId
-			}
-		}
-	});
-	if (!deviceship)
-		throw new BadRequestException("No Deviceship Found between user and device");
-	return deviceship;
+  async deviceship(deviceId: string, userId: number): Promise<deviceship> {
+    const deviceship = await this.prisma.deviceship.findUnique({
+      where: {
+        deviceId_userId: {
+          deviceId,
+          userId,
+        },
+      },
+    });
+    if (!deviceship)
+      throw new BadRequestException(
+        'No Deviceship Found between user and device',
+      );
+    return deviceship;
   }
 
   async deleteDevice(userId: number, data: DeviceRequestDto) {
@@ -117,10 +127,10 @@ export class DevicesService {
     const device = await this.prisma.device.delete({
       where: {
         name_ownerId_id: {
-			name: data.deviceName,
-			ownerId: userId,
-			id: data.deviceId,
-		}
+          name: data.deviceName,
+          ownerId: userId,
+          id: data.deviceId,
+        },
       },
     });
     return device;
@@ -131,26 +141,26 @@ export class DevicesService {
       where: {
         userId,
       },
-	  select: {
-		deviceId: true,
-		device: {
-			select: {
-				name: true,
-			}
-		},
-		userId: true,
-		createdAt: true,
-		canSeek: true,
-		canTogglePlayPause: true,
-		canModifyMusic: true,
-	  }
+      select: {
+        deviceId: true,
+        device: {
+          select: {
+            name: true,
+          },
+        },
+        userId: true,
+        createdAt: true,
+        canSeek: true,
+        canTogglePlayPause: true,
+        canModifyMusic: true,
+      },
     });
 
-	return devices.map(({ device, ...rest }) => ({
-		name: device.name,
-		...rest,
-		isOnlineDevice: this.websocketsService.isOnlineDevice(rest.deviceId),
-	}));
+    return devices.map(({ device, ...rest }) => ({
+      name: device.name,
+      ...rest,
+      isOnlineDevice: this.websocketsService.isOnlineDevice(rest.deviceId),
+    }));
   }
 
   async getUserDevices(userId: number) {
@@ -179,14 +189,6 @@ export class DevicesService {
     });
 
     if (!deviceship) {
-      return undefined;
-    }
-
-    if (
-      !deviceship.canModifyMusic &&
-      !deviceship.canSeek &&
-      !deviceship.canTogglePlayPause
-    ) {
       return undefined;
     }
 

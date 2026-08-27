@@ -61,78 +61,91 @@ export class PlaylistsGateway {
     });
   }
 
-  @SubscribeMessage('add_music')
-  async handleAddMusic(
-    client: Socket,
-    {
-      playlistId,
-      songId,
-      version,
-    }: { playlistId: string; songId: string; version: number },
-  ) {
-    const playlistIdNum = Number(playlistId);
-    const songIdNum = Number(songId);
-    if (isNaN(playlistIdNum) || isNaN(songIdNum)) {
-      client.emit('app_error', {
-        message: 'Invalid playlist ID or song ID provided',
-      });
-      return;
-    }
-    if (!client.rooms.has(`playlist_${playlistId}`)) {
-      client.emit('app_error', {
-        message: 'Client is not a member of this playlist',
-      });
-      return;
-    }
-
-    const true_version =
-      await this.playlistsService.getPlaylistVersion(playlistIdNum);
-    if (version !== true_version) {
-      client.emit('app_error', {
-        message: `Version mismatch: client version ${version}, server version ${true_version}`,
-      });
-      return;
-    }
-    console.log('playlist version before adding music:', version);
-
-    let newVersion: number | void;
-    try {
-      newVersion = (
-        await this.playlistsService.addMusic(playlistIdNum, songIdNum)
-      )?.version;
-    } catch (error) {
-      throw error;
-    }
-    if (newVersion === undefined) {
-      client.emit('app_error', {
-        message: 'Failed to add music to playlist',
-      });
-      return;
-    }
-
-    console.log('playlist version after adding music:', newVersion);
-    this.server
-      .to(`playlist_${playlistId}`)
-      .emit('music_added', { songId, version: newVersion, playlistId });
-    console.log(
-      `Client ${client.id} added music ${songId} to playlist ${playlistId}`,
-    );
+  sendAddMusic(playlistId: number, songId: number, version: number): void {
+    this.server.to(`playlist_${playlistId}`).emit('add_music', {
+      songId: songId,
+      version: version,
+    });
   }
+
+  // @SubscribeMessage('add_music')
+  // async handleAddMusic(
+  //   client: Socket,
+  //   {
+  //     playlistId,
+  //     songId,
+  //     version,
+  //   }: { playlistId: string; songId: string; version: number },
+  // ) {
+  //   const playlistIdNum = Number(playlistId);
+  //   const songIdNum = Number(songId);
+  //   if (isNaN(playlistIdNum) || isNaN(songIdNum)) {
+  //     client.emit('app_error', {
+  //       message: 'Invalid playlist ID or song ID provided',
+  //     });
+  //     return;
+  //   }
+  //   if (!client.rooms.has(`playlist_${playlistId}`)) {
+  //     client.emit('app_error', {
+  //       message: 'Client is not a member of this playlist',
+  //     });
+  //     return;
+  //   }
+
+  //   const true_version =
+  //     await this.playlistsService.getPlaylistVersion(playlistIdNum);
+  //   if (version !== true_version) {
+  //     client.emit('app_error', {
+  //       message: `Version mismatch: client version ${version}, server version ${true_version}`,
+  //     });
+  //     return;
+  //   }
+  //   console.log('playlist version before adding music:', version);
+
+  //   let newVersion: number | void;
+  //   try {
+  //     newVersion = (
+  //       await this.playlistsService.addMusic(playlistIdNum, songIdNum)
+  //     )?.version;
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  //   if (newVersion === undefined) {
+  //     client.emit('app_error', {
+  //       message: 'Failed to add music to playlist',
+  //     });
+  //     return;
+  //   }
+
+  //   console.log('playlist version after adding music:', newVersion);
+  //   this.server
+  //     .to(`playlist_${playlistId}`)
+  //     .emit('music_added', { songId, version: newVersion, playlistId });
+  //   console.log(
+  //     `Client ${client.id} added music ${songId} to playlist ${playlistId}`,
+  //   );
+  // }
 
   @SubscribeMessage('move_music')
   async handleMoveMusic(
     client: Socket,
     {
       playlistId,
-      musicId,
-      index,
+      oldIndex,
+      newIndex,
       version,
-    }: { playlistId: string; musicId: string; index: number; version: number },
+    }: {
+      playlistId: string;
+      oldIndex: number;
+      newIndex: number;
+      version: number;
+    },
   ) {
     console.log('enter move_music');
     const playlistIdNum = Number(playlistId);
-    const musicIdNum = Number(musicId);
-    if (isNaN(playlistIdNum) || isNaN(musicIdNum) || isNaN(index)) {
+    const oldIndexNum = Number(oldIndex);
+    const newIndexNum = Number(newIndex);
+    if (isNaN(playlistIdNum) || isNaN(oldIndexNum) || isNaN(newIndexNum)) {
       client.emit('app_error', {
         message:
           'Invalid playlist ID, music ID, or index provided. Please check the values and try again.',
@@ -157,8 +170,8 @@ export class PlaylistsGateway {
 
     const newVersion = await this.playlistsService.moveMusic(
       playlistIdNum,
-      musicIdNum,
-      index,
+      oldIndexNum,
+      newIndexNum,
     );
 
     if (newVersion === undefined) {
@@ -168,11 +181,14 @@ export class PlaylistsGateway {
       return;
     }
 
-    this.server
-      .to(`playlist_${playlistId}`)
-      .emit('music_moved', { musicId, index, version: newVersion, playlistId });
+    this.server.to(`playlist_${playlistId}`).emit('music_moved', {
+      oldIndex: oldIndex,
+      newIndex: newIndex,
+      version: newVersion,
+      playlistId,
+    });
     console.log(
-      `Client ${client.id} moved music ${musicId} in playlist ${playlistId} to index ${index}`,
+      `Client ${client.id} moved music ${oldIndex} in playlist ${playlistId} to index ${newIndex}`,
     );
   }
 

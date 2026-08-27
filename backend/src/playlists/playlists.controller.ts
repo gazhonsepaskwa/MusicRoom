@@ -127,6 +127,7 @@ export class PlaylistsController {
     const result = await this.playlistsService.removeMusic(
       musicPlaylistDto.playlistId,
       musicPlaylistDto.musicId,
+      musicPlaylistDto.version,
     );
     if (result) {
       this.playlistsGateway.sendRemoveMusic(

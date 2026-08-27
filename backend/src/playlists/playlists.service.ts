@@ -224,6 +224,7 @@ export class PlaylistsService {
   async removeMusic(
     playlistId: number,
     songId: number,
+    versionPlaylist: number,
   ): Promise<PlaylistVersionResponseDto | undefined> {
     try {
       const playlist = await this.prisma.playlist.findUnique({
@@ -238,6 +239,11 @@ export class PlaylistsService {
       const existingMusic = playlist.musics.find((pm) => pm.musicId === songId);
 
       if (!existingMusic) {
+        return undefined;
+      }
+
+      const playlistVersion = await this.getPlaylistVersion(playlistId);
+      if (playlistVersion !== versionPlaylist) {
         return undefined;
       }
 
@@ -297,7 +303,7 @@ export class PlaylistsService {
 
   async moveMusic(
     playlistId: number,
-    musicId: number,
+    oldIndex: number,
     newIndex: number,
   ): Promise<number | undefined> {
     const playlist = await this.prisma.playlist.findUnique({
@@ -313,13 +319,13 @@ export class PlaylistsService {
       return undefined;
     }
 
-    const musicToMove = playlist.musics.find((pm) => pm.musicId === musicId);
+    const musicToMove = playlist.musics.find((pm) => pm.index === oldIndex);
 
     if (!musicToMove) {
       return undefined;
     }
 
-    const oldIndex = musicToMove.index;
+    const musicId = musicToMove.musicId;
 
     if (
       newIndex < 0 ||
@@ -373,7 +379,7 @@ export class PlaylistsService {
       });
     } catch (error) {
       console.log(
-        `Failed to move music ${musicId} in playlist ${playlistId} to index ${newIndex}: ${error}`,
+        `Failed to move music ${oldIndex} in playlist ${playlistId} to index ${newIndex}: ${error}`,
       );
       return undefined;
     }

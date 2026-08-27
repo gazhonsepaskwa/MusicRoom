@@ -86,10 +86,9 @@ export class PlaylistsGateway {
 
     let newVersion: number | void;
     try {
-      newVersion = (await this.playlistsService.addMusic(
-        playlistIdNum,
-        songIdNum,
-      ))?.version;
+      newVersion = (
+        await this.playlistsService.addMusic(playlistIdNum, songIdNum)
+      )?.version;
     } catch (error) {
       throw error;
     }
@@ -105,12 +104,6 @@ export class PlaylistsGateway {
     console.log(
       `Client ${client.id} added music ${songId} to playlist ${playlistId}`,
     );
-  }
-
-  updateVersion(version: number, playlistId: number) {
-    this.server
-      .to(`playlist_${playlistId}`)
-      .emit('update_version', { version });
   }
 
   @SubscribeMessage('move_music')

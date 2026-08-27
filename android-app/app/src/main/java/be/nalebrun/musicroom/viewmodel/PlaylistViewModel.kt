@@ -138,42 +138,8 @@ class PlaylistViewModel @Inject constructor(
         }
     }}
 
-    fun renamePlaylist(id: Int, title: String) { viewModelScope.launch {
-        val body = """{"title": "$title"}""".toRequestBody("application/json".toMediaType())
-        credentialRepository.jwtFlow.firstOrNull().let { jwt ->
-            apiRepository.patch(
-                url = "/playlists/update/$id",
-                body = body,
-                auth = "Bearer $jwt",
-                onResponse = { _, response ->
-                    if (response.code in 200..<300) {
-                        _title.value = title
-                    }
-                },
-                onFailure = { _, e -> e.printStackTrace()}
-            )
-        }
-    }}
-
-    fun addMusicToPlaylist(musicId: Int, playlistId: Int) { viewModelScope.launch {
-        val body = """{"musicId": $musicId, "playlistId": $playlistId}""".toRequestBody("application/json".toMediaType())
-        credentialRepository.jwtFlow.firstOrNull().let { jwt ->
-            apiRepository.post(
-                url = "/playlists/add-music",
-                body = body,
-                auth = "Bearer $jwt",
-                onResponse = { _, response ->
-//                    if (response.code in 200..<300) {
-//
-//                    }
-                },
-                onFailure = { _, e -> e.printStackTrace()}
-            )
-        }
-    }}
-
     fun removeSongFromPlaylist(musicId: Int, playlistId: Int) { viewModelScope.launch {
-        val body = """{"musicId": $musicId, "playlistId": $playlistId}""".toRequestBody("application/json".toMediaType())
+        val body = """{"musicId": $musicId, "playlistId": $playlistId, "version": ${version.value}}""".toRequestBody("application/json".toMediaType())
         credentialRepository.jwtFlow.firstOrNull().let { jwt ->
             apiRepository.delete(
                 url = "/playlists/remove-music",
@@ -182,6 +148,9 @@ class PlaylistViewModel @Inject constructor(
                 onResponse = { _, response ->
                     if (response.code in 200..<300) {
                         _musics.value = _musics.value.filter { it.id != musicId }
+                    }
+                    else {
+                        Log.d("REMOVE PLAY", response.body?.string() ?: "")
                     }
                 },
                 onFailure = { _, e -> Log.d("REMOVE PLAY", "didnt work") }
@@ -226,7 +195,7 @@ class PlaylistViewModel @Inject constructor(
 
                         moveMusic(oldIndex, newIndex)
                     } else {
-                        Log.d("PLAYLIST", "Ignored our own move echo")
+                        Log.d("PLAYLIST", "Ignored move echo")
                     }
                     // update the playlist version anyway
                     Log.d("PLAYLIST", "playlist version: ${data.optInt("version")}")
@@ -234,13 +203,70 @@ class PlaylistViewModel @Inject constructor(
                 }
             }
         }
+        
+        socketIORepository.on("add_music") { args ->
+            Log.d("PLAYLIST", "<<< RECEIVED EVENT: 'add_music' | DATA: ${args.joinToString()}")
+            val data = args.getOrNull(0)
+            if (data is JSONObject) {
+                viewModelScope.launch {
+                    val musicId = data.optInt("songId")
+                    val version = data.optInt("version")
+
+                    //add the music in the list
+                    credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
+                        apiRepository.get(
+                            url = "music/$musicId",
+                            auth = "Bearer $jwt",
+                            onResponse = { _, response ->
+                                if (response.code in 200..<300) {
+                                    try {
+                                        val music = Json.decodeFromString<MusicJson>(response.body?.string() ?: "")
+                                        _musics.value = _musics.value + music
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
+                                }
+                            },
+                            onFailure = { _, e -> e.printStackTrace() }
+                        )
+                    }
+
+                    // update the playlist version
+                    Log.d("PLAYLIST", "playlist version: $version")
+                    _version.value = version
+                }
+            }
+        }
+
+
+        socketIORepository.on("remove_music") { args ->
+            Log.d("PLAYLIST", "<<< RECEIVED EVENT: 'remove_music' | DATA: ${args.joinToString()}")
+            val data = args.getOrNull(0)
+            if (data is JSONObject) {
+                viewModelScope.launch {
+                    val musicId = data.optInt("songId")
+                    val version = data.optInt("version")
+
+                    // remove the music from the list
+                    _musics.value = _musics.value.filter { it.id != musicId }
+
+                    // update the playlist version
+                    Log.d("PLAYLIST", "playlist version: $version")
+                    _version.value = version
+                }
+            }
+        }
+        
         socketIORepository.emit("join_playlist", playlistId)
     }
 
     fun leavePlaylist(playlistId: Int) {
         socketIORepository.emit("leave_playlist", playlistId)
         socketIORepository.off("join_playlist")
-        socketIORepository.off("move_music")
+        socketIORepository.off("playlist_content")
+        socketIORepository.off("music_moved")
+        socketIORepository.off("add_music")
+        socketIORepository.off("remove_music")
     }
 
     /**

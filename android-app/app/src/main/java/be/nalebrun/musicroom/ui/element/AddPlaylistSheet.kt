@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
@@ -72,6 +73,7 @@ fun AddPlaylistSheet(
         hiltViewModel()
     }
     val playlists: List<libraryJson> by viewModel.playlists.collectAsState()
+    val sharedPlaylists: List<libraryJson> by viewModel.sharedPlaylists.collectAsState()
 
     // get screen height for auto scroll
     val configuration = LocalConfiguration.current
@@ -100,12 +102,21 @@ fun AddPlaylistSheet(
             items(playlists) { it ->
                 AddPlaylistElem(viewModel, it, musicId, onDismissRequest)
             }
+            items(sharedPlaylists) { it ->
+                AddPlaylistElem(viewModel, it, musicId, onDismissRequest, isShared = true)
+            }
         }
     }
 }
 
 @Composable
-fun AddPlaylistElem(viewModel: LibraryViewModel, playlist: libraryJson, musicId: Int, onDismissRequest: () -> Unit) {
+fun AddPlaylistElem(
+    viewModel: LibraryViewModel,
+    playlist: libraryJson,
+    musicId: Int,
+    onDismissRequest: () -> Unit,
+    isShared: Boolean = false
+) {
     Column(
         modifier = Modifier
             .padding(bottom = 5.dp)
@@ -114,7 +125,17 @@ fun AddPlaylistElem(viewModel: LibraryViewModel, playlist: libraryJson, musicId:
                 onDismissRequest()
             })
     ) {
-        Text(playlist.title)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (isShared) {
+                Icon(
+                    painter = painterResource(R.drawable.outline_group_24),
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 8.dp).size(20.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            Text(playlist.title)
+        }
     }
 }
 //@Composable

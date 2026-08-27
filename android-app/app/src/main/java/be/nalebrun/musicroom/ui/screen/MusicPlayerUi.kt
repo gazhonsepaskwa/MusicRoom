@@ -3,6 +3,7 @@ package be.nalebrun.musicroom.ui.screen
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -108,9 +109,19 @@ fun MusicPlayerUi() {
         CoverArt(musicJson.album?.images?.getOrNull(1) ?: "", lyrics) // take the second image because the screen quality is low
 
         // Title and artist
-        Column {
-            Text(musicJson.title, fontSize = 18.sp, fontWeight = FontWeight.Black)
-            Text(musicJson.artists.firstOrNull()?.title ?: "Unknown Artist")
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = musicJson.title,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Black,
+                maxLines = 1,
+                modifier = Modifier.basicMarquee()
+            )
+            Text(
+                text = musicJson.artists.firstOrNull()?.title ?: "Unknown Artist",
+                maxLines = 1,
+                modifier = Modifier.basicMarquee()
+            )
         }
 
         SongProgressBar(musicViewModel, devicesViewModel)

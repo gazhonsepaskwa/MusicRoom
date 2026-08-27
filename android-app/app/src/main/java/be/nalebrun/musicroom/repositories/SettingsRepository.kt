@@ -33,12 +33,6 @@ interface ISettingsRepository {
     val deviceNameFlow: Flow<String?>
 
     /**
-     * flow to get the debug text from the storage
-     * @return the debug text
-     */
-    val debugTextFlow: Flow<String>
-
-    /**
      * Set the server url in the storage
      * @param url the server url
      */
@@ -55,12 +49,6 @@ interface ISettingsRepository {
      * @param name the device name
      */
     suspend fun setDeviceName(name: String)
-
-    /**
-     * Set the debug text in the storage
-     * @param text the debug text
-     */
-    suspend fun setDebugText(text: String)
 }
 
 class SettingsRepository @Inject constructor(
@@ -78,19 +66,12 @@ class SettingsRepository @Inject constructor(
     override val deviceNameFlow: Flow<String?>
         get() = dataStore.data.map { it[PreferenceKey.deviceName] }
 
-    override val debugTextFlow: Flow<String>
-        get() = dataStore.data.map { it[PreferenceKey.debugText] ?: "" }
-
     override suspend fun setDeviceUuid(uuid: String) {
         dataStore.edit { it[PreferenceKey.deviceUuid] = uuid }
     }
 
     override suspend fun setDeviceName(name: String) {
         dataStore.edit { it[PreferenceKey.deviceName] = name }
-    }
-
-    override suspend fun setDebugText(text: String) {
-        dataStore.edit { it[PreferenceKey.debugText] = text }
     }
 
     override suspend fun setServerUrl(url: String) {

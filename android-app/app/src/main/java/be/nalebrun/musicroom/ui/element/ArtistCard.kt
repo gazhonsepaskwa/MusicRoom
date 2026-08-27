@@ -1,5 +1,6 @@
 package be.nalebrun.musicroom.ui.element
 
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -69,9 +70,15 @@ fun ArtistCard(music: MusicJson) {
         ,
         verticalAlignment = Alignment.CenterVertically
     ){
-        Column {
-            Text(music.title, fontWeight = FontWeight.Bold)
-//            Text(artist)
+        Column(
+            modifier = Modifier.weight(1f).padding(end = 8.dp)
+        ) {
+            Text(
+                text = music.title,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                modifier = Modifier.basicMarquee()
+            )
         }
         Icon(
             painter = painterResource(R.drawable.outline_more_horiz_24),

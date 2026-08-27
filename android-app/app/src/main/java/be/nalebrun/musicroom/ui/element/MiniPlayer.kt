@@ -1,6 +1,7 @@
 package be.nalebrun.musicroom.ui.element
 
 import android.app.Activity
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -55,12 +56,26 @@ fun MiniPlayer(musicViewModel: MusicViewModel, activity: Activity) {
     ) {
         // song info
         Column(
-            modifier = Modifier.clickable(onClick = {
-                navigationViewModel.navigateTo("music-player")
-            })
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 16.dp)
+                .clickable(onClick = {
+                    navigationViewModel.navigateTo("music-player")
+                })
         ) {
-            Text(musicJson.title, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-            Text(musicJson.artists.firstOrNull()?.title ?: "Unknown Artist", fontSize = 13.sp)
+            Text(
+                text = musicJson.title,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                modifier = Modifier.basicMarquee()
+            )
+            Text(
+                text = musicJson.artists.firstOrNull()?.title ?: "Unknown Artist",
+                fontSize = 13.sp,
+                maxLines = 1,
+                modifier = Modifier.basicMarquee()
+            )
         }
 
         // music control

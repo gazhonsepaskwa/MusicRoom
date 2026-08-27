@@ -38,23 +38,6 @@ class SettingsViewModel @Inject constructor(
             initialValue = ""
         )
 
-    val debugText: StateFlow<String> = settingsRepository.debugTextFlow
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ""
-        )
-
-    /**
-     * Update the debug text in the repository
-     * @param text The new debug text
-     */
-    fun updateDebugText(text: String) {
-        viewModelScope.launch {
-            settingsRepository.setDebugText(text)
-        }
-    }
-
     /**
      * Update the server URL in the repository and clear the JWT
      * @param url The new server URL

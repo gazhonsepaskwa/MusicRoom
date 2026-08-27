@@ -1,5 +1,6 @@
 package be.nalebrun.musicroom.ui.element
 
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -72,10 +73,21 @@ fun AlbumListCard(musicViewModel: MusicRepository, music: MusicJson) {
         ,
         verticalAlignment = Alignment.CenterVertically
     ){
-        Column {
-            Text(music.title, fontWeight = FontWeight.Bold)
+        Column(
+            modifier = Modifier.weight(1f).padding(end = 8.dp)
+        ) {
+            Text(
+                text = music.title,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                modifier = Modifier.basicMarquee()
+            )
             val artists: String = music.artists.joinToString(", ") { it.title }
-            Text(artists)
+            Text(
+                text = artists,
+                maxLines = 1,
+                modifier = Modifier.basicMarquee()
+            )
         }
         Icon(
             modifier = Modifier.clickable(true, onClick = {

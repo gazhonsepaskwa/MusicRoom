@@ -29,7 +29,7 @@ import be.nalebrun.musicroom.viewmodel.PlaylistViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlaylistCard(playlistId: Int, music: MusicJson) {
+fun PlaylistCard(playlistId: Int, music: MusicJson, modifier: Modifier = Modifier) {
     val viewModel: PlaylistViewModel = hiltViewModel()
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
@@ -60,7 +60,7 @@ fun PlaylistCard(playlistId: Int, music: MusicJson) {
 
     Row (
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
+        modifier = modifier
             .padding(top = 2.dp, bottom = 2.dp, start = 10.dp, end = 10.dp)
             .height(50.dp)
             .fillMaxWidth()

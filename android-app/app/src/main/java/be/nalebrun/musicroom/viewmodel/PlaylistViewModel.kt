@@ -7,7 +7,9 @@ import be.nalebrun.musicroom.IAPIRepository
 import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.PlaylistJson
 import be.nalebrun.musicroom.repositories.ICredentialRepository
+import be.nalebrun.musicroom.repositories.ISettingsRepository
 import be.nalebrun.musicroom.repositories.MusicRepository
+import be.nalebrun.musicroom.repositories.SocketIORepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +18,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import org.json.JSONObject
 import okhttp3.FormBody
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -25,7 +28,9 @@ import javax.inject.Inject
 class PlaylistViewModel @Inject constructor(
     val apiRepository: IAPIRepository,
     val credentialRepository: ICredentialRepository,
-    val musicRepository: MusicRepository
+    val musicRepository: MusicRepository,
+    val socketIORepository: SocketIORepository,
+    val settingsRepository: ISettingsRepository
 ) : ViewModel() {
     private val _title = MutableStateFlow<String>("")
     private val _friends = MutableStateFlow<Int>(0)
@@ -33,6 +38,7 @@ class PlaylistViewModel @Inject constructor(
     private val _isDefault = MutableStateFlow<Boolean>(true)
     private val _musics = MutableStateFlow<List<MusicJson>>(emptyList())
     private val _id = MutableStateFlow<Int>(0)
+    private val _version = MutableStateFlow<Int>(0)
 
     val title: StateFlow<String> = _title
     val friends: StateFlow<Int> = _friends
@@ -40,6 +46,7 @@ class PlaylistViewModel @Inject constructor(
     val isDefault: StateFlow<Boolean> = _isDefault
     val musics: StateFlow<List<MusicJson>> = _musics
     val id: StateFlow<Int> = _id
+    val version: StateFlow<Int> = _version
 
     fun getPlaylist(id: Int) { viewModelScope.launch {
         credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
@@ -181,6 +188,84 @@ class PlaylistViewModel @Inject constructor(
             )
         }
     }
+    }
+
+    fun joinPlaylist(playlistId: Int) {
+        socketIORepository.on("join_playlist") { args ->
+            val data = args.getOrNull(0)
+            if (data is JSONObject) {
+
+                // update the playlist version
+                Log.d("PLAYLIST", "playlist version: ${data.optInt("version")}")
+                _version.value = data.optInt("version")
+            }
+        }
+        // If the playlist change between the api call and the join playlist response on the WS
+        socketIORepository.on("playlist_content") { args ->
+            val data = args.getOrNull(0)
+            if (data is JSONObject) {
+                viewModelScope.launch {
+                    val playlistString = data.optString("playList")
+                    val playlist = Json.decodeFromString<PlaylistJson>(playlistString)
+                    _musics.value = playlist.musics.map { it.music }
+                }
+            }
+        }
+        socketIORepository.on("music_moved") { args ->
+            Log.d("PLAYLIST", "<<< RECEIVED EVENT: 'music_moved' | DATA: ${args.joinToString()}")
+            val data = args.getOrNull(0)
+            if (data is JSONObject) {
+                viewModelScope.launch {
+                    val senderId = data.optString("deviceId")
+                    val myId = settingsRepository.deviceUuidFlow.firstOrNull()
+
+                    // only apply if the update is not from myself
+                    if (senderId != myId) {
+                        val oldIndex = data.optInt("oldIndex")
+                        val newIndex = data.optInt("newIndex")
+
+                        moveMusic(oldIndex, newIndex)
+                    } else {
+                        Log.d("PLAYLIST", "Ignored our own move echo")
+                    }
+                    // update the playlist version anyway
+                    Log.d("PLAYLIST", "playlist version: ${data.optInt("version")}")
+                    _version.value = data.optInt("version")
+                }
+            }
+        }
+        socketIORepository.emit("join_playlist", playlistId)
+    }
+
+    fun leavePlaylist(playlistId: Int) {
+        socketIORepository.emit("leave_playlist", playlistId)
+        socketIORepository.off("join_playlist")
+        socketIORepository.off("move_music")
+    }
+
+    /**
+     * Moves the music at the given index to the new index in the playlist
+     */
+    fun moveMusic(from: Int, to: Int) {
+        val currentList = _musics.value.toMutableList()
+        if (from in currentList.indices && to in currentList.indices) {
+            val item = currentList.removeAt(from)
+            currentList.add(to, item)
+            _musics.value = currentList
+        }
+    }
+
+    fun broadcastMove(from: Int, to: Int) {
+        viewModelScope.launch {
+            val data = JSONObject().apply {
+                put("playlistId", _id.value)
+                put("oldIndex", from)
+                put("newIndex", to)
+                put("version", _version.value)
+                put("deviceId", settingsRepository.deviceUuidFlow.firstOrNull())
+            }
+            socketIORepository.emit("move_music", data)
+        }
     }
 
 }

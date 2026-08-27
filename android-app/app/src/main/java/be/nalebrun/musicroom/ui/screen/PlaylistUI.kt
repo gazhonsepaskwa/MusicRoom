@@ -1,6 +1,8 @@
 package be.nalebrun.musicroom.ui.screen
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -38,18 +43,14 @@ import be.nalebrun.musicroom.ui.element.BottomScreenMenu
 import be.nalebrun.musicroom.ui.element.PlaylistCard
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import be.nalebrun.musicroom.viewmodel.PlaylistViewModel
-import be.nalebrun.musicroom.viewmodel.SocketViewModel
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun PlaylistUi(id: Int, owned: Boolean = true) {
     val viewModel: PlaylistViewModel = hiltViewModel()
     val activity = LocalActivity.current
     val navigationView: NavigationViewModel = if (activity != null) {
-        hiltViewModel(activity as ViewModelStoreOwner)
-    } else {
-        hiltViewModel()
-    }
-    val socketViewModel: SocketViewModel = if (activity != null) {
         hiltViewModel(activity as ViewModelStoreOwner)
     } else {
         hiltViewModel()
@@ -78,11 +79,11 @@ fun PlaylistUi(id: Int, owned: Boolean = true) {
 
     DisposableEffect(effectiveJoinId) {
         if (effectiveJoinId > 0) {
-            socketViewModel.playlistJoin(effectiveJoinId)
+            viewModel.joinPlaylist(effectiveJoinId)
         }
         onDispose {
             if (effectiveJoinId > 0) {
-                socketViewModel.playlistLeave(effectiveJoinId)
+                viewModel.leavePlaylist(effectiveJoinId)
             }
         }
     }
@@ -185,13 +186,60 @@ fun PlaylistUi(id: Int, owned: Boolean = true) {
                     }
                 }
             }
+        var dragStartStartIndex by remember { mutableStateOf<Int?>(null) }
+        var dragEndIndex by remember { mutableStateOf<Int?>(null) }
+        val lazyListState = rememberLazyListState()
+        val reorderableLazyColumnState = rememberReorderableLazyListState(lazyListState) { from, to ->
+            if (dragStartStartIndex == null) {
+                dragStartStartIndex = from.index
+            }
+            dragEndIndex = to.index
+            // Handle item move event in the app back
+            viewModel.moveMusic(from.index, to.index)
+        }
+
+        LaunchedEffect(reorderableLazyColumnState.isAnyItemDragging) {
+            if (!reorderableLazyColumnState.isAnyItemDragging) {
+                val start = dragStartStartIndex
+                val end = dragEndIndex
+                if (start != null && end != null && start != end) {
+                    // broadcast the move to the other users of the app
+                    viewModel.broadcastMove(start, end)
+                }
+                dragStartStartIndex = null
+                dragEndIndex = null
+            }
+        }
+
         HorizontalDivider(thickness = 2.dp, color = MaterialTheme.colorScheme.onBackground)
         LazyColumn(
+            state = lazyListState,
             modifier = Modifier.weight(1f)
         ) {
-            items(musics) { item ->
-                PlaylistCard(playlistId, item)
-                HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.onBackground)
+            itemsIndexed(musics, key = { _, item: MusicJson -> item.id }) { index: Int, item: MusicJson ->
+                ReorderableItem(
+                    reorderableLazyColumnState,
+                    key = item.id,
+                    animateItemModifier = Modifier.animateItem()
+                ) { isDragging: Boolean ->
+                    // lift effect when dragging, normal card when not dragging
+                    val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
+                    Column(
+                        modifier = Modifier
+                            .shadow(elevation)
+                            .background(MaterialTheme.colorScheme.background)
+                    ) {
+                        PlaylistCard(
+                            playlistId = playlistId,
+                            music = item,
+                            modifier = Modifier.longPressDraggableHandle()
+                        )
+                        HorizontalDivider(
+                            thickness = 1.dp,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
             }}
         }
 

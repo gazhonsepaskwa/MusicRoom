@@ -18,6 +18,7 @@ ksp = "2.3.9"
 media3 = "1.5.1"
 errorprone = "2.50.0"
 socketio = "2.1.2"
+reorderable = "3.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -50,6 +51,7 @@ androidx-media3-common = { group = "androidx.media3", name = "media3-common", ve
 androidx-media3-session = { group = "androidx.media3", name = "media3-session", version.ref = "media3" }
 google-errorprone-annotations = { group = "com.google.errorprone", name = "error_prone_annotations", version.ref = "errorprone" }
 socketio = { group = "io.socket", name = "socket.io-client", version.ref = "socketio" }
+reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

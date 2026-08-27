@@ -33,6 +33,9 @@ export class PlaylistsService {
           isDefault: true,
           status: true,
           musics: {
+            orderBy: {
+              index: 'asc',
+            },
             select: {
               index: true,
               music: {

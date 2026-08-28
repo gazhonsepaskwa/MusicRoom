@@ -88,8 +88,10 @@ fun UserProfileUi(userId: Int) {
                         Column(modifier = Modifier.padding(start = 16.dp)) {
                             Text("username:", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(user.username, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                            Text("email:", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp))
-                            Text(user.email ?: "N/A", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                            if (user.email != null) {
+                                Text("email:", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp))
+                                Text(user.email ?: "", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
                 }
@@ -100,17 +102,19 @@ fun UserProfileUi(userId: Int) {
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Surface(
-                            modifier = Modifier
-                                .border(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.onBackground,
-                                    RoundedCornerShape(8.dp)
-                                )
-                                .padding(horizontal = 12.dp, vertical = 8.dp),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text("${user.friends} friends", fontWeight = FontWeight.Bold)
+                        if (user.friends != null) {
+                            Surface(
+                                modifier = Modifier
+                                    .border(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.onBackground,
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text("${user.friends} friends", fontWeight = FontWeight.Bold)
+                            }
                         }
                         if (!profile!!.isYou) {
                             Button(
@@ -142,12 +146,14 @@ fun UserProfileUi(userId: Int) {
                 }
 
                 item {
-                    Text(
-                        "Favorites",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 24.dp, bottom = 8.dp)
-                    )
+                    if (!favoriteMusics.isEmpty()) {
+                        Text(
+                            "Favorites",
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(top = 24.dp, bottom = 8.dp)
+                        )
+                    }
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -188,6 +194,19 @@ fun UserProfileUi(userId: Int) {
                     }
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
+                    }
+                } else {
+                    item {
+                        Text("$user hided they playlists", fontSize = 16.sp)
+                    }
+                }
+                if (displayPlaylists?.isEmpty() ?: false) {
+                    item {
+                        if (selectedPlaylistTab == "owned") {
+                            Text("${user.username} has no playlists", fontSize = 16.sp)
+                        } else {
+                            Text("${user.username} is invited to no playlists, so sad :C", fontSize = 16.sp)
+                        }
                     }
                 }
             }

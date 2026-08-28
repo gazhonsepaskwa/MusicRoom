@@ -1,13 +1,16 @@
 package be.nalebrun.musicroom.ui.screen
 
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,9 +19,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,22 +36,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.SearchResponseJson
+import be.nalebrun.musicroom.ui.element.ActionItem
+import be.nalebrun.musicroom.ui.element.ActionSheet
 import be.nalebrun.musicroom.ui.element.ActiveScreen
 import be.nalebrun.musicroom.ui.element.BottomScreenMenu
 import be.nalebrun.musicroom.ui.element.CustomTextField
 import be.nalebrun.musicroom.viewmodel.MusicViewModel
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import be.nalebrun.musicroom.viewmodel.SearchViewModel
+import be.nalebrun.musicroom.viewmodel.UserProfileViewModel
+import coil3.compose.AsyncImage
 
 enum class ResultType {
     ARTIST,
@@ -159,6 +170,7 @@ fun SearchUi() {
  * @param title First line to display
  * @param subtitle Second line to display
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchResultCard(
     id: Int,
@@ -175,14 +187,54 @@ fun SearchResultCard(
         hiltViewModel(LocalActivity.current as ViewModelStoreOwner)
     } else {
         hiltViewModel()
-    }
+    },
+    userProfileViewModel: UserProfileViewModel = hiltViewModel()
 ) {
+    var showActionSheet by remember { mutableStateOf(false) }
+    var showFavoriteSlotsSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+
+    if (showActionSheet) {
+        ActionSheet(
+            onDismissRequest = { showActionSheet = false },
+            actions = listOf(
+                ActionItem(
+                    label = "Set as favorite",
+                    icon = R.drawable.baseline_edit_24,
+                    onClick = {
+                        showActionSheet = false
+                        showFavoriteSlotsSheet = true
+                    }
+                ),
+                ActionItem(
+                    label = "Add to queue (next)",
+                    icon = R.drawable.outline_play_arrow_24,
+                    onClick = {
+                        showActionSheet = false
+                        music?.let { musicViewModel.addSongToWaitingListNext(it) }
+                    }
+                )
+            ),
+            sheetState = sheetState
+        )
+    }
+
+    if (showFavoriteSlotsSheet) {
+        FavoriteSlotsBottomSheet(
+            onDismissRequest = { showFavoriteSlotsSheet = false },
+            onSlotSelected = { slotIndex ->
+                showFavoriteSlotsSheet = false
+                music?.let {
+                    userProfileViewModel.updateFavoriteMusic(slotIndex, it.id)
+                }
+            }
+        )
+    }
+
     Row (
-        horizontalArrangement = Arrangement
-            .spacedBy(10.dp)
-        ,
+        horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
-            .padding(top = 2.dp, bottom = 2.dp, start = 10.dp)
+            .padding(top = 2.dp, bottom = 2.dp, start = 10.dp, end = 10.dp)
             .background(MaterialTheme.colorScheme.background)
             .height(50.dp)
             .fillMaxWidth()
@@ -200,26 +252,119 @@ fun SearchResultCard(
         ,
         verticalAlignment = Alignment.CenterVertically
     ){
-        Icon(
-            modifier = Modifier
-                .padding(2.dp)
-                .size(36.dp),
-            painter = painterResource(id = when(resultType) {
-                ResultType.ARTIST -> R.drawable.artist
-                ResultType.MUSIC -> R.drawable.note_1
-                ResultType.PLAYLIST -> R.drawable.playlist_tmp
-                ResultType.ALBUM -> R.drawable.album
-                ResultType.USER -> R.drawable.baseline_account_circle_24
-            }),
-            contentDescription = "",
-            tint = MaterialTheme.colorScheme.onBackground
-        )
-        Column (
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f)
         ) {
-            Text(title, fontWeight = FontWeight.Bold)
-            if (resultType != ResultType.USER) {
-                Text(subtitle)
+            Icon(
+                modifier = Modifier
+                    .padding(2.dp)
+                    .size(36.dp),
+                painter = painterResource(id = when(resultType) {
+                    ResultType.ARTIST -> R.drawable.artist
+                    ResultType.MUSIC -> R.drawable.note_1
+                    ResultType.PLAYLIST -> R.drawable.playlist_tmp
+                    ResultType.ALBUM -> R.drawable.album
+                    ResultType.USER -> R.drawable.baseline_account_circle_24
+                }),
+                contentDescription = "",
+                tint = MaterialTheme.colorScheme.onBackground
+            )
+            Column (
+                modifier = Modifier.padding(start = 10.dp)
+            ) {
+                Text(title, fontWeight = FontWeight.Bold, maxLines = 1, modifier = Modifier.basicMarquee())
+                if (resultType != ResultType.USER) {
+                    Text(subtitle, maxLines = 1, modifier = Modifier.basicMarquee())
+                }
             }
+        }
+        if (resultType == ResultType.MUSIC) {
+            Icon(
+                painter = painterResource(id = R.drawable.outline_more_horiz_24),
+                contentDescription = "More",
+                modifier = Modifier
+                    .clickable { showActionSheet = true }
+                    .padding(8.dp)
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FavoriteSlotsBottomSheet(
+    onDismissRequest: () -> Unit,
+    onSlotSelected: (Int) -> Unit,
+    viewModel: UserProfileViewModel = hiltViewModel()
+) {
+    val favoriteMusics by viewModel.favoriteMusics.collectAsState()
+    val sheetState = rememberModalBottomSheetState()
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchProfile(-1)
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = sheetState
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                "Select a slot",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                for (i in 0 until 3) {
+                    val music = favoriteMusics.getOrNull(i)
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { onSlotSelected(i + 1) },
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .aspectRatio(1f)
+                                .clip(RoundedCornerShape(8.dp))
+                                .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(8.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (music != null) {
+                                AsyncImage(
+                                    model = music.album?.images?.firstOrNull() ?: "https://via.placeholder.com/150",
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.baseline_edit_24),
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        Text(
+                            text = music?.title ?: "Empty",
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(top = 4.dp),
+                            maxLines = 1,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
@@ -301,4 +446,3 @@ fun FilterButton(
         )
     }
 }
-

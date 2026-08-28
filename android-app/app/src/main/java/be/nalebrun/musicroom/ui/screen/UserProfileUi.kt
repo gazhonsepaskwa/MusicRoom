@@ -26,6 +26,7 @@ import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
 import be.nalebrun.musicroom.apiJsonStruct.responds.PlaylistProfileJson
 import be.nalebrun.musicroom.ui.element.ActiveScreen
 import be.nalebrun.musicroom.ui.element.BottomScreenMenu
+import be.nalebrun.musicroom.ui.element.FavoriteMusicSquare
 import be.nalebrun.musicroom.ui.element.PageTopBackButton
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import be.nalebrun.musicroom.viewmodel.UserProfileViewModel
@@ -147,10 +148,21 @@ fun UserProfileUi(userId: Int) {
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(top = 24.dp, bottom = 8.dp)
                     )
-                }
 
-                items(favoriteMusics) { music ->
-                    FavoriteMusicItem(music)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        favoriteMusics.take(3).forEach { music ->
+                            Box(modifier = Modifier.weight(1f)) {
+                                FavoriteMusicSquare(music)
+                            }
+                        }
+                        // If there are fewer than 3, add Spacers to maintain alignment
+                        repeat(3 - favoriteMusics.take(3).size) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
                 }
 
                 item {
@@ -186,32 +198,6 @@ fun UserProfileUi(userId: Int) {
         }
 
         BottomScreenMenu(activeScreen = ActiveScreen.SEARCH)
-    }
-}
-
-@Composable
-fun FavoriteMusicItem(music: MusicJson) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        AsyncImage(
-            model = music.album?.images?.firstOrNull() ?: "https://via.placeholder.com/60",
-            contentDescription = null,
-            modifier = Modifier
-                .size(60.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(8.dp)),
-            contentScale = ContentScale.Crop
-        )
-        Text(
-            text = music.title,
-            modifier = Modifier.padding(start = 16.dp),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold
-        )
     }
 }
 

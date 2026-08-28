@@ -23,6 +23,8 @@ import androidx.lifecycle.ViewModelStoreOwner
 import be.nalebrun.musicroom.R
 import be.nalebrun.musicroom.ui.element.ActiveScreen
 import be.nalebrun.musicroom.ui.element.BottomScreenMenu
+import be.nalebrun.musicroom.ui.element.EmptyFavoriteMusicSquare
+import be.nalebrun.musicroom.ui.element.FavoriteMusicSquare
 import be.nalebrun.musicroom.ui.element.PageTopBackButton
 import be.nalebrun.musicroom.viewmodel.NavigationViewModel
 import be.nalebrun.musicroom.viewmodel.UserProfileViewModel
@@ -175,10 +177,22 @@ fun ProfileUi() {
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
-                }
 
-                items(favoriteMusics) { music ->
-                    FavoriteMusicItem(music)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        for (i in 0 until 3) {
+                            val music = favoriteMusics.getOrNull(i)
+                            Box(modifier = Modifier.weight(1f)) {
+                                if (music != null) {
+                                    FavoriteMusicSquare(music, onClick = { navigationViewModel.navigateTo("search") })
+                                } else {
+                                    EmptyFavoriteMusicSquare(onClick = { navigationViewModel.navigateTo("search") })
+                                }
+                            }
+                        }
+                    }
                 }
 
                 item {

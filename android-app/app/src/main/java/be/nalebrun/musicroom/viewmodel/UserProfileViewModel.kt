@@ -157,6 +157,32 @@ class UserProfileViewModel @Inject constructor(
             )
         }
     }
+
+    fun updateFavoriteMusic(slotIndex: Int, musicId: Int) {
+        val param = when (slotIndex) {
+            1 -> "firstPreferredMusicId"
+            2 -> "secondPreferredMusicId"
+            3 -> "thirdPreferredMusicId"
+            else -> return
+        }
+        val body = """{"$param": $musicId}""".toRequestBody("application/json".toMediaType())
+        viewModelScope.launch {
+            credentialRepository.jwtFlow.firstOrNull()?.let { jwt ->
+                apiRepository.patch(
+                    "users/update",
+                    body,
+                    "Bearer $jwt",
+                    { _, response ->
+                        if (response.code in 200..<300) {
+                            fetchProfile(-1)
+                        }
+                    },
+                    { _, e -> e.printStackTrace() }
+                )
+            }
+        }
+    }
+
     fun changeVisibility(param: String, currentValue: String) {
         val nextVisibility = when (currentValue) {
             "PUBLIC" -> "FRIEND"

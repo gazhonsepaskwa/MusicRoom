@@ -75,7 +75,7 @@ fun LibraryUi() {
     val invitations: List<PlaylistNotificationJson> by accessViewModel.playlistRequest.collectAsState()
 
     var newPlaylist by remember { mutableStateOf("") }
-    var newPlaylistPublicStatus by remember { mutableStateOf(false) }
+    var newPlaylistPublicStatus by remember { mutableStateOf(true) }
 
     LaunchedEffect(0) {
         accessViewModel.getPlaylistInvitations()

@@ -171,33 +171,32 @@ fun UserProfileUi(userId: Int) {
                     }
                 }
 
-                item {
-                    Row(
-                        modifier = Modifier
-                            .padding(top = 24.dp, bottom = 8.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Playlists :", fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                        PlaylistTabSwitcher(
-                            selectedTab = selectedPlaylistTab,
-                            onTabSelected = { selectedPlaylistTab = it }
-                        )
-                    }
-                }
-
                 val displayPlaylists = if (selectedPlaylistTab == "owned") user.ownedPlaylists else user.invitedPlaylists
+
                 if (displayPlaylists != null) {
+                    // title row
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .padding(top = 24.dp, bottom = 8.dp)
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Playlists :", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                            PlaylistTabSwitcher(
+                                selectedTab = selectedPlaylistTab,
+                                onTabSelected = { selectedPlaylistTab = it }
+                            )
+                        }
+                    }
+
+                    // playlist items
                     items(displayPlaylists) { playlist ->
                         PlaylistItem(playlist)
                     }
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
-                    }
-                } else {
-                    item {
-                        Text("$user hided they playlists", fontSize = 16.sp)
                     }
                 }
                 if (displayPlaylists?.isEmpty() ?: false) {
@@ -207,6 +206,7 @@ fun UserProfileUi(userId: Int) {
                         } else {
                             Text("${user.username} is invited to no playlists, so sad :C", fontSize = 16.sp)
                         }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }

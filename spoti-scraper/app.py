@@ -170,6 +170,10 @@ def handle_add_album_post():
 		for artist_id in artist_ids:
 			db.link_track_to_artist(track_id, artist_id)
 
+		yt_api.search_and_download(
+			f"{track.get('name')} - {result.get('artists')[0].get('name')}", track_id
+		)
+
 	db.commit()
 
 	response.content_type = "application/json"

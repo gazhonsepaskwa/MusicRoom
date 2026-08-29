@@ -12,8 +12,12 @@ import androidx.media3.session.MediaSessionService
 import be.nalebrun.musicroom.repositories.ICredentialRepository
 import be.nalebrun.musicroom.repositories.IMusicRepository
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -23,6 +27,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class PlaybackService : MediaSessionService() {
     private var mediaSession: MediaSession? = null
+    private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     @Inject
     lateinit var musicRepository: IMusicRepository
@@ -34,9 +39,13 @@ class PlaybackService : MediaSessionService() {
     override fun onCreate() {
         super.onCreate()
 
-        val jwt = runBlocking { credentialRepository.jwtFlow.first() }
         val dataSourceFactory = DefaultHttpDataSource.Factory()
-            .setDefaultRequestProperties(mapOf("Authorization" to "Bearer $jwt"))
+
+        serviceScope.launch {
+            credentialRepository.jwtFlow.collectLatest { jwt ->
+                dataSourceFactory.setDefaultRequestProperties(mapOf("Authorization" to "Bearer $jwt"))
+            }
+        }
 
         // create the ExoPlayer
         val player = ExoPlayer.Builder(this)
@@ -65,6 +74,7 @@ class PlaybackService : MediaSessionService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        serviceScope.cancel()
         mediaSession?.run {
             player.release()
             release() // release the mediaSession

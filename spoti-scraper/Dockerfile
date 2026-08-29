@@ -27,10 +27,13 @@ RUN adduser \
 # Download dependencies as a separate step to take advantage of Docker's caching.
 # Leverage a cache mount to /root/.cache/pip to speed up subsequent builds.
 # Leverage a bind mount to requirements.txt to avoid having to copy them into this layer.
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential libpq-dev gcc ffmpeg
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential libpq-dev gcc ffmpeg nodejs
 RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
     python -m pip install -r requirements.txt
+
+# Create the download directory and set permissions before switching to non-privileged user
+RUN mkdir -p /dl && chown appuser:appuser /dl
 
 # Switch to the non-privileged user to run the application.
 USER appuser

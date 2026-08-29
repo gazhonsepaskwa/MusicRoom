@@ -23,6 +23,42 @@ main
 ```
 for each feature or bug fix: an `issue`, a `branch` and a `pull request` have to be oppened
 
+## Docker Structure
+
+The project is orchestrated using Docker Compose. The following diagram illustrates the service architecture, networking, and volume mounts:
+
+```mermaid
+flowchart TD
+    Internet((Internet))
+    
+    %% External Access
+    Internet <-->|Caddy Port| Caddy[Caddy Reverse Proxy]
+    Internet <-->|Port 8080| Adminer[Adminer DB UI]
+    Internet <-->|Port 8031| Scraper[Spoti-Scraper]
+
+    subgraph Docker_Compose [Docker Compose: music_room_network]
+        direction TB
+        
+        Caddy -->|Proxy| Backend[NestJS Backend]
+        
+        %% Database Connections
+        Backend -->|Prisma| DB[(Postgres DB)]
+        Adminer -->|SQL| DB
+        Scraper -->|SQL| DB
+
+        subgraph Storage [Persistent Storage]
+            direction LR
+            DL[./dl MP3 Files]
+            PG[(Postgres Data)]
+        end
+
+        %% Volume Mounts
+        Backend --- DL
+        Scraper --- DL
+        DB --- PG
+    end
+```
+
 ## Backend
 
 Git main branch for this project part : `dev`

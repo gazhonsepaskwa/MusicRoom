@@ -3,6 +3,7 @@ Main application module for the Spotify/YouTube scraper.
 """
 
 from time import sleep
+import threading
 
 # files
 import json
@@ -19,6 +20,14 @@ from bottle import Bottle, response, run
 
 app = Bottle()
 
+def download_tracks_task(tracks):
+	"""Task to download tracks in the background."""
+	for query, track_id in tracks:
+		try:
+			yt_api.search_and_download(query, track_id)
+		except Exception as e:
+			print(f"Error downloading {query}: {e}")
+
 def add_artist(query: str):
 	# get artist info from spotify
 	result = sp_api.search_artist(query)
@@ -32,6 +41,8 @@ def add_artist(query: str):
 
 	# get artist album from spotify
 	albums = sp_api.get_artist_albums(result.get("uri"))
+
+	tracks_to_download = []
 
 	# create each album of the artist in the db
 	for album in albums:
@@ -67,7 +78,10 @@ def add_artist(query: str):
 				else:
 					db.link_track_to_artist(track_id, artist_id)
 
+			tracks_to_download.append((f"{track.get('name')} - {result.get('name')}", track_id))
+
 	db.commit()
+	threading.Thread(target=download_tracks_task, args=(tracks_to_download,), daemon=True).start()
 	return result
 
 # routes
@@ -159,6 +173,8 @@ def handle_add_album_post():
 		return json.dumps(
 			{"message": "Failed to get album tracks from Spotify", "error": error}
 		)
+
+	tracks_to_download = []
 	for track in album_tracks:
 		track_id = db.insert_track(
 			track.get("uri"),
@@ -170,11 +186,10 @@ def handle_add_album_post():
 		for artist_id in artist_ids:
 			db.link_track_to_artist(track_id, artist_id)
 
-		yt_api.search_and_download(
-			f"{track.get('name')} - {result.get('artists')[0].get('name')}", track_id
-		)
+		tracks_to_download.append((f"{track.get('name')} - {result.get('artists')[0].get('name')}", track_id))
 
 	db.commit()
+	threading.Thread(target=download_tracks_task, args=(tracks_to_download,), daemon=True).start()
 
 	response.content_type = "application/json"
 	return json.dumps(
@@ -218,9 +233,6 @@ def handle_add_track_post():
 		result.get("track_number"),
 		album_id,
 	)
-	yt_api.search_and_download(
-		f"{result.get('name')} - {result.get('artists')[0].get('name')}", track_id
-	)
 
 	# create artist record in db
 	for artist in result.get("artists"):
@@ -233,6 +245,9 @@ def handle_add_track_post():
 		db.link_track_to_artist(track_id, artist_id)
 
 	db.commit()
+
+	download_query = f"{result.get('name')} - {result.get('artists')[0].get('name')}"
+	threading.Thread(target=download_tracks_task, args=([(download_query, track_id)],), daemon=True).start()
 
 	response.content_type = "application/json"
 	return json.dumps(

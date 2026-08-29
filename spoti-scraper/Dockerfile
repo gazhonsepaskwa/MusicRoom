@@ -32,6 +32,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
     python -m pip install -r requirements.txt
 
+# Create the download directory and set permissions before switching to non-privileged user
+RUN mkdir -p /dl && chown appuser:appuser /dl
+
 # Switch to the non-privileged user to run the application.
 USER appuser
 

@@ -73,7 +73,106 @@ A Firebase Notification system was attempted, but is not used, but could be ease
 For each Services that used Controllers and therefore API's, dto files are present to structure the body of each request API as well as the answer body, to ensure and enforce a proper used of each route used.
 All of of this is dockerized and run on a containerized caddy server that handle https request and can handle http with the right change in .env files. The backend and Database are each in separte containers.
 The credentials and sensitives data are kept in secrets files or .env depending on the level of security needed.
- 
+
+### Websocket devices
+
+```mermaid
+    sequenceDiagram
+    participant A as Device A (Client)
+    participant BE as Backend
+    participant B as Device B (Host)
+
+    Note over BE: Maintains the list of<br/>connected devices via Socket.IO
+
+    %% Connection request
+    A->>BE: Request connection to B
+    BE->>BE: Check if B is connected
+    BE->>B: Forward connection request from A
+
+    alt B rejects the request
+        B-->>BE: Reject connection
+        BE-->>A: Connection rejected
+
+    else B accepts the request
+        B->>BE: Accept + send current playback state
+
+        Note over B,BE: Playlist<br/>Play / Pause state<br/>Current track index<br/>Playback position
+
+        BE->>BE: Create room
+        BE-->>A: Send initial playback state
+
+        Note over A,B: Both devices are now synchronized
+
+        %% Host changes
+        B->>BE: Playback state changed
+        BE->>BE: Sending updated state to the room
+        BE-->>A: Updated playback state
+
+        %% Client changes
+        A->>BE: Request playback change
+        BE->>BE: Check permissions
+
+        alt Modification not allowed
+            BE-->>A: Reject modification
+        else Modification allowed
+            BE->>BE: Apply modification
+            BE->>BE: Sending updated state to the room
+            A<<-->>B: Updated playback state
+        end
+    end
+```
+### Websocket playlist
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant BE as Backend
+    participant R as Socket.IO Room
+
+    Note over BE: Each playlist has a dedicated room<br/>playlist_{playlistId}
+
+    %% Join playlist
+    C->>BE: join_playlist(playlistId)
+    BE->>BE: Check permission
+
+    alt Playlist not found / access denied
+        BE-->>C: Join rejected
+    else Join allowed
+        BE->>R: Join room
+        BE->>R: Broadcast userId join, updated version
+        R-->>C: Playlist joined
+    end
+
+    %% Add music
+    C->>BE: add_music(playlistId, songId, version)
+    BE->>BE: Check permission
+
+    alt Version mismatch
+        BE-->>C: Reject modification
+    else Version is valid
+        BE->>BE: Add music
+        BE->>R: Broadcast music added updated version
+        R-->>C: Music added
+    end
+
+    %% Move music
+    C->>BE: move_music(playlistId, musicId, index, version)
+    BE->>BE: Check permission
+
+    alt Version mismatch,
+        BE-->>C: Reject modification
+    else Version is valid
+        BE->>BE: Move music
+        BE->>R: Broadcast the music moved, updated version)
+        R-->>C: Music moved
+    end
+
+    %% Leave playlist
+    C->>BE: leave_playlist(playlistId)
+    BE->>R: Leave playlist_{playlistId}
+    BE->>R: Broadcast leave_playlist
+    R-->>C: Client left
+```
 
 ## Android-app
 

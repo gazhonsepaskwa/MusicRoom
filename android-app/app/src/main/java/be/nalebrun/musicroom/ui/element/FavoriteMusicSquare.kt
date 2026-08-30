@@ -72,7 +72,7 @@ fun EmptyFavoriteMusicSquare(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.baseline_edit_24),
+                painter = painterResource(id = R.drawable.outline_add_24),
                 contentDescription = "Add favorite",
                 modifier = Modifier.size(32.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant

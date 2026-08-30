@@ -40,7 +40,7 @@ fun AlbumListCard(musicViewModel: MusicRepository, music: MusicJson) {
             actions = listOf(
                 ActionItem(
                     label = "add to queue (next)",
-                    icon = R.drawable.outline_devices_other_24,
+                    icon = R.drawable.outline_skip_next_24,
                     onClick = {
                         musicViewModel.addSongToWaitingListNext(music)
                         showBottomSheet = false
@@ -48,7 +48,7 @@ fun AlbumListCard(musicViewModel: MusicRepository, music: MusicJson) {
                 ),
                 ActionItem(
                     label = "add to queue (end)",
-                    icon = R.drawable.outline_devices_other_24,
+                    icon = R.drawable.outline_expand_circle_down_24,
                     onClick = {
                         musicViewModel.addSongToWaitingListEnd(music)
                         showBottomSheet = false
@@ -56,7 +56,7 @@ fun AlbumListCard(musicViewModel: MusicRepository, music: MusicJson) {
                 ),
                 ActionItem(
                     label = "add to playlist",
-                    icon = R.drawable.outline_devices_other_24,
+                    icon = R.drawable.outline_add_24,
                     onClick = { addPlaylistSheet = true }
                 )
             ),

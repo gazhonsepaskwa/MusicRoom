@@ -64,12 +64,12 @@ fun LibraryCard(music: libraryJson, navigationViewModel: NavigationViewModel) {
             actions = listOf(
                 ActionItem(
                     label = "rename playlist",
-                    icon = R.drawable.outline_devices_other_24,
+                    icon = R.drawable.baseline_edit_24,
                     onClick = { showChangeName = true }
                 ),
                 ActionItem(
                     label = "delete playlist",
-                    icon = R.drawable.outline_devices_other_24,
+                    icon = R.drawable.outline_cancel_24,
                     onClick = {
                         libraryViewModel.deletePlaylist(music.id)
                         showBottomSheet = false

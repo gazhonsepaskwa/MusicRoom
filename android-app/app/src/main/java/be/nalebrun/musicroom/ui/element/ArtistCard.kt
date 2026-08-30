@@ -43,17 +43,17 @@ fun ArtistCard(music: MusicJson) {
             actions = listOf(
                 ActionItem(
                     label = "add to queue (next)",
-                    icon = R.drawable.playlist_tmp,
+                    icon = R.drawable.outline_skip_next_24,
                     onClick = { viewModel.musicRepository.addSongToWaitingListNext(music) }
                 ),
                 ActionItem(
                     label = "add to queue (end)",
-                    icon = R.drawable.playlist_tmp,
+                    icon = R.drawable.outline_expand_circle_down_24,
                     onClick = { viewModel.musicRepository.addSongToWaitingListEnd(music) }
                 ),
                 ActionItem(
                     label = "add to playlist",
-                    icon = R.drawable.playlist_tmp,
+                    icon = R.drawable.outline_add_24,
                     onClick = { addPlaylistSheet = true }
                 )
             ),

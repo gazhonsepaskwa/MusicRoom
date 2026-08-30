@@ -40,20 +40,20 @@ fun PlaylistCard(playlistId: Int, music: MusicJson, modifier: Modifier = Modifie
             onDismissRequest = { showBottomSheet = false },
             actions = listOf(
                 ActionItem(
-                    label = "remove from playlist",
-                    icon = R.drawable.outline_devices_other_24,
-                    onClick = { viewModel.removeSongFromPlaylist(music.id, playlistId) }
-                ),
-                ActionItem(
                     label = "add to queue (next)",
-                    icon = R.drawable.outline_devices_other_24,
+                    icon = R.drawable.outline_skip_next_24,
                     onClick = { viewModel.musicRepository.addSongToWaitingListNext(music) }
                 ),
                 ActionItem(
                     label = "add to queue (end)",
-                    icon = R.drawable.outline_devices_other_24,
+                    icon = R.drawable.outline_expand_circle_down_24,
                     onClick = { viewModel.musicRepository.addSongToWaitingListEnd(music) }
-                )
+                ),
+                ActionItem(
+                    label = "remove from playlist",
+                    icon = R.drawable.outline_cancel_24,
+                    onClick = { viewModel.removeSongFromPlaylist(music.id, playlistId) }
+                ),
             ),
             sheetState = sheetState
         )

@@ -20,7 +20,7 @@ export class PlaylistsGateway {
   ) {}
 
   @SubscribeMessage('join_playlist')
-  handleJoinPlaylist(client: Socket, playlistId: String) {
+  async handleJoinPlaylist(client: Socket, playlistId: String) {
     const playlistIdNum = Number(playlistId);
     if (isNaN(playlistIdNum)) {
       console.log(
@@ -35,7 +35,7 @@ export class PlaylistsGateway {
       return;
     }
 
-    const version = this.playlistsService.canJoinPlaylist(
+    const version = await this.playlistsService.canJoinPlaylist(
       playlistIdNum,
       client.data.userId,
     );

@@ -257,7 +257,7 @@ export class PlaylistsService {
 	}
   }
 
-  async canJoinPlaylist(playlistId: number, userId: number): Promise<number> {
+  async canJoinPlaylist(playlistId: number, userId: number): Promise<number | undefined> {
     const playlist = await this.prisma.playlist.findUnique({
       where: {
         id: playlistId,
@@ -276,9 +276,7 @@ export class PlaylistsService {
     });
 
     if (!playlist) {
-      throw new NotFoundException(
-        `Playlist ${playlistId} not found or user not authorized`,
-      );
+      return undefined;
     }
 
     return await this.getPlaylistVersion(playlistId);

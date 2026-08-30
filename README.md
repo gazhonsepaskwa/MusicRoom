@@ -1,15 +1,16 @@
 # MusicRoom
-42 project where you have to make a music streaming service
+42 project where you have to develop a music streaming service
 
 ## Team members & work repartition:
 | name      | worked on        |
 |-----------|------------------|
-| nalebrun  | Android app, caddy, spotiscraper, ytdownloader |
-| lvodak    | Backend          |
-| jgoudema  | Frontend         |
-| ajossera  | Backend          |
+| nalebrun  | Android app (most of the logic, friends, music player, settings, auth), Backend (spotiscraper, ytdownloader) |
+| lvodak    | Backend (auth, ...TODO), Android app (profile page) |
+| jgoudema  | Frontend (artist, playlist, library, album) |
+| ajossera  | Backend (web socket, ...TODO) |
 
-## Git structure :
+## The Git :
+### Stucture
 ```text
 main
 │
@@ -23,9 +24,45 @@ main
 ```
 for each feature or bug fix: an `issue`, a `branch` and a `pull request` have to be oppened
 
+### Rules
+PR have to be reviewed before merged on main.
+
+## Requirement
+The android app need a certified SSL certificate on the api to work (We used Let's Encrypt). Therefore, the api must be accessible via HTTPS. Meaning that the backend cannot be runned in localhost to test with the app (api routes are still testable with curl, bruno, postman or other http tool when ran in localhost). It need a domain name to get a SSL certificate so we deployed the api on a staging server.
+
+`Android studio` ( Quail 1 | 2026.1.1 ) has been used to dev the android app. The app is made for android device on SDK version 37 (minimal supported version 28).
+
+The `Backend` need node.js to run the `NestJS` app and `docker` for the architecture.
+
+## How to launch the project
+
+### Backend :
+1. clone the project
+2. fill the secretsa and .env files
+3. make the project (It will be launched with docker (stucture explained under) )
+```bash
+make up
+```
+4. done
+
+### Andoid app
+1. clone the project
+2. open the `android-app` folder in Android Studio (a cli also exist but the steps will not be explained here)
+3. install the SDK if not already installed
+4. Wait for the gradle build to be done
+#### for emulator : 
+5. Create an emulator in android studio
+6. launch the app with the "green play button"
+#### for physical device : 
+5. enable developer options on your device
+6. connect the phone to the pc for communication via ADB
+7. install the app with the "green play button"
+
 ## Docker Structure
 
-The project is orchestrated using Docker Compose. The following diagram illustrates the service architecture, networking, and volume mounts:
+The project is orchestrated using Docker Compose. The following diagram illustrate the service architecture, networking, and volume mounts:
+
+Note : The `Spot-Scraper` and the `Adminer DB Ui` are exposed directly so they can be disabled without needing to touch the reverse proxy conf. They are only there to be accessed on local and/or for debug/developement purpose.
 
 ```mermaid
 flowchart TD
@@ -59,7 +96,7 @@ flowchart TD
     end
 ```
 
-## Backend
+## Backend - deep dive 
 
 Git main branch for this project part : `dev`
 
@@ -75,7 +112,7 @@ All of of this is dockerized and run on a containerized caddy server that handle
 The credentials and sensitives data are kept in secrets files or .env depending on the level of security needed.
  
 
-## Android-app
+## Android-app - deep dive
 
 Git main branch for this project part : `android-app`
 
@@ -189,3 +226,6 @@ sequenceDiagram
 
 ## Server Client WS communication
 ToDo
+
+## Usage of AI
+AI has been used to accelerate some repetitve task. The generated code has always been reviewed and edited when needed. And sometime it has been used to get information faster than searching on internet. Documentation has been done by human.

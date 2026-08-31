@@ -177,10 +177,13 @@ fun CreateNavGraph(
                 token?.let {
                     Log.d("NavGraph", "Storing token from deep link (validate_email): $it")
                     authViewModel.credentialRepository.setJWT(it)
-                    // connect to the socket ? I am not sure if it I should do it there (TODO : check)
-                    socketViewModel.connectSocket()
-                    navController.navigate("search") {
-                        popUpTo(navController.graph.id) { inclusive = true }
+                    // create the device on the backend
+                    authViewModel.createDevice {
+                        // connect to the viewmodel
+                        socketViewModel.connectSocket()
+                        navController.navigate("search") {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
                     }
                 }
             }

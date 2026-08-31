@@ -219,15 +219,10 @@ class AuthViewModel @Inject constructor(
                     auth = "Bearer $jwt",
                     onResponse = { _, response ->
                         Log.d("AuthViewModel", "Logout response: ${response.code}")
-                        if (response.code in 200..<300) {
-                            viewModelScope.launch {
-                                credentialRepository.setJWT("")
-                                _loginOk.value = false
-                                _logoutComplete.value = true
-                            }
-                        }
-                        else {
-                            uiMessageManager.showMessage("Failed to log you out from server")
+                        viewModelScope.launch {
+                            credentialRepository.setJWT("")
+                            _loginOk.value = false
+                            _logoutComplete.value = true
                         }
                     },
                     onFailure = { _, e ->
@@ -317,4 +312,35 @@ class AuthViewModel @Inject constructor(
             }
         )
     }}
+
+    fun createDevice( callback: () -> Unit ) {
+        viewModelScope.launch {
+            val deviceUUID = settingsRepository.deviceUuidFlow.firstOrNull() ?: return@launch
+            val deviceName = settingsRepository.deviceNameFlow.firstOrNull() ?: return@launch
+            val body       = FormBody.Builder()
+                .add("deviceId"  , deviceUUID)
+                .add("deviceName", deviceName)
+                .build()
+
+            Log.d("AuthViewModel", body.toString())
+
+            Log.d("AuthViewModel", "Creating device $deviceUUID $deviceName")
+            apiRepository.post(
+                url = "devices/add-device",
+                body = body,
+                auth = "Bearer ${credentialRepository.jwtFlow.first()}",
+                onResponse = { _, response ->
+                    if (response.code in 200..<300) {
+                        Log.d("AuthViewModel", "Device created")
+                        callback()
+                    } else {
+                        Log.d("AuthViewModel", "Device not created: error : ${response.code}")
+                    }
+                },
+                onFailure = { _, e ->
+                    Log.d("AuthViewModel", "Device not created")
+                }
+            )
+        }
+    }
 }

@@ -21,6 +21,7 @@ import be.nalebrun.musicroom.repositories.MusicRepository
 import be.nalebrun.musicroom.repositories.UiMessageManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import be.nalebrun.musicroom.repositories.CredentialRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -322,9 +323,6 @@ class AuthViewModel @Inject constructor(
                 .add("deviceName", deviceName)
                 .build()
 
-            Log.d("AuthViewModel", body.toString())
-
-            Log.d("AuthViewModel", "Creating device $deviceUUID $deviceName")
             apiRepository.post(
                 url = "devices/add-device",
                 body = body,
@@ -332,7 +330,9 @@ class AuthViewModel @Inject constructor(
                 onResponse = { _, response ->
                     if (response.code in 200..<300) {
                         Log.d("AuthViewModel", "Device created")
-                        callback()
+                        viewModelScope.launch(Dispatchers.Main) {
+                            callback()
+                        }
                     } else {
                         Log.d("AuthViewModel", "Device not created: error : ${response.code}")
                     }

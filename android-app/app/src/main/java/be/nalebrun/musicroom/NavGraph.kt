@@ -177,8 +177,7 @@ fun CreateNavGraph(
                 token?.let {
                     Log.d("NavGraph", "Storing token from deep link (validate_email): $it")
                     authViewModel.credentialRepository.setJWT(it)
-                    // create the device on the backend
-                    authViewModel.createDevice {
+                    authViewModel.createDevice() {
                         // connect to the viewmodel
                         socketViewModel.connectSocket()
                         navController.navigate("search") {

@@ -1,32 +1,30 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { MusicArtistDto } from '../../music/dto/music.dto';
-import {
-  IsString,
-  IsNotEmpty,
-  IsBoolean,
-  IsOptional
-} from 'class-validator';
+import { IsString, IsNotEmpty, IsBoolean, IsOptional } from 'class-validator';
 
 export class MusicPlaylistDto {
   @ApiProperty({ example: 1 })
-  musicId!: number
+  musicId!: number;
 
   @ApiProperty({ example: 1 })
-  playlistId!: number
+  playlistId!: number;
+
+  @ApiProperty({ example: 1 })
+  version?: number;
 }
 
 export class PlaylistListItemDto {
-	@ApiProperty({ example: 1 })
-	id!: number
+  @ApiProperty({ example: 1 })
+  id!: number;
 
-	@ApiProperty({ example: 'My Playlist' })
-	title!: string
-	
-	@ApiProperty({ example: 5 })
-	songs!: number
-	
-	@ApiProperty({ example: 180000 })
-	duration!: number
+  @ApiProperty({ example: 'My Playlist' })
+  title!: string;
+
+  @ApiProperty({ example: 5 })
+  songs!: number;
+
+  @ApiProperty({ example: 180000 })
+  duration!: number;
 }
 
 export class CreatePlaylistDto {
@@ -44,7 +42,7 @@ export class CreatePlaylistDto {
   @IsNotEmpty()
   @ApiProperty({ example: true })
   isPublic!: boolean;
-} 
+}
 
 export class UpdatePlaylistDto {
   @ApiProperty({ example: 'My Playlist 2.0', required: false })
@@ -143,9 +141,9 @@ export class PlaylistDetailResponseDto {
 export class PlaylistResponseDto {
   @ApiProperty({ example: 1 })
   id!: number;
-  
-	@ApiProperty({ example: true })
-	isPublic!: boolean;
+
+  @ApiProperty({ example: true })
+  isPublic!: boolean;
 
   @ApiProperty({ example: 'My Playlist' })
   title!: string;

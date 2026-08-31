@@ -47,12 +47,6 @@ fun PlaylistSharedCard(music: libraryJson, navigationViewModel: NavigationViewMo
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
 
-    val activity = LocalActivity.current
-    val viewModel: LibraryViewModel = if (activity != null) {
-        hiltViewModel(activity as ViewModelStoreOwner)
-    } else {
-        hiltViewModel()
-    }
     val accessViewModel: PlaylistAccessViewModel = hiltViewModel()
     val hours = music.duration / (1000 * 60 * 60)
     val minutes = (music.duration / (1000 * 60)) % 60

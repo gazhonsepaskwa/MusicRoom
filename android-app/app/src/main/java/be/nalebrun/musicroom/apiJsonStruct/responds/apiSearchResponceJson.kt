@@ -13,6 +13,7 @@ sealed class SearchResponseJson {
     abstract val type: String // discriminator to choose the right class to cast into
 
     @Serializable
+    @JsonIgnoreUnknownKeys
     @SerialName("music") // the discriminator value
     data class Music(
         override val    id:         Int,
@@ -27,6 +28,14 @@ sealed class SearchResponseJson {
         }
     }
 
+    @Serializable
+    @JsonIgnoreUnknownKeys
+    @SerialName("playlist")
+    data class Playlist(
+        override val    id:         Int,
+        val             title:      String,
+        override val    type:       String = "playlist"
+    ) : SearchResponseJson()
     @Serializable
     @SerialName("album")
     data class Album(

@@ -193,6 +193,15 @@ fun SearchUi() {
                                 subtitle = ""
                             )
                         }
+                        is SearchResponseJson.Playlist -> {
+                            SearchResultCard(
+                                id = item.id,
+                                music = null,
+                                title = item.title,
+                                subtitle = "Playlist",
+                                resultType = ResultType.PLAYLIST
+                            )
+                        }
                     }
                 }
             }

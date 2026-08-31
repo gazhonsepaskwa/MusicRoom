@@ -62,19 +62,11 @@ fun AddPlaylistSheet(
     onDismissRequest: () -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
 ) {
-    val activity = LocalActivity.current
-//    val waitingList by musicViewModel.waitingList.collectAsState()
-//    val currentMusic by musicViewModel.music.collectAsState()
-//    val currentMusicIndex = waitingList.indexOfFirst { it.id == currentMusic.id }
     val listState = rememberLazyListState()
-    val viewModel: LibraryViewModel = if (activity != null) {
-        hiltViewModel(activity as ViewModelStoreOwner)
-    } else {
-        hiltViewModel()
-    }
+    val viewModel: LibraryViewModel = hiltViewModel()
     val playlists: List<libraryJson> by viewModel.playlists.collectAsState()
     val sharedPlaylists: List<libraryJson> by viewModel.sharedPlaylists.collectAsState()
-
+    Log.d("AddPlaylist", "$playlists\n$sharedPlaylists")
     // get screen height for auto scroll
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp

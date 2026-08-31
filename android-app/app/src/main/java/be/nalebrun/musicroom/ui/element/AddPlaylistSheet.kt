@@ -1,0 +1,133 @@
+package be.nalebrun.musicroom.ui.element
+
+import android.util.Log
+import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.getDrawable
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import be.nalebrun.musicroom.R
+import be.nalebrun.musicroom.apiJsonStruct.responds.MusicJson
+import be.nalebrun.musicroom.apiJsonStruct.responds.libraryJson
+import be.nalebrun.musicroom.repositories.MusicRepository
+import be.nalebrun.musicroom.viewmodel.LibraryViewModel
+import be.nalebrun.musicroom.viewmodel.MusicViewModel
+import be.nalebrun.musicroom.viewmodel.PlaylistViewModel
+import coil3.Image
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
+import java.nio.file.WatchEvent
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddPlaylistSheet(
+    musicId: Int,
+    onDismissRequest: () -> Unit,
+    sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+) {
+    val activity = LocalActivity.current
+//    val waitingList by musicViewModel.waitingList.collectAsState()
+//    val currentMusic by musicViewModel.music.collectAsState()
+//    val currentMusicIndex = waitingList.indexOfFirst { it.id == currentMusic.id }
+    val listState = rememberLazyListState()
+    val viewModel: LibraryViewModel = if (activity != null) {
+        hiltViewModel(activity as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
+    val playlists: List<libraryJson> by viewModel.playlists.collectAsState()
+    val sharedPlaylists: List<libraryJson> by viewModel.sharedPlaylists.collectAsState()
+
+    // get screen height for auto scroll
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.background,
+        modifier = Modifier.fillMaxHeight()
+    ) {
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+            contentPadding = PaddingValues(bottom = screenHeight)
+        ) {
+            items(playlists) { it ->
+                AddPlaylistElem(viewModel, it, musicId, onDismissRequest)
+            }
+            items(sharedPlaylists) { it ->
+                AddPlaylistElem(viewModel, it, musicId, onDismissRequest, isShared = true)
+            }
+        }
+    }
+}
+
+@Composable
+fun AddPlaylistElem(
+    viewModel: LibraryViewModel,
+    playlist: libraryJson,
+    musicId: Int,
+    onDismissRequest: () -> Unit,
+    isShared: Boolean = false
+) {
+    Column(
+        modifier = Modifier
+            .padding(bottom = 5.dp)
+            .clickable(true, onClick = {
+                viewModel.addMusicToPlaylist(musicId, playlist.id)
+                onDismissRequest()
+            })
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (isShared) {
+                Icon(
+                    painter = painterResource(R.drawable.outline_group_24),
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 8.dp).size(20.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            Text(playlist.title)
+        }
+    }
+}

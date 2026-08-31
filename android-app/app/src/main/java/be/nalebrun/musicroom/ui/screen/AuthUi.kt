@@ -1,0 +1,165 @@
+package be.nalebrun.musicroom.ui.screen
+
+import android.content.Intent
+import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import be.nalebrun.musicroom.viewmodel.AuthViewModel
+import be.nalebrun.musicroom.ui.element.BlackOrWhiteButton
+import be.nalebrun.musicroom.ui.element.CustomTextField
+import be.nalebrun.musicroom.viewmodel.NavigationViewModel
+import be.nalebrun.musicroom.viewmodel.SocketViewModel
+
+@Composable
+fun AuthUi() {
+    val viewModel: AuthViewModel = hiltViewModel()
+    val context = LocalContext.current
+    // passing the activity scope the view model to the activity
+    // level making it share a global instance
+    val activity = LocalActivity.current
+    val navigationViewModel: NavigationViewModel = if (activity != null) {
+        hiltViewModel(activity as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
+    val socketViewModel: SocketViewModel = if (activity != null) {
+        hiltViewModel(activity as ViewModelStoreOwner)
+    } else {
+        hiltViewModel()
+    }
+
+    // get the viewModel var in the AuthUi to update ui when value change
+    val loginResult:  String?  by viewModel.loginResult.collectAsStateWithLifecycle()
+    val signinResult: String?  by viewModel.signinResult.collectAsStateWithLifecycle()
+    val loginOk:      Boolean? by viewModel.loginOk.collectAsStateWithLifecycle()
+
+    // navigation triggers
+    LaunchedEffect(loginOk) {
+        // launch when login is done or when the token already exist
+        if (loginOk == true) {
+            // when the login is ok, connect the socket and then navigate to the fav page
+            socketViewModel.connectSocket()
+            navigationViewModel.navigateTo("search") {
+                popUpTo("auth") { inclusive = true }
+            }
+        }
+    }
+
+    //  UI state
+    var loginMode  by remember { mutableStateOf(true) }
+    var tfUsername by remember { mutableStateOf("") }
+    var tfEmail    by remember { mutableStateOf("") }
+    var tfPassword by remember { mutableStateOf("") }
+
+    //  Which result to display
+    var currentResult: String? = if (loginMode) loginResult else signinResult
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Titles
+        Text("Music Room", fontSize = 20.sp)
+        Text(
+            text = if (loginMode) "Login" else "Sign-up",
+            modifier = Modifier.padding(bottom = 30.dp),
+            fontSize = 30.sp
+        )
+
+        // text fields
+        if (!loginMode) {
+            CustomTextField(
+                "email",
+                tfEmail,
+                { tfEmail = it },
+                Modifier.padding(bottom = 10.dp)
+            )
+        }
+        CustomTextField(
+            if (loginMode) "username or email" else "username",
+            tfUsername,
+            { tfUsername = it },
+            Modifier.padding(bottom = 10.dp)
+        )
+        CustomTextField(
+            "password",
+            tfPassword,
+            { tfPassword = it },
+            Modifier.padding(bottom = 30.dp),
+            visualTransformation = PasswordVisualTransformation()
+        )
+
+        // Buttons
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(2.5f.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 5.dp)
+        ) {
+            val buttonMod = Modifier.height(60.dp)
+            // toggle sign-up / login
+            BlackOrWhiteButton(
+                text = if (loginMode) "Sign-up" else "Login",
+                modifier = buttonMod.weight(2f),
+                active = false,
+                onClick = { loginMode = !loginMode }
+            )
+
+            // Send api request
+            BlackOrWhiteButton(
+                text = if (loginMode) "Login ->" else "Sign-up ->",
+                modifier = buttonMod.weight(3f),
+                active = true,
+                onClick = {
+                    currentResult = ""
+                    if (loginMode) {
+                        viewModel.login(tfUsername, tfPassword)
+                    } else {
+                        viewModel.signin(tfUsername, tfPassword, tfEmail)
+                    }
+                }
+            )
+        }
+        BlackOrWhiteButton(
+            text = "Google",
+            modifier = Modifier.height(60.dp),
+            active = true,
+            onClick = {
+                if (activity != null) {
+                    viewModel.googleAuth(activity)
+                }
+            }
+        )
+        Text("forgot password ?", textAlign = TextAlign.Right, modifier = Modifier
+            .padding(top = 5.dp, bottom = 10.dp)
+            .clickable {
+                navigationViewModel.navigateTo("reset-password")
+            }
+        )
+
+        // Display response
+        Text(currentResult ?: "", textAlign = TextAlign.Center)
+    }
+}

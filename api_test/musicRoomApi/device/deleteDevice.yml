@@ -1,0 +1,24 @@
+info:
+  name: deleteDevice
+  type: http
+  seq: 5
+
+http:
+  method: DELETE
+  url: https://localhost:8443/devices/remove-device
+  body:
+    type: json
+    data: |-
+      {
+        "deviceId": "no clue",
+        "deviceName": "woiehf"
+      }
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInVzZXJuYW1lIjoibW9uYmVhdWN1bCIsImlhdCI6MTc4NDYzNjQ2OCwiZXhwIjoxNzg3MzE0ODY4fQ.92flD7l5YZanjBNt06BeLyaT7JRqcvgImSu949KU1ow
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

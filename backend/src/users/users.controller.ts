@@ -1,0 +1,84 @@
+import {
+  Controller,
+  Get,
+  Param,
+  Body,
+  Query,
+  BadRequestException,
+  Patch,
+} from '@nestjs/common';
+import { UsersService } from './users.service';
+import { ApiBody, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import { ChangePasswordDto, PasswordCheckDto, UserProfileResponseDto, UserResponseDto, UserUpdateDto } from './dto/user.dto';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { ParseSafeIntPipe } from '../common/pipe/parse_safe_int.pipe';
+
+@Controller('users')
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
+//   //a garder ou pas ?
+//   @ApiQuery({ name: 'id', required: false, type: String })
+//   @ApiQuery({ name: 'username', required: false, type: String })
+//   @ApiOkResponse({ type: UserResponseDto })
+//   @Get()
+//   async getUser(
+//     @Query('id') id?: string,
+//     @Query('username') username?: string,
+//   ) {
+//     let user: any = null;
+//     if (id) {
+//       user = await this.usersService.user({ id: +id });
+//     }
+
+//     if (username) {
+//       user = await this.usersService.user({ username });
+//     }
+//     if (user == null) throw new BadRequestException();
+//     return {
+//       id: user.id,
+//       username: user.username,
+//       email: user.email,
+//     };
+//   }
+
+  @ApiOkResponse({type: UserProfileResponseDto})
+  @Get('profile')
+  async getOwnProfile(@CurrentUser() userId: number) {
+	return await this.usersService.getUserProfile(userId, userId);
+  }
+
+  @ApiOkResponse({type: UserProfileResponseDto})
+  @Get('profile/:id')
+  async getProfile(@CurrentUser() userId: number, @Param('id', ParseSafeIntPipe) profileId: number) {
+	return await this.usersService.getUserProfile(profileId, userId);
+  }
+
+  @ApiBody({type: UserUpdateDto})
+  @Patch('update')
+  async updateProfile(
+	@CurrentUser() userId: number,
+	@Body() data: UserUpdateDto)
+  {
+	await this.usersService.updateUser({ where:{id: userId}, data})
+  }
+
+  @ApiOkResponse({ type: PasswordCheckDto})
+  @Get('is-google-checked')
+  async isPasswordSet(@CurrentUser() userId: number) {
+	const user = await this.usersService.user({id: userId})
+	return {
+		isPasswordSet: user!.password != null
+	}
+  }
+
+  @ApiBody({type: ChangePasswordDto})
+  @Patch('change-password')
+  async changePassword(@CurrentUser() userId: number, @Body() data: ChangePasswordDto) {
+	await this.usersService.changePassword(userId, data);
+	return {
+		message: "Password changes Succesfully!",
+	}
+  }
+}
+ 

@@ -1,0 +1,24 @@
+info:
+  name: get_profile
+  type: http
+  seq: 5
+
+http:
+  method: GET
+  url: https://localhost/auth/profile
+  headers:
+    - name: ""
+      value: ""
+  params:
+    - name: ""
+      value: ""
+      type: query
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInVzZXJuYW1lIjoibGVvIiwiaWF0IjoxNzgyNzQ3MzkyLCJleHAiOjE3ODU0MjU3OTJ9.73g8sgEimFwzObP1nQxg8GfV0_bXIWws8S2NY2m8ShM
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

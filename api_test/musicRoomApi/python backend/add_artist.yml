@@ -1,0 +1,79 @@
+info:
+  name: /add_artist
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:8031/add_artist
+  body:
+    type: json
+    data: |-
+      {
+        "q" : "Queen"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: 200 - not much data to create
+    request:
+      url: http://localhost:4242/add_artist
+      method: POST
+      body:
+        type: json
+        data: |-
+          {
+            "q" : "FuzeIII"
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Fri, 29 May 2026 16:12:08 GMT
+        - name: server
+          value: WSGIServer/0.2 CPython/3.12.13
+        - name: content-type
+          value: application/json
+        - name: content-length
+          value: "60"
+      body:
+        type: json
+        data: |-
+          {
+            "msg": "Fuze III added successfully to MusicRoom database"
+          }
+  - name: 200 - a lot of data to create
+    request:
+      url: http://localhost:4242/add_artist
+      method: POST
+      body:
+        type: json
+        data: |-
+          {
+            "q" : "Queen"
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Fri, 29 May 2026 16:12:08 GMT
+        - name: server
+          value: WSGIServer/0.2 CPython/3.12.13
+        - name: content-type
+          value: application/json
+        - name: content-length
+          value: "60"
+      body:
+        type: json
+        data: |-
+          {
+            "msg": "Queen added successfully to MusicRoom database"
+          }

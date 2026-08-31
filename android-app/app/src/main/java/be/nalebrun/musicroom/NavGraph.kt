@@ -47,6 +47,7 @@ import be.nalebrun.musicroom.ui.screen.ManageAccessUi
 import be.nalebrun.musicroom.ui.screen.DeleteAccountUi
 import be.nalebrun.musicroom.ui.screen.ResetPasswordUi
 import be.nalebrun.musicroom.ui.screen.ResetPasswordConfirmationUi
+import kotlinx.coroutines.launch
 
 /**
  * Function that Create the NavGraph.
@@ -178,10 +179,10 @@ fun CreateNavGraph(
                     authViewModel.credentialRepository.setJWT(it)
                     // connect to the socket ? I am not sure if it I should do it there (TODO : check)
                     socketViewModel.connectSocket()
+                    navController.navigate("search") {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                    }
                 }
-            }
-            navController.navigate("search") {
-                popUpTo(navController.graph.id) { inclusive = true }
             }
         }
 

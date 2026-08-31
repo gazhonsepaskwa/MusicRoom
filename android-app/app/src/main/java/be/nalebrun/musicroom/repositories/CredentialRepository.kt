@@ -3,6 +3,7 @@ package be.nalebrun.musicroom.repositories
 import android.content.Context
 import android.util.Log
 import androidx.datastore.preferences.core.edit
+import androidx.lifecycle.viewmodel.compose.viewModel
 import be.nalebrun.musicroom.dataStore
 import be.nalebrun.musicroom.keys.PreferenceKey
 import dagger.hilt.android.qualifiers.ApplicationContext

@@ -23,8 +23,8 @@ def cleanup_image(images_table) -> list[str]:
     Get rid of the width and height from the image urls by rewriting the structure.
     """
     if not images_table:
-        return []
-    else
+        return ["","",""]
+    else :
         return [
             images_table[0].get('url') if images_table else "",
             images_table[1].get('url') if images_table else "",

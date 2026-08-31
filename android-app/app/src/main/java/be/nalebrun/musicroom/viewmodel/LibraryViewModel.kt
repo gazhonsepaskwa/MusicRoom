@@ -86,9 +86,11 @@ class LibraryViewModel @Inject constructor(
                 body = body,
                 auth = "Bearer $jwt",
                 onResponse = { _, response ->
-//                    if (response.code in 200..<300) {
-//
-//                    }
+                    if (response.code in 200..<300) {
+                        Log.d("Add music", "Success")
+                    } else {
+                        Log.d("Add music", "Failure with code ${response.code}, ${response.body?.string() ?: ""}")
+                    }
                 },
                 onFailure = { _, e -> e.printStackTrace()}
             )

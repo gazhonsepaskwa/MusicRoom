@@ -89,7 +89,18 @@ fun SearchUi() {
     ) {
         Column(modifier = Modifier.weight(1f)) {
             // search bar
-            CustomTextField("", tfSearch, { tfSearch = it })
+            CustomTextField(
+                "",
+                tfSearch,
+                { tfSearch = it },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.outline_search_24),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                },
+            )
 
             Filters(
                 filters = arrayOf("music", "artist", "album", "playlist", "user"),
@@ -106,6 +117,35 @@ fun SearchUi() {
             LazyColumn(
                 modifier = Modifier.weight(1f)
             ) {
+                // Text to tell the user to search something or that he disabled all the filters
+                if ((tfSearch.isEmpty() && results.isEmpty()) || selectedFilters.isEmpty()) {
+                    // prioritize the filter msg
+                    val msg = if (selectedFilters.isEmpty())  "Select a filter to see results" else "Start typing to see results"
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .padding(top = 20.dp)
+                                .fillMaxWidth()
+                            ,
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.outline_search_24),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text(
+                                msg,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.padding(start = 10.dp)
+                            )
+                        }
+                    }
+                }
+
                 items(results) { item ->
                     when (item) {
                         is SearchResponseJson.Music -> {
@@ -200,7 +240,7 @@ fun SearchResultCard(
             actions = listOf(
                 ActionItem(
                     label = "Set as favorite",
-                    icon = R.drawable.baseline_edit_24,
+                    icon = R.drawable.baseline_favorite_border_24,
                     onClick = {
                         showActionSheet = false
                         showFavoriteSlotsSheet = true
@@ -208,7 +248,7 @@ fun SearchResultCard(
                 ),
                 ActionItem(
                     label = "Add to queue (next)",
-                    icon = R.drawable.outline_play_arrow_24,
+                    icon = R.drawable.outline_skip_next_24,
                     onClick = {
                         showActionSheet = false
                         music?.let { musicViewModel.addSongToWaitingListNext(it) }

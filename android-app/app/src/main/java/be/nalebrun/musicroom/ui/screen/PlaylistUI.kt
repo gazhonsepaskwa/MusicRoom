@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -150,7 +151,9 @@ fun PlaylistUi(id: Int, owned: Boolean = true) {
                     Icon(
                         painter = painterResource(R.drawable.outline_play_arrow_24),
                         contentDescription = "",
-                        modifier = Modifier.clickable(true, onClick = {
+                        modifier = Modifier
+                            .size(35.dp)
+                            .clickable(true, onClick = {
                             viewModel.musicRepository.replaceWaitingList(musics)
                         }),
                         tint = MaterialTheme.colorScheme.onBackground
@@ -161,7 +164,9 @@ fun PlaylistUi(id: Int, owned: Boolean = true) {
                             R.drawable.outline_shuffle_24
                         }),
                         contentDescription = "",
-                        modifier = Modifier.clickable(enabled = false, onClick = { /*shuffleOn = !shuffleOn*/ }),
+                        modifier = Modifier
+                            .size(35.dp)
+                            .clickable(enabled = false, onClick = { /*shuffleOn = !shuffleOn*/ }),
                         tint = if (shuffleOn) MaterialTheme.colorScheme.primary.copy(alpha = 0.38f) else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.38f)
                     )
                 }

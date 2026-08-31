@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,11 +35,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -76,6 +79,7 @@ fun ArtistUi(artistId: Int) {
 
     var type by remember { mutableStateOf(ArtistType.SONGS) }
     var shuffleOn by remember { mutableStateOf(false) }
+    var showPhotoPopup by remember { mutableStateOf(false) }
 
     LaunchedEffect(artistId) {
         viewModel.getAlbumsFromArtist(artistId)
@@ -91,39 +95,60 @@ fun ArtistUi(artistId: Int) {
             modifier = Modifier.weight(1f)
         ) {
             PageTopBackButton(onClick = { navigationViewModel.navigateBack() })
-            Box(
-                modifier = Modifier
-                    .height(100.dp)
-                    .fillMaxWidth()
 
-            )
-            {
-                AsyncImage(
-                    modifier = Modifier.fillMaxWidth(),
-                    model = image,
-                    contentDescription = null
-                )
+            if (showPhotoPopup) {
+                Dialog(onDismissRequest = { showPhotoPopup = false }) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(MaterialTheme.colorScheme.surface)
+                    ) {
+                        AsyncImage(
+                            model = image,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxWidth(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
             }
             HorizontalDivider(thickness = 2.dp, color = MaterialTheme.colorScheme.onBackground)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                if (artist != "") {
-                    Text(artist!!, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                } else {
-                    Text("???", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (artist != "") {
+                        Text(artist!!, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    } else {
+                        Text("loading ...", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    }
+                    Icon(
+                        painter = painterResource(id = R.drawable.outline_account_circle_24),
+                        contentDescription = "Show artist photo",
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .size(24.dp)
+                            .clickable { showPhotoPopup = true },
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
                 }
                 if (type == ArtistType.SONGS) {
                     Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.outline_play_arrow_24),
                             contentDescription = "",
-                            modifier = Modifier.clickable(true, onClick = {
+                            modifier = Modifier
+                                .size(35.dp)
+                                .clickable(true, onClick = {
                                 viewModel.musicRepository.replaceWaitingList(musics)
                             }),
                             tint = MaterialTheme.colorScheme.onBackground
@@ -137,7 +162,9 @@ fun ArtistUi(artistId: Int) {
                                 }
                             ),
                             contentDescription = "",
-                            modifier = Modifier.clickable(
+                            modifier = Modifier
+                                .size(35.dp)
+                                .clickable(
                                 enabled = false,
                                 onClick = { /*shuffleOn = !shuffleOn*/ }),
                             tint = if (shuffleOn) MaterialTheme.colorScheme.primary.copy(alpha = 0.38f) else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.38f)

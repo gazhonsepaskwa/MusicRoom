@@ -75,7 +75,7 @@ fun FriendsUi() {
             actions = listOf(
                 ActionItem(
                     label = "manage account access",
-                    icon = R.drawable.outline_account_circle_24,
+                    icon = R.drawable.outline_manage_accounts_24,
                     onClick = {
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
                             if (!sheetState.isVisible) {

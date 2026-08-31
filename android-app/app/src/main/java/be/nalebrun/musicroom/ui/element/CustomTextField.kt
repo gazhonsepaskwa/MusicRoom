@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
  * @param modifier style modifier
  * @param visualTransformation visual transformation for the text field
  * @param singleLine whether the text field is single line. Default to true
+ * @param leadingIcon optional leading icon
  * @author nalebrun
  */
 @Composable
@@ -38,7 +39,8 @@ fun CustomTextField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    singleLine: Boolean = true
+    singleLine: Boolean = true,
+    leadingIcon: @Composable (() -> Unit)? = null,
 ) {
     Column(
         modifier = modifier
@@ -61,6 +63,7 @@ fun CustomTextField(
                 onValueChange = onValueChange,
                 visualTransformation = visualTransformation,
                 singleLine = singleLine,
+                leadingIcon = leadingIcon,
                 colors = TextFieldDefaults.colors(
                     unfocusedContainerColor = Color.Transparent,
                     focusedContainerColor = Color.Transparent

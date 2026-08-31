@@ -34,17 +34,25 @@ export class DevicesController {
     const { id, friendId, canSeek, canTogglePlayPause, canModifyMusic } =
       updatePermissionDto;
 
-    return await this.devicesService.updateDevicePermission(id, userId, friendId, {
-      canSeek,
-      canTogglePlayPause,
-      canModifyMusic,
-    });
+    return await this.devicesService.updateDevicePermission(
+      id,
+      userId,
+      friendId,
+      {
+        canSeek,
+        canTogglePlayPause,
+        canModifyMusic,
+      },
+    );
   }
 
   @Get('device-permission/:id')
   @ApiOkResponse({ type: DeviceshipResponseDto })
-  async getDevicePermission(@CurrentUser() userId: number, @Param('id') deviceId: string) {
-	return await this.devicesService.deviceship(deviceId, userId);
+  async getDevicePermission(
+    @CurrentUser() userId: number,
+    @Param('id') deviceId: string,
+  ) {
+    return await this.devicesService.deviceship(deviceId, userId);
   }
 
   @ApiBody({ type: UpdateNameDto })
@@ -65,10 +73,13 @@ export class DevicesController {
     return await this.devicesService.getAvailableDevices(userId);
   }
 
-  @ApiBody({ type: DeviceRequestDto})
+  @ApiBody({ type: DeviceRequestDto })
   @ApiOkResponse({ type: DeviceResponseDto })
   @Delete('remove-device')
-  async deleteDevice(@CurrentUser() userId: number,  @Body() data: DeviceRequestDto) {
+  async deleteDevice(
+    @CurrentUser() userId: number,
+    @Body() data: DeviceRequestDto,
+  ) {
     return await this.devicesService.deleteDevice(userId, data);
   }
 
@@ -78,10 +89,17 @@ export class DevicesController {
     return await this.devicesService.getUserDevices(userId);
   }
 
-  @ApiOkResponse({ type: DeviceResponseDto})
-  @ApiBody({ type: DeviceRequestDto})
+  @ApiOkResponse({ type: DeviceResponseDto })
+  @ApiBody({ type: DeviceRequestDto })
   @Post('add-device')
-  async addDevice(@CurrentUser() useriId: number, data: DeviceRequestDto) {
-	return await this.devicesService.addDevice(useriId, data.deviceId, data.deviceName);
+  async addDevice(
+    @CurrentUser() useriId: number,
+    @Body() data: DeviceRequestDto,
+  ) {
+    return await this.devicesService.addDevice(
+      useriId,
+      data.deviceId,
+      data.deviceName,
+    );
   }
 }

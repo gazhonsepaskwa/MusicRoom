@@ -59,7 +59,7 @@ class SearchViewModel @Inject constructor(
                                     try {
                                         val parsedResults = Json.decodeFromString<List<SearchResponseJson>>(body)
                                         _results.value = parsedResults
-                                        //Log.d("API_RESPONSE", "Search results: $parsedResults")
+                                        Log.d("API_RESPONSE", "Search results: $parsedResults")
                                     } catch (e: Exception) {
                                         e.printStackTrace()
                                     }

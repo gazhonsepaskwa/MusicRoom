@@ -3,6 +3,7 @@ Main application module for the Spotify/YouTube scraper.
 """
 
 from time import sleep
+import threading
 
 # files
 import json
@@ -19,12 +20,20 @@ from bottle import Bottle, response, run
 
 app = Bottle()
 
+def download_tracks_task(tracks):
+	"""Task to download tracks in the background."""
+	for query, track_id in tracks:
+		try:
+			yt_api.search_and_download(query, track_id)
+		except Exception as e:
+			print(f"Error downloading {query}: {e}")
+
 def add_artist(query: str):
 	# get artist info from spotify
 	result = sp_api.search_artist(query)
 
 	# create artist record in db
-	artist_id = db.insert_artist(
+	main_artist_id = db.insert_artist(
 		result.get("uri"),
 		result.get("name"),
 		utils.cleanup_image(result.get("images")),
@@ -32,6 +41,9 @@ def add_artist(query: str):
 
 	# get artist album from spotify
 	albums = sp_api.get_artist_albums(result.get("uri"))
+
+	tracks_to_download = []
+	artist_cache = {result.get("uri"): main_artist_id}
 
 	# create each album of the artist in the db
 	for album in albums:
@@ -41,7 +53,7 @@ def add_artist(query: str):
 			album.get("release_date"),
 			utils.cleanup_image(album.get("images")),
 		)
-		db.link_album_to_artist(album_id, artist_id)
+		db.link_album_to_artist(album_id, main_artist_id)
 
 		# create every track of the album in the db
 		album_tracks = sp_api.get_album_tracks(album.get("uri"))
@@ -53,21 +65,28 @@ def add_artist(query: str):
 				track.get("track_number"),
 				album_id,
 			)
-			# create artist that are featuring some songs
-			for song_specific_artist in track.get("artists"):
-				if (
-					song_specific_artist.get("name") != result.get("name")
-				):  # check if one of the artist is the different than the album artist. If yes, create it
-					song_specific_artist_id = db.insert_artist(
-						song_specific_artist.get("uri"),
-						song_specific_artist.get("name"),
-						utils.cleanup_image(song_specific_artist.get("images")),
-					)
-					db.link_track_to_artist(track_id, song_specific_artist_id)
+
+			# Handle track artists
+			for track_artist in track.get("artists"):
+				uri = track_artist.get("uri")
+				if uri in artist_cache:
+					track_artist_id = artist_cache[uri]
 				else:
-					db.link_track_to_artist(track_id, artist_id)
+					# Featuring artist
+					track_artist_id = db.insert_artist(
+						uri,
+						track_artist.get("name"),
+						utils.cleanup_image(album.get("images")) # Fallback
+					)
+					db.link_album_to_artist(album_id, track_artist_id)
+					artist_cache[uri] = track_artist_id
+
+				db.link_track_to_artist(track_id, track_artist_id)
+
+			tracks_to_download.append((f"{track.get('name')} - {result.get('name')}", track_id))
 
 	db.commit()
+	threading.Thread(target=download_tracks_task, args=(tracks_to_download,), daemon=True).start()
 	return result
 
 # routes
@@ -126,29 +145,24 @@ def handle_add_album_post():
 		utils.cleanup_image(result.get("images")),
 	)
 
+	# Cache for artist IDs to avoid redundant lookups/inserts
+	artist_cache = {}
+
 	# create artists record in db
-	artist_ids = []
 	for artist in result.get("artists"):
-		# in the artist in the album there isn't the images
 		try:
 			artist_data = sp_api.get_artist(artist.get("uri"))
-		except Exception as e:
-			error = str(e)
-			response.status = 500
-			return json.dumps(
-				{
-					"message": "Failed to get artist info from Spotify",
-					"error": error,
-				}
-			)
+			artist_images = artist_data.get("images")
+		except Exception:
+			artist_images = result.get("images")
 
 		artist_id = db.insert_artist(
 			artist.get("uri"),
 			artist.get("name"),
-			utils.cleanup_image(artist_data.get("images")),
+			utils.cleanup_image(artist_images),
 		)
 		db.link_album_to_artist(album_id, artist_id)
-		artist_ids.append(artist_id)
+		artist_cache[artist.get("uri")] = artist_id
 
 	# create every track of the album in the db
 	try:
@@ -159,6 +173,8 @@ def handle_add_album_post():
 		return json.dumps(
 			{"message": "Failed to get album tracks from Spotify", "error": error}
 		)
+
+	tracks_to_download = []
 	for track in album_tracks:
 		track_id = db.insert_track(
 			track.get("uri"),
@@ -167,10 +183,28 @@ def handle_add_album_post():
 			track.get("track_number"),
 			album_id,
 		)
-		for artist_id in artist_ids:
-			db.link_track_to_artist(track_id, artist_id)
+
+		# Link tracks to artists
+		for track_artist in track.get("artists"):
+			uri = track_artist.get("uri")
+			if uri in artist_cache:
+				track_artist_id = artist_cache[uri]
+			else:
+				# Featuring artist not in album artist list
+				track_artist_id = db.insert_artist(
+					uri,
+					track_artist.get("name"),
+					utils.cleanup_image(result.get("images"))
+				)
+				db.link_album_to_artist(album_id, track_artist_id)
+				artist_cache[uri] = track_artist_id
+
+			db.link_track_to_artist(track_id, track_artist_id)
+
+		tracks_to_download.append((f"{track.get('name')} - {result.get('artists')[0].get('name')}", track_id))
 
 	db.commit()
+	threading.Thread(target=download_tracks_task, args=(tracks_to_download,), daemon=True).start()
 
 	response.content_type = "application/json"
 	return json.dumps(
@@ -206,7 +240,7 @@ def handle_add_track_post():
 		utils.cleanup_image(result.get("album").get("images")),
 	)
 
-	# create music record in db and download the audio file
+	# create music record in db
 	track_id = db.insert_track(
 		result.get("uri"),
 		result.get("name"),
@@ -214,21 +248,29 @@ def handle_add_track_post():
 		result.get("track_number"),
 		album_id,
 	)
-	yt_api.search_and_download(
-		f"{result.get('name')} - {result.get('artists')[0].get('name')}", track_id
-	)
 
 	# create artist record in db
 	for artist in result.get("artists"):
+		try:
+			# Try to get full artist info for real images
+			artist_data = sp_api.get_artist(artist.get("uri"))
+			artist_images = artist_data.get("images")
+		except Exception:
+			# Fallback to album images
+			artist_images = result.get("album").get("images")
+
 		artist_id = db.insert_artist(
 			artist.get("uri"),
 			artist.get("name"),
-			utils.cleanup_image(result.get("album").get("images")),
+			utils.cleanup_image(artist_images),
 		)
 		db.link_album_to_artist(album_id, artist_id)
 		db.link_track_to_artist(track_id, artist_id)
 
 	db.commit()
+
+	download_query = f"{result.get('name')} - {result.get('artists')[0].get('name')}"
+	threading.Thread(target=download_tracks_task, args=([(download_query, track_id)],), daemon=True).start()
 
 	response.content_type = "application/json"
 	return json.dumps(

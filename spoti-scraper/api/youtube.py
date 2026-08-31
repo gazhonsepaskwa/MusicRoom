@@ -50,7 +50,7 @@ def download_youtube_music(video_url, title) -> None:
     Download the audio from a YouTube video and convert it to MP3 format.
     """
     ydl_opts = {
-        "format": "bestaudio",  # Grab the best audio stream
+        "format": "bestaudio/best",  # Grab the best audio stream
         "postprocessors": [
             {
                 "key": "FFmpegExtractAudio",
@@ -59,6 +59,14 @@ def download_youtube_music(video_url, title) -> None:
             }
         ],
         "outtmpl": f"/dl/{title}.%(ext)s",  # Save as the title given by the caller
+        "quiet": False,
+        "no_warnings": False,
+        "noprogress": True,
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["android", "web"],
+            }
+        },
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:

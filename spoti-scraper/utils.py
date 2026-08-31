@@ -18,12 +18,15 @@ def get_querry() -> str:
 
     return query
 
-def cleanup_image(images_table) -> list:
+def cleanup_image(images_table) -> list[str]:
     """
     Get rid of the width and height from the image urls by rewriting the structure.
     """
-    return [
-        images_table[0].get('url') if images_table else None,
-        images_table[1].get('url') if images_table else None,
-        images_table[2].get('url') if images_table else None
-    ]
+    if not images_table:
+        return ["","",""]
+    else :
+        return [
+            images_table[0].get('url') if images_table else "",
+            images_table[1].get('url') if images_table else "",
+            images_table[2].get('url') if images_table else ""
+        ]

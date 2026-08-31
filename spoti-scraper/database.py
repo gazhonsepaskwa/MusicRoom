@@ -69,7 +69,11 @@ def insert_track(
         """
         INSERT INTO "music" ("spotifyId", title, duration, "albumIndex", "albumId")
         VALUES (%s, %s, %s, %s, %s)
-        ON CONFLICT ("spotifyId") DO UPDATE SET "spotifyId" = EXCLUDED."spotifyId"
+        ON CONFLICT ("spotifyId") DO UPDATE SET
+            title = EXCLUDED.title,
+            duration = EXCLUDED.duration,
+            "albumIndex" = EXCLUDED."albumIndex",
+            "albumId" = EXCLUDED."albumId"
         RETURNING id
         """,
         (
@@ -90,7 +94,10 @@ def insert_album(spotifyId: str, title: str, date: str, images: str):
         """
         INSERT INTO "album" ("spotifyId", title, date, images)
         VALUES (%s, %s, %s, %s)
-        ON CONFLICT ("spotifyId") DO UPDATE SET "spotifyId" = EXCLUDED."spotifyId"
+        ON CONFLICT ("spotifyId") DO UPDATE SET
+            title = EXCLUDED.title,
+            date = EXCLUDED.date,
+            images = EXCLUDED.images
         RETURNING id
         """,
         (
@@ -109,7 +116,9 @@ def insert_artist(spotifyId: str, name: str, images: str):
         """
         INSERT INTO "artist" ("spotifyId", title, images)
         VALUES (%s, %s, %s)
-        ON CONFLICT ("spotifyId") DO UPDATE SET "spotifyId" = EXCLUDED."spotifyId"
+        ON CONFLICT ("spotifyId") DO UPDATE SET
+            title = EXCLUDED.title,
+            images = EXCLUDED.images
         RETURNING id
         """,
         (

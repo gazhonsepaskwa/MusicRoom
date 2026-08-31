@@ -229,7 +229,7 @@ fun PlaylistItem(playlist: PlaylistProfileJson) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
-            model = playlist.images.firstOrNull() ?: "https://via.placeholder.com/60",
+            model = playlist.images.firstOrNull() ?: "",
             contentDescription = null,
             modifier = Modifier
                 .size(60.dp)
@@ -246,17 +246,17 @@ fun PlaylistItem(playlist: PlaylistProfileJson) {
                     modifier = Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.onBackground
                 )
-                Text(text = formatDuration(playlist.duration), fontSize = 14.sp, modifier = Modifier.padding(start = 4.dp))
+                Text(text = formatDuration(playlist.duration / 1000), fontSize = 14.sp, modifier = Modifier.padding(start = 4.dp))
             }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(id = R.drawable.note_1),
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.onBackground
-                )
-                Text(text = "${playlist.musicCount}", fontSize = 14.sp, modifier = Modifier.padding(start = 4.dp))
-            }
+//            Row(verticalAlignment = Alignment.CenterVertically) {
+//                Icon(
+//                    painter = painterResource(id = R.drawable.note_1),
+//                    contentDescription = null,
+//                    modifier = Modifier.size(16.dp),
+//                    tint = MaterialTheme.colorScheme.onBackground
+//                )
+//                Text(text = "${playlist.musicCount}", fontSize = 14.sp, modifier = Modifier.padding(start = 4.dp))
+//            }
         }
     }
 }

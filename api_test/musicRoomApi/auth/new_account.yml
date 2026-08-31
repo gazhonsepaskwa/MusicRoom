@@ -1,0 +1,25 @@
+info:
+  name: new_account
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: https://localhost:8443/auth/new_account
+  body:
+    type: json
+    data: |-
+      {
+        "username": "monbeaucule",
+        "password": "esttresJolie1@",
+        "email": "aurele.josserand@gmail.comd",
+        "deviceID": "1",
+        "deviceName": "1"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

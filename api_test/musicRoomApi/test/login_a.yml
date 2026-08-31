@@ -1,0 +1,31 @@
+info:
+  name: login_a
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: https://localhost:8443/auth/login
+  body:
+    type: json
+    data: |-
+      {
+      "username": "player_a",
+      "password": "Password_a1@",
+      "deviceID": "device_a",
+      "deviceName": "device_a"
+      }
+  auth: inherit
+
+runtime:
+  variables:
+    - name: deviceID
+      value: suefhs
+    - name: deviceName
+      value: qsd
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

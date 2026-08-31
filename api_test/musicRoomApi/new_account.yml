@@ -1,0 +1,23 @@
+info:
+  name: new_account
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: https://localhost/auth/new_account
+  body:
+    type: json
+    data: |-
+      {
+        username: moncul,
+        password: esttresjolie,
+        email: etjelerecommande@bxl.be,
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

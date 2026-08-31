@@ -1,0 +1,22 @@
+info:
+  name: login
+  type: http
+  seq: 18
+
+http:
+  method: POST
+  url: http://localhost:80/auth/login
+  body:
+    type: json
+    data: |-
+      {
+      "username": "a",
+      "password": "dsfj"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

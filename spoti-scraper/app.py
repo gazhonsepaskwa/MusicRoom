@@ -1,0 +1,314 @@
+"""
+Main application module for the Spotify/YouTube scraper.
+"""
+
+from time import sleep
+import threading
+
+# files
+import json
+
+import api.kworb as kworb_api
+import api.spotify as sp_api
+import api.youtube as yt_api
+import database as db
+import utils
+from api.utils import RateLimitError
+
+# external libs
+from bottle import Bottle, response, run
+
+app = Bottle()
+
+def download_tracks_task(tracks):
+	"""Task to download tracks in the background."""
+	for query, track_id in tracks:
+		try:
+			yt_api.search_and_download(query, track_id)
+		except Exception as e:
+			print(f"Error downloading {query}: {e}")
+
+def add_artist(query: str):
+	# get artist info from spotify
+	result = sp_api.search_artist(query)
+
+	# create artist record in db
+	main_artist_id = db.insert_artist(
+		result.get("uri"),
+		result.get("name"),
+		utils.cleanup_image(result.get("images")),
+	)
+
+	# get artist album from spotify
+	albums = sp_api.get_artist_albums(result.get("uri"))
+
+	tracks_to_download = []
+	artist_cache = {result.get("uri"): main_artist_id}
+
+	# create each album of the artist in the db
+	for album in albums:
+		album_id = db.insert_album(
+			album.get("uri"),
+			album.get("name"),
+			album.get("release_date"),
+			utils.cleanup_image(album.get("images")),
+		)
+		db.link_album_to_artist(album_id, main_artist_id)
+
+		# create every track of the album in the db
+		album_tracks = sp_api.get_album_tracks(album.get("uri"))
+		for track in album_tracks:
+			track_id = db.insert_track(
+				track.get("uri"),
+				track.get("name"),
+				track.get("duration_ms"),
+				track.get("track_number"),
+				album_id,
+			)
+
+			# Handle track artists
+			for track_artist in track.get("artists"):
+				uri = track_artist.get("uri")
+				if uri in artist_cache:
+					track_artist_id = artist_cache[uri]
+				else:
+					# Featuring artist
+					track_artist_id = db.insert_artist(
+						uri,
+						track_artist.get("name"),
+						utils.cleanup_image(album.get("images")) # Fallback
+					)
+					db.link_album_to_artist(album_id, track_artist_id)
+					artist_cache[uri] = track_artist_id
+
+				db.link_track_to_artist(track_id, track_artist_id)
+
+			tracks_to_download.append((f"{track.get('name')} - {result.get('name')}", track_id))
+
+	db.commit()
+	threading.Thread(target=download_tracks_task, args=(tracks_to_download,), daemon=True).start()
+	return result
+
+# routes
+@app.route("/add_artist", method="POST")
+def handle_add_artist_post():
+	try:
+		query = utils.get_querry()
+	except ValueError as e:
+		error = str(e)
+		response.status = 400
+		return json.dumps({"message": "Invalid request body", "error": error})
+
+	try:
+		result = add_artist(query)
+
+		response.content_type = "application/json"
+		return json.dumps(
+			{
+				"msg": f"{result.get('name')} added successfully to MusicRoom database"
+			}
+		)
+
+	except RateLimitError as e:
+		error = str(e)
+		response.status = 429
+		return json.dumps({"message": "Rate limited", "error": error})
+	except Exception as e:
+		error = str(e)
+		response.status = 500
+		return json.dumps({"message": "Internal server error", "error": error})
+
+@app.route("/add_album", method="POST")
+def handle_add_album_post():
+	try:
+		query = utils.get_querry()
+	except ValueError as e:
+		error = str(e)
+		response.status = 400
+		return json.dumps({"message": "Invalid request body", "error": error})
+
+	# get album info from spotify
+	try:
+		result = sp_api.search_album(query)
+	except Exception as e:
+		error = str(e)
+		response.status = 500
+		return json.dumps(
+			{"message": "Failed to get album info from Spotify", "error": error}
+		)
+
+	# create album record in db
+	album_id = db.insert_album(
+		result.get("uri"),
+		result.get("name"),
+		result.get("release_date"),
+		utils.cleanup_image(result.get("images")),
+	)
+
+	# Cache for artist IDs to avoid redundant lookups/inserts
+	artist_cache = {}
+
+	# create artists record in db
+	for artist in result.get("artists"):
+		try:
+			artist_data = sp_api.get_artist(artist.get("uri"))
+			artist_images = artist_data.get("images")
+		except Exception:
+			artist_images = result.get("images")
+
+		artist_id = db.insert_artist(
+			artist.get("uri"),
+			artist.get("name"),
+			utils.cleanup_image(artist_images),
+		)
+		db.link_album_to_artist(album_id, artist_id)
+		artist_cache[artist.get("uri")] = artist_id
+
+	# create every track of the album in the db
+	try:
+		album_tracks = sp_api.get_album_tracks(result.get("uri"))
+	except Exception as e:
+		error = str(e)
+		response.status = 500
+		return json.dumps(
+			{"message": "Failed to get album tracks from Spotify", "error": error}
+		)
+
+	tracks_to_download = []
+	for track in album_tracks:
+		track_id = db.insert_track(
+			track.get("uri"),
+			track.get("name"),
+			track.get("duration_ms"),
+			track.get("track_number"),
+			album_id,
+		)
+
+		# Link tracks to artists
+		for track_artist in track.get("artists"):
+			uri = track_artist.get("uri")
+			if uri in artist_cache:
+				track_artist_id = artist_cache[uri]
+			else:
+				# Featuring artist not in album artist list
+				track_artist_id = db.insert_artist(
+					uri,
+					track_artist.get("name"),
+					utils.cleanup_image(result.get("images"))
+				)
+				db.link_album_to_artist(album_id, track_artist_id)
+				artist_cache[uri] = track_artist_id
+
+			db.link_track_to_artist(track_id, track_artist_id)
+
+		tracks_to_download.append((f"{track.get('name')} - {result.get('artists')[0].get('name')}", track_id))
+
+	db.commit()
+	threading.Thread(target=download_tracks_task, args=(tracks_to_download,), daemon=True).start()
+
+	response.content_type = "application/json"
+	return json.dumps(
+		{
+			"msg": f"The Album '{result.get('name')}' was added successfully to MusicRoom database"
+		}
+	)
+
+@app.route("/add_track", method="POST")
+def handle_add_track_post():
+	try:
+		query = utils.get_querry()
+	except ValueError as e:
+		error = str(e)
+		response.status = 400
+		return json.dumps({"message": "Invalid request body", "error": error})
+
+	# get track info from spotify api
+	try:
+		result = sp_api.search_track(query)
+	except Exception as e:
+		error = str(e)
+		response.status = 500
+		return json.dumps(
+			{"message": "Failed to get track info from Spotify", "error": error}
+		)
+
+	# create album record in db
+	album_id = db.insert_album(
+		result.get("album").get("uri"),
+		result.get("album").get("name"),
+		result.get("album").get("release_date"),
+		utils.cleanup_image(result.get("album").get("images")),
+	)
+
+	# create music record in db
+	track_id = db.insert_track(
+		result.get("uri"),
+		result.get("name"),
+		result.get("duration_ms"),
+		result.get("track_number"),
+		album_id,
+	)
+
+	# create artist record in db
+	for artist in result.get("artists"):
+		try:
+			# Try to get full artist info for real images
+			artist_data = sp_api.get_artist(artist.get("uri"))
+			artist_images = artist_data.get("images")
+		except Exception:
+			# Fallback to album images
+			artist_images = result.get("album").get("images")
+
+		artist_id = db.insert_artist(
+			artist.get("uri"),
+			artist.get("name"),
+			utils.cleanup_image(artist_images),
+		)
+		db.link_album_to_artist(album_id, artist_id)
+		db.link_track_to_artist(track_id, artist_id)
+
+	db.commit()
+
+	download_query = f"{result.get('name')} - {result.get('artists')[0].get('name')}"
+	threading.Thread(target=download_tracks_task, args=([(download_query, track_id)],), daemon=True).start()
+
+	response.content_type = "application/json"
+	return json.dumps(
+		{
+			"msg": f"The track '{result.get('name')}' was added successfully to MusicRoom database"
+		}
+	)
+
+@app.route("/admin/seed", method="POST")
+def handle_admin_seed():
+        try:
+            page = utils.get_querry()
+        except ValueError as e:
+            error = str(e)
+            response.status = 400
+            return json.dumps({"message": "Invalid request body", "error": error})
+
+        try:
+            artist_list = kworb_api.get_artist_list(page)
+            for artist in artist_list:
+                try:
+                    add_artist(artist)
+                    print(f"Added artist: {artist}")
+                except RateLimitError as e:
+                    print(f"Rate limit error: sleeping for {str(e)} seconds")
+                    sleep(int(str(e)))
+                except Exception as e:
+                    error = str(e)
+                    response.status = 400
+                    return json.dumps(
+                        {"message": "Internal server error", "error": error}
+                    )
+                sleep(3)
+        except Exception as e:
+            error = str(e)
+            response.status = 400
+            return json.dumps({"message": "Internal server error", "error": error})
+
+if __name__ == "__main__":
+    # run server
+    run(app, host="0.0.0.0", port=4242)

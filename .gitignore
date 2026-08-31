@@ -1,0 +1,5 @@
+.DS_Store
+.env
+dl
+secrets
+backend/prisma/migrations/

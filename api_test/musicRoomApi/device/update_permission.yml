@@ -1,0 +1,25 @@
+info:
+  name: update_permission
+  type: http
+  seq: 3
+
+http:
+  method: PATCH
+  url: https://localhost/devices/update_permissions
+  body:
+    type: json
+    data: |-
+      {
+        "id": "1",
+        "friendId":1,
+        "canSeek":true,
+        "canTogglePlayPause":false,
+        "canModifyMusic":true
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
